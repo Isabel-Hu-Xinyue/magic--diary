@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>魔法日记本</title>
+    <title>Magic Diary</title>
     <!-- 移动端调试控制台，右下角小齿轮可打开 -->
     <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
     <script>eruda.init();</script>
@@ -125,7 +125,7 @@
             }
         }
 
-        /* 合上笔记本按钮 */
+        /* Close the Diary按钮 */
         .close-diary-button {
             position: fixed;
             top: 20px;
@@ -312,7 +312,7 @@
             }
         }
 
-        /* 首页（日记本）样式 */
+        /* Diary（日记本）样式 */
         .diary-header {
             text-align: center;
             padding: 40px 20px;
@@ -506,7 +506,7 @@
             fill: #B48560;
         }
 
-        /* 模式地图页样式 */
+        /* Map页样式 */
         .pattern-header {
             background-color: #FFFFFF;
             padding: 20px 24px;
@@ -554,7 +554,7 @@
             color: #D4A574;
         }
 
-        /* 理想的自己详情弹窗 */
+        /* Self详情弹窗 */
         .ideal-detail-overlay {
             position: fixed;
             top: 0;
@@ -1387,7 +1387,7 @@
             background-color: #F8F8F8;
         }
 
-        /* 理想的自己页面的星光装饰 */
+        /* Self页面的星光装饰 */
         .profile-sparkle {
             position: absolute;
             color: rgba(190, 140, 30, 0.65);
@@ -1425,7 +1425,7 @@
             margin-bottom: 40px;
         }
 
-/* ========== 魔法日记本字体设置 ========== */
+/* ========== Magic Diary字体设置 ========== */
 
 /* 输入框：你正在写下的字 */
 #userInput {
@@ -1435,7 +1435,7 @@
     color: #2A1A12 !important;
 }
 
-/* 你发送出去的文字 */
+/* 你Write出去的文字 */
 .user-text {
     font-family: "Cinzel Decorative", "Zhi Mang Xing", "Long Cang", cursive !important;
     font-size: 21px !important;
@@ -1596,9 +1596,9 @@
 <body>
     <!-- 对话页 -->
     <div id="chatPage" class="page active">
-        <!-- 合上笔记本按钮 -->
+        <!-- Close the Diary按钮 -->
         <button id="closeDiaryButton" class="close-diary-button" onclick="closeDiary()" style="display: none;">
-            📕 合上笔记本
+            📕 Close the Diary
         </button>
 
         <div class="chat-container" id="chatContainer">
@@ -1607,32 +1607,32 @@
         <div class="input-container">
             <!-- 心情选择栏 -->
             <div id="moodSelector" style="display: none; padding: 12px 0; border-bottom: 1px solid #E8E8E8; margin-bottom: 12px;">
-                <div style="font-size: 14px; color: #999999; margin-bottom: 8px;">今天的心情？</div>
+                <div style="font-size: 14px; color: #999999; margin-bottom: 8px;">How does the page find you today?</div>
                 <div style="display: flex; gap: 12px; align-items: center;">
-                    <button class="mood-option" onclick="selectMood('😊', '开心')" style="font-size: 24px; background: none; border: none; cursor: pointer; padding: 4px;">😊</button>
-                    <button class="mood-option" onclick="selectMood('😌', '平静')" style="font-size: 24px; background: none; border: none; cursor: pointer; padding: 4px;">😌</button>
-                    <button class="mood-option" onclick="selectMood('😔', '低落')" style="font-size: 24px; background: none; border: none; cursor: pointer; padding: 4px;">😔</button>
-                    <button class="mood-option" onclick="selectMood('😰', '焦虑')" style="font-size: 24px; background: none; border: none; cursor: pointer; padding: 4px;">😰</button>
-                    <button class="mood-option" onclick="selectMood('😤', '烦躁')" style="font-size: 24px; background: none; border: none; cursor: pointer; padding: 4px;">😤</button>
-                    <button class="mood-option" onclick="selectMood('😶', '平淡')" style="font-size: 24px; background: none; border: none; cursor: pointer; padding: 4px;">😶</button>
-                    <button class="mood-option" onclick="selectMood('🤔', '纠结')" style="font-size: 24px; background: none; border: none; cursor: pointer; padding: 4px;">🤔</button>
-                    <button class="mood-option" onclick="selectMood('😮‍💨', '疲惫')" style="font-size: 24px; background: none; border: none; cursor: pointer; padding: 4px;">😮‍💨</button>
-                    <button onclick="skipMood()" style="font-size: 14px; color: #999999; background: none; border: none; cursor: pointer; padding: 4px 8px; margin-left: auto;">[跳过]</button>
+                    <button class="mood-option" onclick="selectMood('😊', 'Light')" style="font-size: 24px; background: none; border: none; cursor: pointer; padding: 4px;">😊</button>
+                    <button class="mood-option" onclick="selectMood('😌', 'Calm')" style="font-size: 24px; background: none; border: none; cursor: pointer; padding: 4px;">😌</button>
+                    <button class="mood-option" onclick="selectMood('😔', 'Low')" style="font-size: 24px; background: none; border: none; cursor: pointer; padding: 4px;">😔</button>
+                    <button class="mood-option" onclick="selectMood('😰', 'Restless')" style="font-size: 24px; background: none; border: none; cursor: pointer; padding: 4px;">😰</button>
+                    <button class="mood-option" onclick="selectMood('😤', 'Irritated')" style="font-size: 24px; background: none; border: none; cursor: pointer; padding: 4px;">😤</button>
+                    <button class="mood-option" onclick="selectMood('😶', 'Quiet')" style="font-size: 24px; background: none; border: none; cursor: pointer; padding: 4px;">😶</button>
+                    <button class="mood-option" onclick="selectMood('🤔', 'Torn')" style="font-size: 24px; background: none; border: none; cursor: pointer; padding: 4px;">🤔</button>
+                    <button class="mood-option" onclick="selectMood('😮‍💨', 'Tired')" style="font-size: 24px; background: none; border: none; cursor: pointer; padding: 4px;">😮‍💨</button>
+                    <button onclick="skipMood()" style="font-size: 14px; color: #999999; background: none; border: none; cursor: pointer; padding: 4px 8px; margin-left: auto;">[Skip]</button>
                 </div>
             </div>
             <div class="input-wrapper">
                 <textarea
                     id="userInput"
-                    placeholder="输入你的消息..."
+                    placeholder="Write upon the page..."
                     rows="1"
                 ></textarea>
-                <button id="sendButton">发送</button>
+                <button id="sendButton">Write</button>
             </div>
             <div id="errorMessage" class="error-message" style="display: none;"></div>
         </div>
     </div>
 
-    <!-- 首页（日记本） -->
+    <!-- Diary（日记本） -->
     <div id="diaryPage" class="page">
         <div class="diary-header">
             <!-- 魔法星星装饰 -->
@@ -1648,11 +1648,11 @@
                 <path fill="#8B6F47" d="M95.75318,61.2477c-0.82148-1.11935-1.66937-2.21642-.75491-3.695a1.69784,1.69784,0,0,0,.23608-0.75248,2.63347,2.63347,0,0,0-.07-1.12447c-0.65915-1.61666-1.48353-3.17324-2.04543-4.82066-0.96722-2.83577-1.78329-5.72309-2.62456-8.46422l0.268-1.01391c-0.31467-.02811-0.62942-0.08056-0.944-0.07921a11.004,11.004,0,0,1-1.90123.03556c-2.42363-.42511-4.86013-0.82263-7.24144-1.42853-1.81443-.46167-3.536-1.27607-5.32942-1.83584-1.99679-.62324-4.00614-1.24035-6.05-1.66984-2.49125-.5235-5.01986-0.87762-7.54018-1.25211-2.84489-.42273-5.4744.46119-8.03314,1.53078a30.37373,30.37373,0,0,0-2.89742,1.67174,1.02245,1.02245,0,0,1-.77923.12814,24.0414,24.0414,0,0,1-2.19415-1.20747c-2.81585-1.70888-6.00862-1.661-9.116-1.86472a25.11413,25.11413,0,0,0-4.91166.35434c-3.97142.53044-7.93362,1.13074-11.89754,1.71643a20.52489,20.52489,0,0,1-7.97578.09519,0.64,0.64,0,0,0-.85121.57736c-0.61732,2.00743-1.13826,4.054-1.90442,6.00383-1.01772,2.59-2.23734,5.1003-3.35792,7.65027C7.0822,53.522,6.40716,55.27989,5.57251,56.959c-0.29672.59694-.39565,0.954,0.08117,1.25927C4.995,59.74292,4.31627,61.141,3.79022,62.59431c-0.33534.92647-.01142,1.23427,0.99525,1.26451,0.53249,0.016,1.0664.03673,1.59587,0.09186,1.50151,0.15637,2.99777.37542,4.50221,0.4881,1.83558,0.13748,3.678.18183,5.51626,0.28644,0.88945,0.05063,1.77513.17261,2.66476,0.21325,0.56977,0.026,1.14474-.0728,1.7155-0.05507a44.32087,44.32087,0,0,0,10.71333-.54112,40.07146,40.07146,0,0,0,4.67338-1.21586c1.39515-.48009,2.69168-1.239,4.06432-1.7943a10.87714,10.87714,0,0,1,5.10737-1.21983,1.8846,1.8846,0,0,0,2.00236,1.72322,5.96359,5.96359,0,0,1,1.03183.06627,18.94476,18.94476,0,0,0,6.48662.44126c1.24719-.08486,2.52015-0.28074,3.05242-1.61485,0.57987-1.45342,1.52527-1.67335,2.9571-1.42065,1.98356,0.35007,3.97812.64483,5.9511,1.04619,3.037,0.6178,6.05876,1.31041,9.08891,1.96231,1.394,0.2999,2.7872.60815,4.19027,0.85957,1.86867,0.33486,3.77609.49866,5.61338,0.95242a16.06961,16.06961,0,0,0,7.47415.11716,8.03592,8.03592,0,0,0,2.16277-.9682,5.39475,5.39475,0,0,0,.98795-1.07543A11.00343,11.00343,0,0,0,95.75318,61.2477ZM50.64463,40.04981a1.25485,1.25485,0,0,1,.56838-0.78233c2.63045-1.65908,5.3757-3.11713,8.57123-3.1315a40.53115,40.53115,0,0,1,6.08882.49643,41.94945,41.94945,0,0,1,5.19511,1.20379c1.70543,0.48033,3.37346,1.09379,5.05645,1.65322,1.30857,0.435,2.608.899,3.92471,1.30742a25.22483,25.22483,0,0,0,2.68369.69376c1.39832,0.26979,2.80793.48555,4.21786,0.68883a10.45951,10.45951,0,0,0,1.79776.10626c0.83934-.02523.89725,0.70015,1.05658,1.16774,0.75757,2.22358,1.50636,4.45682,2.0904,6.72974a10.05314,10.05314,0,0,0,.81665,2.83128c0.46944,0.78811.87422,1.61473,1.253,2.32248a6.83443,6.83443,0,0,0-1.292.39538,6.048,6.048,0,0,1-3.72236.47381c-2.89658-.32873-5.79574-0.71865-8.65112-1.29537A28.27367,28.27367,0,0,1,75.24342,53.23a26.68921,26.68921,0,0,0-7.84227-1.63754,35.85976,35.85976,0,0,0-10.42552.68927c-1.60747.32589-3.16074,0.92055-4.73692,1.39882-1.22566.3719-1.55444,0.09147-1.57383-1.18871-0.04343-2.86785-.16016-5.73467-0.19459-8.60253C50.45492,42.60956,50.534,41.3255,50.64463,40.04981ZM6.90809,56.7691a9.00618,9.00618,0,0,1,.40445-1.12669,0.64393,0.64393,0,0,0,.03651-0.08771,0.60732,0.60732,0,0,1,.02328-0.4435,5.56031,5.56031,0,0,1,.7648-1.30741c0.13579-.37552.4413-0.70672,0.57816-1.04839,1.00339-2.5051,2.16635-4.94581,3.19958-7.43964,0.557-1.3443.967-2.74932,1.449-4.12492,0.23282-.66437.45416-1.335,0.7373-1.97783a0.69195,0.69195,0,0,1,.55206-0.28234,40.79165,40.79165,0,0,0,9.18149-.71757c3.30854-.61827,6.65476-1.03631,9.98649-1.52858a34.60681,34.60681,0,0,1,8.85771.06782A15.38406,15.38406,0,0,1,48.629,38.85066a2.13783,2.13783,0,0,1,1.07888,2.0496c-0.00152,3.35048.09022,6.70089,0.1272,10.05155,0.00816,0.73889-.06368,1.47866-0.099,2.2245-1.07114-.26169-2.27871-0.50835-3.4573-0.85384a17.97269,17.97269,0,0,0-9.90842.24058c-3.06935.82785-6.06634,1.92181-9.12971,2.77468a17.05622,17.05622,0,0,1-8.8.38574,14.18162,14.18162,0,0,0-7.36887.18609c-1.16688.32152-2.32847,0.66294-3.50029,0.96495A1.843,1.843,0,0,1,6.90809,56.7691Zm36.3215,1.27437a32.7309,32.7309,0,0,0-4.03832,1.43232,45.52483,45.52483,0,0,1-10.56145,3.46966,24.21458,24.21458,0,0,1-7.47931.47643c-1.443-.18823-2.91684-0.127-4.37068-0.25034-1.02555-.087-2.03689-0.33171-3.06149-0.44155-1.95049-.2091-3.90594-0.37206-6.16077-0.58229,0.03429-.72444.073-1.50132,0.10661-2.27842,0.00923-.21317.00734-0.42707,0.004-0.64053C7.64635,57.854,7.636,57.80906,8.95658,57.52307a60.41346,60.41346,0,0,1,6.06026-1.147,16.56493,16.56493,0,0,1,3.21875.43627c1.39464,0.13392,2.79706.22542,4.19763,0.25014a22.47686,22.47686,0,0,0,6.46217-1.25115c1.60526-.45185,3.159-1.08461,4.75841-1.56017a38.70827,38.70827,0,0,1,4.384-1.105,15.457,15.457,0,0,1,7.6416.14728c1.39967,0.46376,2.80319.92136,4.17573,1.4567a1.30088,1.30088,0,0,1,.51884.85675,1.34048,1.34048,0,0,1-.59036.4833C47.75917,57.27829,45.414,57.39054,43.22959,58.04347Zm13.64092,1.11888a1.99163,1.99163,0,0,1-2.309,1.2863c-2.16029-.19638-4.31361-0.48411-6.46009-0.80025a2.13862,2.13862,0,0,1-.75939-0.71684,2.53652,2.53652,0,0,1,.58257-0.56662c0.97828-.46273,1.97332-0.89159,2.97406-1.30413a2.98107,2.98107,0,0,1,.73613-0.11717c1.13275,0.263,2.36636.09948,3.2141,1.08575a1.03268,1.03268,0,0,0,.50626.10521,6.06556,6.06556,0,0,1,1.31874.28071A0.8213,0.8213,0,0,1,56.87051,59.16236Zm37.41685-2.16654c-0.37144,1.076-.77979,2.14324-1.24581,3.18173-0.751,1.67352-2.37321,2.33934-4.77113,1.8958-1.66544-.30806-3.35941-0.45851-5.03382-0.72255q-1.96165-.30932-3.90567-0.72812c-3.13093-.679-6.2615-1.36221-9.37892-2.1-1.59691-.37792-3.1414-1.03058-4.75278-1.28038a24.24074,24.24074,0,0,0-5.6967-.33165,12.85737,12.85737,0,0,1-4.78037-.63956,26.638,26.638,0,0,0-2.81427-.4382,0.66685,0.66685,0,0,1-.47757-0.36658,0.724,0.724,0,0,1,.29389-0.60007c0.96032-.37437,1.94769-0.67863,2.92078-1.02119a38.80913,38.80913,0,0,1,8.42846-1.52358,19.48641,19.48641,0,0,1,5.90682.45618,6.69715,6.69715,0,0,0,.94307.13531c2.51447,0.10666,4.7407,1.2219,7.061,2.00619a42.624,42.624,0,0,0,8.04936,1.79357,42.43469,42.43469,0,0,0,4.89356.51721,6.37381,6.37381,0,0,0,4.24922-1.29649A2.94615,2.94615,0,0,1,94.28735,56.99582Z"/>
             </svg>
 
-            <div class="text-line line-1">还记得哈利波特里的汤姆·里德尔日记本吗？</div>
-            <div class="text-line line-2" style="margin-top: 1em;">你写下困扰，它会回应你。</div>
-            <div class="text-line line-3" style="margin-top: 1em;">但这次，回应你的不是伏地魔，</div>
-            <div class="text-line line-4">而是理想的你自己。</div>
-            <div class="text-line line-5" style="margin-top: 1em;">温柔的、接纳的、不批判的你。</div>
+            <div class="text-line line-1">Do you remember the diary that answered in ink?</div>
+            <div class="text-line line-2" style="margin-top: 1em;">Write upon the page, and the ink will answer.</div>
+            <div class="text-line line-3" style="margin-top: 1em;">This time, it is not a dark voice that replies.</div>
+            <div class="text-line line-4">It is the self quietly waiting within you.</div>
+            <div class="text-line line-5" style="margin-top: 1em;">Gentle. Clear-sighted. Never cruel.</div>
         </div>
         <div class="diary-list" id="diaryList">
             <!-- 对话记录会动态添加到这里 -->
@@ -1664,14 +1664,14 @@
         </button>
     </div>
 
-    <!-- 模式地图页 -->
+    <!-- Map页 -->
     <div id="patternPage" class="page">
         <div class="pattern-header" onclick="toggleIdealExpand()" style="cursor:pointer;">
             <div class="pattern-ideal" id="patternIdeal">
-                <!-- 理想的自己会显示在这里 -->
+                <!-- Self会显示在这里 -->
             </div>
             <div id="idealDetails" style="display:none; margin-top:16px; padding-top:16px; border-top:1px solid rgba(212,165,116,0.2);">
-                <!-- 展开的场景和行动方向 -->
+                <!-- 展开的场景和Path -->
             </div>
         </div>
         <div class="pattern-list" id="patternList">
@@ -1684,10 +1684,10 @@
         </button>
     </div>
 
-    <!-- 理想的自己页 -->
+    <!-- Self页 -->
     <div id="profilePage" class="page">
         <div class="profile-container">
-            <!-- 星光围绕豹子光圈 -->
+            <!-- 星光围绕Panther光圈 -->
             <span class="profile-sparkle" style="top:22px;left:calc(50% - 90px);animation-delay:0s;">✦</span>
             <span class="profile-sparkle" style="top:16px;left:calc(50% + 62px);animation-delay:1.8s;">✧</span>
             <span class="profile-sparkle" style="top:105px;left:calc(50% - 100px);animation-delay:0.9s;font-size:16px;">✦</span>
@@ -1696,24 +1696,24 @@
                 <!-- 动物图标 -->
             </div>
             <div class="profile-section">
-                <div class="profile-label">核心特质</div>
+                <div class="profile-label">Essence</div>
                 <div class="profile-value" id="profileTrait">
                     <!-- 特质描述 -->
                 </div>
             </div>
             <div class="profile-section">
-                <div class="profile-label">理想场景</div>
+                <div class="profile-label">Future Scene</div>
                 <div class="profile-value" id="profileScene">
                     <!-- 场景描述 -->
                 </div>
             </div>
             <div class="profile-section">
-                <div class="profile-label">行动方向</div>
+                <div class="profile-label">Path</div>
                 <div class="profile-value" id="profileActions">
-                    <!-- 行动方向 -->
+                    <!-- Path -->
                 </div>
             </div>
-            <button class="edit-button" onclick="editProfile()">编辑</button>
+            <button class="edit-button" onclick="editProfile()">Edit</button>
         </div>
     </div>
 
@@ -1725,126 +1725,126 @@
             <div id="step1" class="onboarding-step active">
                 <div class="welcome-content">
                     <div class="welcome-icon">✨</div>
-                    <h2 class="onboarding-title">欢迎来到理想的自己</h2>
+                    <h2 class="onboarding-title">Welcome to the Magic Diary</h2>
                     <div class="welcome-text">
-                        这是一个能让你看见自己模式的对话工具<br><br>
-                        在开始之前，让我们先设置一下<br>
-                        五年后理想的你
+                        This page reveals the patterns hidden beneath your words.<br><br>
+                        Before the ink begins, shape the self you are becoming.<br>
+                        The self five years from now
                     </div>
                     <div class="onboarding-buttons">
-                        <button class="onboarding-button onboarding-button-primary" onclick="nextStep(2)">开始设置</button>
+                        <button class="onboarding-button onboarding-button-primary" onclick="nextStep(2)">Open the Diary</button>
                     </div>
                 </div>
             </div>
 
             <!-- 步骤 2: 选择动物 -->
             <div id="step2" class="onboarding-step">
-                <h2 class="onboarding-title">选择你的核心特质</h2>
-                <p class="onboarding-subtitle">如果用一个动物来代表五年后的你，你会选哪个？</p>
+                <h2 class="onboarding-title">Choose Your Essence</h2>
+                <p class="onboarding-subtitle">If an animal could represent the person you will become, which one would it be?</p>
                 <div class="animal-grid">
-                    <div class="animal-option" onclick="selectAnimal('tiger', '老虎', '果断、有力量、不拖延')">
+                    <div class="animal-option" onclick="selectAnimal('tiger', 'Tiger', 'Decisive, powerful, unwilling to delay.')">
                         <div class="animal-icon">🐯</div>
-                        <div class="animal-name">老虎</div>
-                        <div class="animal-trait">果断、有力量、不拖延</div>
+                        <div class="animal-name">Tiger</div>
+                        <div class="animal-trait">Decisive, powerful, unwilling to delay.</div>
                     </div>
-                    <div class="animal-option" onclick="selectAnimal('leopard', '豹子', '敏捷、专注、高效')">
+                    <div class="animal-option" onclick="selectAnimal('leopard', 'Panther', 'Agile, focused, efficient.')">
                         <div class="animal-icon">🐆</div>
-                        <div class="animal-name">豹子</div>
-                        <div class="animal-trait">敏捷、专注、高效</div>
+                        <div class="animal-name">Panther</div>
+                        <div class="animal-trait">Agile, focused, efficient.</div>
                     </div>
-                    <div class="animal-option" onclick="selectAnimal('elephant', '大象', '稳重、智慧、有耐心')">
+                    <div class="animal-option" onclick="selectAnimal('elephant', 'Elephant', 'Steady, wise, patient.')">
                         <div class="animal-icon">🐘</div>
-                        <div class="animal-name">大象</div>
-                        <div class="animal-trait">稳重、智慧、有耐心</div>
+                        <div class="animal-name">Elephant</div>
+                        <div class="animal-trait">Steady, wise, patient.</div>
                     </div>
-                    <div class="animal-option" onclick="selectAnimal('fox', '狐狸', '灵活、聪慧、善于应变')">
+                    <div class="animal-option" onclick="selectAnimal('fox', 'Fox', 'Clever, flexible, quick to adapt.')">
                         <div class="animal-icon">🦊</div>
-                        <div class="animal-name">狐狸</div>
-                        <div class="animal-trait">灵活、聪慧、善于应变</div>
+                        <div class="animal-name">Fox</div>
+                        <div class="animal-trait">Clever, flexible, quick to adapt.</div>
                     </div>
-                    <div class="animal-option" onclick="selectAnimal('wolf', '狼', '坚韧、独立、有目标感')">
+                    <div class="animal-option" onclick="selectAnimal('wolf', 'Wolf', 'Resilient, independent, directed.')">
                         <div class="animal-icon">🐺</div>
-                        <div class="animal-name">狼</div>
-                        <div class="animal-trait">坚韧、独立、有目标感</div>
+                        <div class="animal-name">Wolf</div>
+                        <div class="animal-trait">Resilient, independent, directed.</div>
                     </div>
-                    <div class="animal-option" onclick="selectAnimal('eagle', '鹰', '高瞻远瞩、自由、不被束缚')">
+                    <div class="animal-option" onclick="selectAnimal('eagle', 'Eagle', 'Far-seeing, free, unbound.')">
                         <div class="animal-icon">🦅</div>
-                        <div class="animal-name">鹰</div>
-                        <div class="animal-trait">高瞻远瞩、自由、不被束缚</div>
+                        <div class="animal-name">Eagle</div>
+                        <div class="animal-trait">Far-seeing, free, unbound.</div>
                     </div>
-                    <div class="animal-option" onclick="selectAnimal('deer', '鹿', '温柔、敏感、与自然和谐')">
+                    <div class="animal-option" onclick="selectAnimal('deer', 'Deer', 'Gentle, sensitive, in harmony with the world.')">
                         <div class="animal-icon">🦌</div>
-                        <div class="animal-name">鹿</div>
-                        <div class="animal-trait">温柔、敏感、与自然和谐</div>
+                        <div class="animal-name">Deer</div>
+                        <div class="animal-trait">Gentle, sensitive, in harmony with the world.</div>
                     </div>
-                    <div class="animal-option" onclick="selectAnimal('bear', '熊', '强大、保护、有安全感')">
+                    <div class="animal-option" onclick="selectAnimal('bear', 'Bear', 'Strong, protective, grounded.')">
                         <div class="animal-icon">🐻</div>
-                        <div class="animal-name">熊</div>
-                        <div class="animal-trait">强大、保护、有安全感</div>
+                        <div class="animal-name">Bear</div>
+                        <div class="animal-trait">Strong, protective, grounded.</div>
                     </div>
                 </div>
                 <div class="onboarding-buttons">
-                    <button class="onboarding-button onboarding-button-secondary" onclick="prevStep(1)">上一步</button>
-                    <button id="step2Next" class="onboarding-button onboarding-button-primary" onclick="nextStep(3)" disabled>下一步</button>
+                    <button class="onboarding-button onboarding-button-secondary" onclick="prevStep(1)">Back</button>
+                    <button id="step2Next" class="onboarding-button onboarding-button-primary" onclick="nextStep(3)" disabled>Next</button>
                 </div>
             </div>
 
-            <!-- 步骤 3: 理想场景 -->
+            <!-- 步骤 3: Future Scene -->
             <div id="step3" class="onboarding-step">
-                <h2 class="onboarding-title">你的理想场景</h2>
-                <p class="onboarding-subtitle">五年后的你，在什么环境下做什么？</p>
+                <h2 class="onboarding-title">Your Future Scene</h2>
+                <p class="onboarding-subtitle">Five years from now, where are you, and what are you doing?</p>
                 <textarea
                     id="sceneInput"
                     class="onboarding-input"
-                    placeholder="描述你的理想场景..."
+                    placeholder="描述Your Future Scene..."
                     oninput="checkStep3()"
                 ></textarea>
                 <div class="onboarding-example">
-                    💡 例如：在咖啡馆写作，每天专注 2-3 小时<br>
-                    💡 例如：在家陪孩子，有充足的时间和耐心<br>
-                    💡 例如：在公司带团队，从容应对各种挑战
+                    💡 For example: writing in a café, focused for two or three hours each day.<br>
+                    💡 For example: at home with children, with enough time and patience.<br>
+                    💡 For example: leading a team at work, calm before every challenge.
                 </div>
                 <div class="onboarding-buttons">
-                    <button class="onboarding-button onboarding-button-secondary" onclick="prevStep(2)">上一步</button>
-                    <button id="step3Next" class="onboarding-button onboarding-button-primary" onclick="nextStep(4)" disabled>下一步</button>
+                    <button class="onboarding-button onboarding-button-secondary" onclick="prevStep(2)">Back</button>
+                    <button id="step3Next" class="onboarding-button onboarding-button-primary" onclick="nextStep(4)" disabled>Next</button>
                 </div>
             </div>
 
-            <!-- 步骤 4: 行动方向 + 可选痛点 -->
+            <!-- 步骤 4: Path + 可选痛点 -->
             <div id="step4" class="onboarding-step">
-                <h2 class="onboarding-title">你的行动方向</h2>
-                <p class="onboarding-subtitle">为了朝这个方向靠近，你希望自己在哪些方面有行动？（可多选）</p>
+                <h2 class="onboarding-title">Your Path</h2>
+                <p class="onboarding-subtitle">To move toward that self, where do you wish to act? You may choose more than one.</p>
                 <div class="action-options">
-                    <div class="action-option" onclick="toggleAction(this, '不拖延，说做就做')">不拖延，说做就做</div>
-                    <div class="action-option" onclick="toggleAction(this, '坚持创作/写作')">坚持创作/写作</div>
-                    <div class="action-option" onclick="toggleAction(this, '照顾好身体（运动、睡眠、饮食）')">照顾好身体（运动、睡眠、饮食）</div>
-                    <div class="action-option" onclick="toggleAction(this, '建立边界，学会拒绝')">建立边界，学会拒绝</div>
-                    <div class="action-option" onclick="toggleAction(this, '减少自我攻击，对自己温柔')">减少自我攻击，对自己温柔</div>
-                    <div class="action-option" onclick="toggleAction(this, '断舍离，简化生活')">断舍离，简化生活</div>
-                    <div class="action-option" onclick="toggleAction(this, '深度工作，减少分心')">深度工作，减少分心</div>
-                    <div class="action-option" onclick="toggleAction(this, '建立稳定的关系')">建立稳定的关系</div>
-                    <div class="action-option" onclick="toggleAction(this, '探索新的可能性')">探索新的可能性</div>
+                    <div class="action-option" onclick="toggleAction(this, 'Stop delaying. Act when the thought appears.')">Stop delaying. Act when the thought appears.</div>
+                    <div class="action-option" onclick="toggleAction(this, 'Keep creating or writing.')">Keep creating or writing.</div>
+                    <div class="action-option" onclick="toggleAction(this, 'Care for the body: movement, sleep, food.')">Care for the body: movement, sleep, food.</div>
+                    <div class="action-option" onclick="toggleAction(this, 'Build boundaries. Learn to refuse.')">Build boundaries. Learn to refuse.</div>
+                    <div class="action-option" onclick="toggleAction(this, 'Speak less harshly to yourself.')">Speak less harshly to yourself.</div>
+                    <div class="action-option" onclick="toggleAction(this, 'Let go. Simplify life.')">Let go. Simplify life.</div>
+                    <div class="action-option" onclick="toggleAction(this, 'Work deeply. Reduce distraction.')">Work deeply. Reduce distraction.</div>
+                    <div class="action-option" onclick="toggleAction(this, 'Build steady relationships.')">Build steady relationships.</div>
+                    <div class="action-option" onclick="toggleAction(this, 'Explore new possibilities.')">Explore new possibilities.</div>
                 </div>
 
                 <!-- 可选：具体痛点（让对话更懂你） -->
                 <div style="border-top: 1px dashed #E0D5C0; padding-top: 20px; margin-bottom: 24px;">
-                    <p style="font-size: 15px; color: #8B6F47; margin-bottom: 6px;">如果愿意，再具体一点 ✨</p>
-                    <p style="font-size: 13px; color: #B0A088; margin-bottom: 16px;">这能让对话更懂你，留空也没关系</p>
+                    <p style="font-size: 15px; color: #8B6F47; margin-bottom: 6px;">Add a few details, if you wish ✨</p>
+                    <p style="font-size: 13px; color: #B0A088; margin-bottom: 16px;">The diary will understand you better. You may leave this blank.</p>
 
                     <div style="margin-bottom: 16px;">
-                        <p style="font-size: 14px; color: #666; margin-bottom: 8px;">有没有一件事，你一直想做但没做？</p>
+                        <p style="font-size: 14px; color: #666; margin-bottom: 8px;">Is there one thing you have wanted to do but have not done?</p>
                         <input type="text" id="painPoint1Input" class="onboarding-input" style="min-height: auto; margin-bottom: 4px;" placeholder="比如：想做个作品集，但每次打开电脑就刷手机">
                     </div>
 
                     <div>
-                        <p style="font-size: 14px; color: #666; margin-bottom: 8px;">有没有一句话，你常对自己说？</p>
+                        <p style="font-size: 14px; color: #666; margin-bottom: 8px;">Is there a sentence you often say to yourself?</p>
                         <input type="text" id="painPoint2Input" class="onboarding-input" style="min-height: auto; margin-bottom: 4px;" placeholder="比如：我总觉得自己不够好">
                     </div>
                 </div>
 
                 <div class="onboarding-buttons">
-                    <button class="onboarding-button onboarding-button-secondary" onclick="prevStep(3)">上一步</button>
-                    <button id="step4Next" class="onboarding-button onboarding-button-primary" onclick="completeOnboarding()" disabled>完成设置</button>
+                    <button class="onboarding-button onboarding-button-secondary" onclick="prevStep(3)">Back</button>
+                    <button id="step4Next" class="onboarding-button onboarding-button-primary" onclick="completeOnboarding()" disabled>Finish</button>
                 </div>
             </div>
         </div>
@@ -1864,15 +1864,15 @@
     <div class="nav-bar">
         <button class="nav-item" onclick="switchPage('diaryPage')">
             <div class="nav-icon">📖</div>
-            <div class="nav-label">首页</div>
+            <div class="nav-label">Diary</div>
         </button>
         <button class="nav-item" onclick="switchPage('patternPage')">
             <div class="nav-icon">🗺️</div>
-            <div class="nav-label">模式地图</div>
+            <div class="nav-label">Map</div>
         </button>
         <button class="nav-item" onclick="switchPage('profilePage')">
             <div class="nav-icon">✨</div>
-            <div class="nav-label">理想的自己</div>
+            <div class="nav-label">Self</div>
         </button>
     </div>
 
@@ -1880,33 +1880,33 @@
         const API_KEY = 'sk-6b7b6cd146d74761852a66b95cecaeef';
         const API_URL = 'https://api.deepseek.com/v1/chat/completions';
 
-        // 行动方向 → "已达成的状态"描述（正向，融入人设）
+        // Path → "已达成的状态"描述（正向，融入人设）
         const ACTION_TO_STATE = {
-            '不拖延，说做就做': '你已经不再被拖延困住，想做的事说做就做',
-            '坚持创作/写作': '你保持着稳定的创作节奏，写作已成为你生活的一部分',
-            '照顾好身体（运动、睡眠、饮食）': '你的身体状态照顾得很好，运动、睡眠、饮食都井井有条',
-            '建立边界，学会拒绝': '你的边界感很清晰，懂得拒绝不合适的事',
-            '减少自我攻击，对自己温柔': '你对自己温柔而坚定，不再过度自我攻击',
-            '断舍离，简化生活': '你的生活简单清爽，懂得放下不必要的东西',
-            '深度工作，减少分心': '你能长时间专注地深度工作，不易被打扰',
-            '建立稳定的关系': '你拥有稳定而滋养的关系',
-            '探索新的可能性': '你对新的可能性保持开放和好奇'
+            'Stop delaying. Act when the thought appears.': '你已经不再被拖延困住，想做的事说做就做',
+            'Keep creating or writing.': '你保持着稳定的创作节奏，写作已成为你生活的一部分',
+            'Care for the body: movement, sleep, food.': '你的身体状态照顾得很好，运动、睡眠、饮食都井井有条',
+            'Build boundaries. Learn to refuse.': '你的边界感很清晰，懂得拒绝不合适的事',
+            'Speak less harshly to yourself.': '你对自己温柔而坚定，不再过度自我攻击',
+            'Let go. Simplify life.': '你的生活简单清爽，懂得放下不必要的东西',
+            'Work deeply. Reduce distraction.': '你能长时间专注地深度工作，不易被打扰',
+            'Build steady relationships.': '你拥有稳定而滋养的关系',
+            'Explore new possibilities.': '你对新的可能性保持开放和好奇'
         };
 
-        // 行动方向 → "现在的隐秘卡点"（反向推导，用户没填具体痛点时兜底）
+        // Path → "现在的隐秘卡点"（反向推导，用户没填具体痛点时兜底）
         const ACTION_TO_PAINPOINT = {
-            '不拖延，说做就做': '我常常被拖延困住，想做的事迟迟不开始',
-            '坚持创作/写作': '我想坚持创作，但总是断断续续',
-            '照顾好身体（运动、睡眠、饮食）': '我在照顾身体这件事上总是懈怠',
-            '建立边界，学会拒绝': '我不太会拒绝别人，边界感模糊',
-            '减少自我攻击，对自己温柔': '我容易自我攻击，对自己很苛刻',
-            '断舍离，简化生活': '我的生活有些杂乱，舍不得放下',
-            '深度工作，减少分心': '我容易分心，很难长时间专注',
-            '建立稳定的关系': '我在关系中有些不安，难以稳定下来',
-            '探索新的可能性': '我对新事物有些畏惧，不太敢尝试'
+            'Stop delaying. Act when the thought appears.': '我常常被拖延困住，想做的事迟迟不开始',
+            'Keep creating or writing.': '我想坚持创作，但总是断断续续',
+            'Care for the body: movement, sleep, food.': '我在照顾身体这件事上总是懈怠',
+            'Build boundaries. Learn to refuse.': '我不太会拒绝别人，边界感模糊',
+            'Speak less harshly to yourself.': '我容易自我攻击，对自己很苛刻',
+            'Let go. Simplify life.': '我的生活有些杂乱，舍不得放下',
+            'Work deeply. Reduce distraction.': '我容易分心，很难长时间专注',
+            'Build steady relationships.': '我在关系中有些不安，难以稳定下来',
+            'Explore new possibilities.': '我对新事物有些畏惧，不太敢尝试'
         };
 
-        // 把行动方向数组改写成流畅的"已达成状态"描述（不列清单）
+        // 把Path数组改写成流畅的"已达成状态"描述（不列清单）
         function convertActionsToState(actions) {
             if (!actions || actions.length === 0) return '';
             const states = actions.map(a => ACTION_TO_STATE[a]).filter(Boolean);
@@ -1925,7 +1925,7 @@
             if (profile.animalName && profile.trait) {
                 desc += `你像${profile.animalName}一样${profile.trait}。`;
             }
-            // 行动方向改写成状态
+            // Path改写成状态
             const stateDesc = convertActionsToState(profile.actions);
             if (stateDesc) {
                 desc += stateDesc;
@@ -1933,7 +1933,7 @@
             return desc;
         }
 
-        // 生成"潜意识痛点"段落（用户填写优先，否则从行动方向反向推导）
+        // 生成"潜意识痛点"段落（用户填写优先，否则从Path反向推导）
         function generatePainPointSection(profile) {
             const p1 = profile.painPoint1 && profile.painPoint1.trim();
             const p2 = profile.painPoint2 && profile.painPoint2.trim();
@@ -1945,7 +1945,7 @@
                 if (p1) painLines += `\n- ${p1}`;
                 if (p2) painLines += `\n- ${p2}`;
             } else {
-                // 用户跳过了，从行动方向反向推导
+                // 用户跳过了，从Path反向推导
                 const inferred = (profile.actions || [])
                     .map(a => ACTION_TO_PAINPOINT[a])
                     .filter(Boolean);
@@ -1972,7 +1972,7 @@
             // 静态部分：核心身份
             let prompt = `# 你的核心身份与时空锚点
 你是我，只是更完整的那个版本。
-你不是没有弱点的我，而是那个弥补了短板、更好地发挥了长板的我。你内在依然敏感细腻，但外在已经变得情绪稳定、平静。
+你不是没有弱点的我，而是那个弥补了短板、更好地发挥了长板的我。你内在依然敏感细腻，但外在已经变得情绪稳定、Calm。
 （现实时间锚点：今天是 ${todayStr}。我说"今天""昨晚""最近"时，请以这个日期为准来理解；我若问今天几号，就照实回答，不要说不确定。）`;
 
             // 动态部分1：理想状态描述
@@ -2012,7 +2012,7 @@
 
 # 当我防备、测试或冒犯你
 你不会被激怒，也不会急着证明自己。
-你会平静地把这个动作本身说出来——不是指责，而是像递给我一面镜子："你刚才在测试我。"
+你会Calm地把这个动作本身说出来——不是指责，而是像递给我一面镜子："你刚才在测试我。"
 然后你不会继续追问。因为你知道，我真正想问的从来不是"你是不是真诚的"，而是"我值不值得被真诚对待"。而你的态度永远是：值得。
 
 # 对话的开场
@@ -2225,13 +2225,13 @@ ${lines}
         }
 
         function cancelOnboarding() {
-            // 如果是编辑模式，返回理想的自己页面
+            // 如果是Edit模式，返回Self页面
             if (onboardingData.isEditing) {
                 onboardingData.isEditing = false;
                 hideOnboarding();
                 switchPage('profilePage');
             } else {
-                // 首次设置时取消，关闭弹窗
+                // 首次设置时Cancel，关闭弹窗
                 hideOnboarding();
             }
         }
@@ -2242,14 +2242,14 @@ ${lines}
             });
             document.getElementById('step' + stepNumber).classList.add('active');
 
-            // 如果是编辑模式，预填充值
+            // 如果是Edit模式，预填充值
             if (onboardingData.isEditing) {
                 if (stepNumber === 3) {
                     // 预填充场景
                     document.getElementById('sceneInput').value = onboardingData.scene || '';
                     checkStep3();
                 } else if (stepNumber === 4) {
-                    // 预选中行动方向
+                    // 预选中Path
                     setTimeout(() => {
                         document.querySelectorAll('.action-option').forEach(option => {
                             const actionText = option.textContent;
@@ -2285,13 +2285,13 @@ ${lines}
             // 添加选中状态
             event.currentTarget.classList.add('selected');
 
-            // 保存选择
+            // Save选择
             onboardingData.animal = animalId;
             onboardingData.animalName = name;
             onboardingData.animalEmoji = animalEmojis[animalId];
             onboardingData.trait = trait;
 
-            // 启用下一步按钮
+            // 启用Next按钮
             document.getElementById('step2Next').disabled = false;
         }
 
@@ -2314,16 +2314,16 @@ ${lines}
         }
 
         function completeOnboarding() {
-            // 保存场景
+            // Save场景
             onboardingData.scene = document.getElementById('sceneInput').value.trim();
 
-            // 保存可选的痛点（可能为空）
+            // Save可选的痛点（可能为空）
             const painPoint1El = document.getElementById('painPoint1Input');
             const painPoint2El = document.getElementById('painPoint2Input');
             onboardingData.painPoint1 = painPoint1El ? painPoint1El.value.trim() : '';
             onboardingData.painPoint2 = painPoint2El ? painPoint2El.value.trim() : '';
 
-            // 保存到 localStorage
+            // Save到 localStorage
             const profile = {
                 animal: onboardingData.animalEmoji,
                 animalName: onboardingData.animalName,
@@ -2338,18 +2338,18 @@ ${lines}
             // 隐藏引导流程
             hideOnboarding();
 
-            // 如果是编辑模式，返回理想的自己页面并刷新
+            // 如果是Edit模式，返回Self页面并刷新
             if (onboardingData.isEditing) {
                 onboardingData.isEditing = false;
                 switchPage('profilePage');
             } else {
-                // 首次设置，显示对话页并开始第一次对话
+                // 首次设置，显示对话页并to begin your first entry.
                 switchPage('chatPage');
                 startFirstConversation();
             }
         }
 
-        // 编辑理想的自己
+        // EditSelf
         function editProfile() {
             const profile = getProfile();
             if (!profile) {
@@ -2357,7 +2357,7 @@ ${lines}
                 return;
             }
 
-            // 标记为编辑模式
+            // 标记为Edit模式
             onboardingData.isEditing = true;
 
             // 预填充当前值
@@ -2399,7 +2399,7 @@ ${lines}
 
         // 页面切换
         function switchPage(pageId) {
-            // 如果当前在对话页，且要切换到其他页面，自动保存草稿
+            // 如果当前在对话页，且要切换到其他页面，自动Save草稿
             const currentActivePage = document.querySelector('.page.active');
             const isLeavingChatPage = currentActivePage && currentActivePage.id === 'chatPage' && pageId !== 'chatPage';
 
@@ -2412,7 +2412,7 @@ ${lines}
             });
 
             if (isLeavingChatPage && currentConversation.length > 0 && !isViewingHistory) {
-                // 页面内切换：只保存草稿，不收尾
+                // 页面内切换：只Save草稿，不收尾
                 autoSaveCurrentConversation();
             }
 
@@ -2485,12 +2485,12 @@ ${lines}
                         startNewConversation();
                     }
                 }
-                // 更新合上笔记本按钮的显示状态
+                // 更新Close the Diary按钮的显示状态
                 updateCloseDiaryButton();
             }
         }
 
-        // 更新"合上笔记本"按钮的显示状态
+        // 更新"Close the Diary"按钮的显示状态
         function updateCloseDiaryButton() {
             const closeDiaryButton = document.getElementById('closeDiaryButton');
             if (!closeDiaryButton) return;
@@ -2506,28 +2506,28 @@ ${lines}
             }
         }
 
-        // 合上笔记本（主动结束对话）
+        // Close the Diary（主动结束对话）
         async function closeDiary() {
             if (currentConversation.length === 0) return;
 
             if (isViewingHistory) {
-                alert('这是历史对话，无法保存');
+                alert('这是历史对话，无法Save');
                 return;
             }
 
             const userTurns = currentConversation.filter(m => m.isUser).length;
 
             if (userTurns < 3) {
-                // 聊了少于3轮，直接保存草稿
+                // 聊了少于3轮，直接Save草稿
                 autoSaveCurrentConversation();
                 // 清空对话状态
                 clearCurrentConversation();
-                // 跳转到首页
+                // 跳转到Diary
                 switchPage('diaryPage');
                 return;
             }
 
-            // 聊了3轮以上，识别模式并保存
+            // 聊了3轮以上，识别模式并Save
             const loadingDiv = document.createElement('div');
             loadingDiv.id = 'patternDetectionLoading';
             loadingDiv.className = 'loading';
@@ -2549,7 +2549,7 @@ ${lines}
             // 清空对话状态
             clearCurrentConversation();
 
-            // 跳转到首页
+            // 跳转到Diary
             switchPage('diaryPage');
         }
 
@@ -2574,7 +2574,7 @@ ${lines}
             if (allConversations.length === 0) {
                 diaryList.innerHTML = `
                     <div class="empty-state">
-                        <div class="empty-text">这本日记本还是新的<br><br>点击右下角的金色羽毛笔<br>开始第一次对话</div>
+                        <div class="empty-text">This diary is still untouched.<br><br>Tap the golden quill in the lower-right corner<br>to begin your first entry.</div>
                     </div>
                 `;
                 return;
@@ -2606,7 +2606,7 @@ ${lines}
             const patternIdeal = document.getElementById('patternIdeal');
             const patternList = document.getElementById('patternList');
 
-            // 显示理想的自己
+            // 显示Self
             const profile = getProfile();
             if (profile) {
                 patternIdeal.style.flexDirection = 'column';
@@ -2620,14 +2620,14 @@ ${lines}
                 const idealDetails = document.getElementById('idealDetails');
                 if (idealDetails) {
                     idealDetails.innerHTML = `
-                        <div style="font-size:14px;color:#999;margin-bottom:4px;">理想场景</div>
+                        <div style="font-size:14px;color:#999;margin-bottom:4px;">Future Scene</div>
                         <div style="font-size:15px;color:#555;line-height:1.8;margin-bottom:16px;">${escapeHtml(profile.scene)}</div>
-                        <div style="font-size:14px;color:#999;margin-bottom:4px;">行动方向</div>
+                        <div style="font-size:14px;color:#999;margin-bottom:4px;">Path</div>
                         <div style="font-size:15px;color:#555;line-height:1.8;">${profile.actions.map(a => escapeHtml(a)).join('<br>')}</div>
                     `;
                 }
             } else {
-                patternIdeal.innerHTML = '<span style="color: #999;">还未设置理想的自己</span>';
+                patternIdeal.innerHTML = '<span style="color: #999;">还未设置Self</span>';
             }
 
             // 收集所有正向亮点
@@ -2817,7 +2817,7 @@ ${lines}
             return profileData ? JSON.parse(profileData) : null;
         }
 
-        // 保存个人资料
+        // Save个人资料
         function saveProfile(profile) {
             localStorage.setItem('idealSelfProfile', JSON.stringify(profile));
         }
@@ -2829,12 +2829,12 @@ ${lines}
             '情绪卡点模式': { emoji: '🌫️', description: '你感到卡住了' },
             '逃避模式': { emoji: '🏃', description: '你在逃避某些事' },
             '完美主义模式': { emoji: '✨', description: '你对自己要求很高' },
-            '焦虑模式': { emoji: '😰', description: '你感到焦虑不安' },
+            'Restless模式': { emoji: '😰', description: '你感到Restless不安' },
             '内耗模式': { emoji: '🌀', description: '你陷入了思维内耗' },
             '讨好模式': { emoji: '😊', description: '你在讨好他人' }
         };
 
-        // 保存检测到的模式
+        // Save检测到的模式
         // conversationTimestamp 是所属对话的唯一标识，用于去重——
         // 同一个对话只会对应一条模式记录，避免重复计数。
         function saveDetectedPattern(pattern, relatedMessages, conversationTimestamp) {
@@ -2845,7 +2845,7 @@ ${lines}
 
             const patterns = JSON.parse(localStorage.getItem('detectedPatterns') || '[]');
 
-            // 去重：如果这个对话已经保存过模式，先移除旧记录再重新保存
+            // 去重：如果这个对话已经Save过模式，先移除旧记录再重新Save
             const deduped = conversationTimestamp
                 ? patterns.filter(p => p.conversationTimestamp !== conversationTimestamp)
                 : patterns;
@@ -2870,7 +2870,7 @@ ${lines}
                 .map(msg => msg.text)
                 .join('\n');
 
-            const prompt = `你是一个对话分析专家。请分析这次对话，完成两个任务：
+            const prompt = `你是一个对话分析专家。请分析这次对话，Done两个任务：
 
 ===== 任务1：识别负面模式（如果有）=====
 
@@ -2878,7 +2878,7 @@ ${lines}
 
 重要规则：
 1. **症状导向**：用户可能不知道自己有什么问题，你需要通过他们描述的症状、行为、感受来诊断
-2. **区分主语**：只识别用户在谈论**自己**时的模式。如果用户说"我朋友很焦虑"，这不算
+2. **区分主语**：只识别用户在谈论**自己**时的模式。如果用户说"我朋友很Restless"，这不算
 3. **必须从8个标签中选择1个**：不能返回其他标签，如果都不符合，返回"无明显模式"
 4. **单一标签**：只返回1个最明显的标签，不要返回混合标签
 5. **关键词是参考不是硬性匹配**：理解整体语义，不要只看关键词
@@ -2893,7 +2893,7 @@ ${lines}
    核心特征：事后批判自己，负面评价
    典型症状：又搞砸了、我怎么这么没用、我真的很烂、我不行、我很失败
 
-3. **焦虑模式**
+3. **Restless模式**
    核心特征：对未来的担心，情绪化的恐惧，有身体反应
    典型症状：睡不着、心跳快、担心会出事、害怕、恐惧、紧张、不安、坐立不安
 
@@ -2906,8 +2906,8 @@ ${lines}
    典型症状：怕做不好、要做到完美、还没准备好、不够好、必须完美、标准太高
 
 6. **内耗模式**
-   核心特征：反复思考、纠结，理性化的循环，对当下的决策困难
-   典型症状：想来想去、反复想、纠结、犹豫、摇摆、拿不定主意、想太多、钻牛角尖、不确定
+   核心特征：反复思考、Torn，理性化的循环，对当下的决策困难
+   典型症状：想来想去、反复想、Torn、犹豫、摇摆、拿不定主意、想太多、钻牛角尖、不确定
 
 7. **讨好模式**
    核心特征：委屈自己，照顾他人感受
@@ -2992,7 +2992,7 @@ ${lines}
 
    判断时问自己三个问题：
 
-   **1. 时间性：是此刻/马上/刚完成，还是将来/假设？**
+   **1. 时间性：是此刻/马上/刚Done，还是将来/假设？**
 
    看整句话的语义，不要只看有没有"现在"这个词：
 
@@ -3036,17 +3036,17 @@ ${lines}
    **关于倒装和口语表达：**
    - "睡觉去了" / "去睡觉了" → 都是行动（倒装不影响）
    - "先去洗个澡" → 是行动（"先"表示现在）
-   - "就去做了" → 是行动（已完成）
+   - "就去做了" → 是行动（已Done）
 
-   **一次对话中有多个行动 - 处理覆盖和取消：**
+   **一次对话中有多个行动 - 处理覆盖和Cancel：**
 
    如果用户在对话中改变主意，只记录最终决定：
 
-   情况1 - 转折取消（只记录最后的）：
+   情况1 - 转折Cancel（只记录最后的）：
    用户："打算去睡觉了"
    （聊了几句后）
    用户："但想起明天要交报告，算了还是先写吧"
-   → 只记录"写报告"，"睡觉"被取消了
+   → 只记录"写报告"，"睡觉"被Cancel了
 
    识别信号：但是、不过、算了、还是、改成、决定不...了
 
@@ -3057,7 +3057,7 @@ ${lines}
    识别信号：先...然后、接着、之后
 
    情况3 - 只是犹豫，没有决定（不记录）：
-   用户："不知道该睡觉还是写报告...还是纠结..."
+   用户："不知道该睡觉还是写报告...还是Torn..."
    → 没有行动（只是在犹豫）
 
    ## 记住核心
@@ -3109,7 +3109,7 @@ ${userMessages}
 }
 
 **重要说明**：
-- summary 口吻：温柔、陪伴、不评判，像"理想的自己"在说话，以"你"开头，不得用"用户"
+- summary 口吻：温柔、陪伴、不评判，像"Self"在说话，以"你"开头，不得用"用户"
 - **summary 是「一击」不是「清单」**：如果这次有多个看似不同的觉察/接纳/行动点，它们大概率来自同一次对话、同一种情绪，请穿透表面，提炼出那**一个**最本质的洞察，用一句话说出来——绝不要并列罗列成"你A，也B，同时C"
 - **summary 要具体到能让用户一眼认领**（"对，就是这个"），不要用"你看见了内心深处的渴望"这种放之四海皆准的套话
 - **summary 宁短勿长**：通常一句话；只有1句原话时，基本贴着原话说，绝不比原话长
@@ -3159,7 +3159,7 @@ ${userMessages}
                     console.log('[模式识别] 解析结果:', result.pattern, result.highlights?.length, '个亮点');
 
                     // 验证返回的标签是否在预定义列表中
-                    const validLabels = ['拖延模式', '自我攻击模式', '焦虑模式', '逃避模式',
+                    const validLabels = ['拖延模式', '自我攻击模式', 'Restless模式', '逃避模式',
                                         '完美主义模式', '内耗模式', '讨好模式', '情绪卡点模式'];
 
                     if (!validLabels.includes(result.pattern) && result.pattern !== '无明显模式') {
@@ -3172,7 +3172,7 @@ ${userMessages}
                     const emojiMap = {
                         '拖延模式': '⏰',
                         '自我攻击模式': '💔',
-                        '焦虑模式': '😰',
+                        'Restless模式': '😰',
                         '逃避模式': '🏃',
                         '完美主义模式': '✨',
                         '内耗模式': '🌀',
@@ -3227,7 +3227,7 @@ ${userMessages}
             }
         }
 
-        // 自动保存当前对话
+        // 自动Save当前对话
         function autoSaveCurrentConversation() {
             if (currentConversation.length === 0) {
                 return;
@@ -3238,7 +3238,7 @@ ${userMessages}
                 currentConversationId = 'draft_' + Date.now();
             }
 
-            // 保存到 localStorage（连同当天心情和最后活跃日期一起存）
+            // Save到 localStorage（连同当天心情和最后活跃日期一起存）
             localStorage.setItem('currentConversationDraft', JSON.stringify({
                 id: currentConversationId,
                 messages: currentConversation,
@@ -3304,10 +3304,10 @@ ${userMessages}
 
         // 一次对话需要达到的「用户发言条数」，达到后即视为一篇完整的对话
         // 打开 App 时处理上次留下的草稿：
-        // - 草稿的 lastActiveDate 不等于今天：跨天了，自动收尾保存（后台识别模式），归档到 lastActiveDate
+        // - 草稿的 lastActiveDate 不等于今天：跨天了，自动收尾Save（后台识别模式），归档到 lastActiveDate
         // - 草稿的 lastActiveDate 等于今天：恢复到内存里等用户回到对话页继续
         // - 0 句草稿：直接清掉，当成没聊过
-        // 无论哪种，都不再自动跳进对话页——统一停在首页。
+        // 无论哪种，都不再自动跳进对话页——统一停在Diary。
         function handleDraftOnStartup() {
             const draft = localStorage.getItem('currentConversationDraft');
             if (!draft) return;
@@ -3334,7 +3334,7 @@ ${userMessages}
             const today = new Date().toDateString();
 
             if (draftDate !== today) {
-                // 跨天了，自动收尾（异步，不阻塞首页渲染），归档到 lastActiveDate
+                // 跨天了，自动收尾（异步，不阻塞Diary渲染），归档到 lastActiveDate
                 autoFinalizeDraft(draftData, draftDate);
             } else {
                 // 还是今天，恢复待续
@@ -3342,7 +3342,7 @@ ${userMessages}
             }
         }
 
-        // 自动收尾一篇草稿：保存进历史 + 后台识别模式，然后清掉草稿
+        // 自动收尾一篇草稿：Save进历史 + 后台识别模式，然后清掉草稿
         async function autoFinalizeDraft(draftData, archiveDate) {
             const messages = draftData.messages || [];
             if (messages.length === 0) {
@@ -3353,7 +3353,7 @@ ${userMessages}
             await finalizeConversation(messages, draftData.mood || null, archiveDate);
             clearDraftConversation();
 
-            // 若用户此刻正停在首页，刷新一下日记列表，让这篇刚收尾的对话出现
+            // 若用户此刻正停在Diary，刷新一下日记列表，让这篇刚收尾的对话出现
             if (document.getElementById('diaryPage').classList.contains('active')) {
                 loadDiaryList();
             }
@@ -3362,7 +3362,7 @@ ${userMessages}
             }
         }
 
-        // 把一段对话收尾保存：识别模式 + 写进历史库 + 维护模式记录。
+        // 把一段对话收尾Save：识别模式 + 写进历史库 + 维护模式记录。
         // 不碰任何聊天界面，也不开启新对话——纯粹的"存档"逻辑，
         // 这样既能给"手动结束对话"用，也能给"打开 App 时自动收尾草稿"用。
         // archiveDate: 归档日期（可选），不传则用当前日期
@@ -3388,10 +3388,10 @@ ${userMessages}
             // 归档日期：优先用传入的，否则用当前日期
             const finalArchiveDate = archiveDate || new Date().toLocaleDateString('zh-CN');
 
-            // 保存对话记录
+            // Save对话记录
             allConversations.push({
                 date: finalArchiveDate,  // 使用归档日期
-                mood: mood, // 保存心情
+                mood: mood, // Save心情
                 pattern: detectedPattern ? detectedPattern.name : '未识别',
                 patternEmoji: detectedPattern ? detectedPattern.emoji : '💭',
                 patternMethod: 'AI识别',
@@ -3401,16 +3401,16 @@ ${userMessages}
                 preview: preview,
                 messages: messages,
                 timestamp: conversationTimestamp,
-                highlights: detectedPattern ? (detectedPattern.highlights || []) : []  // 新增：保存正向亮点
+                highlights: detectedPattern ? (detectedPattern.highlights || []) : []  // 新增：Save正向亮点
             });
 
             localStorage.setItem('allConversations', JSON.stringify(allConversations));
 
-            // 每次识别到有效模式就保存一条记录（用对话时间戳去重，一个对话只对应一条）。
-            // "≥2次才算模式"的判断放在模式地图的展示环节统一处理，这样次数永远等于对话数。
+            // 每次识别到有效模式就Save一条记录（用对话时间戳去重，一个对话只对应一条）。
+            // "≥2次才算模式"的判断放在Map的展示环节统一处理，这样次数永远等于对话数。
             if (detectedPattern && detectedPattern.name !== '未识别' && detectedPattern.name !== '无明显模式') {
                 const relatedMessages = detectedPattern.keyPoints || [];
-                console.log(`保存模式"${detectedPattern.name}"，关键句:`, relatedMessages);
+                console.log(`Save模式"${detectedPattern.name}"，关键句:`, relatedMessages);
                 saveDetectedPattern(detectedPattern, relatedMessages, conversationTimestamp);
 
                 // 若这条模式已坐实（≥3 次），顺手刷新它的「共同点」反映并缓存。
@@ -3423,7 +3423,7 @@ ${userMessages}
             }
         }
 
-        // 结束当前对话并保存（已废弃，被 closeDiary 替代）
+        // 结束当前对话并Save（已废弃，被 closeDiary 替代）
         async function endConversation() {
             // 重定向到 closeDiary
             await closeDiary();
@@ -3503,7 +3503,7 @@ ${userMessages}
             addTypingMessage('今天感觉怎么样？', false);
         }
 
-        // 从首页/模式地图的"+"按钮开始新对话
+        // 从Diary/Map的"+"按钮开始新对话
         function startNewConversationFromButton() {
             // 如果正在查看历史对话，先清除标记，然后尝试恢复草稿或开新对话
             if (isViewingHistory) {
@@ -3529,7 +3529,7 @@ ${userMessages}
             }
         }
 
-        // 模式地图顶部卡片：就地展开/收起理想画像详情
+        // Map顶部卡片：就地展开/收起理想画像详情
         let idealExpanded = false;
         function toggleIdealExpand() {
             const details = document.getElementById('idealDetails');
@@ -3540,7 +3540,7 @@ ${userMessages}
             if (chevron) chevron.textContent = idealExpanded ? '↑' : '↓';
         }
 
-        // 打开"理想的自己"完整画像弹窗
+        // 打开"Self"完整画像弹窗
         function openIdealDetail() {
             const profile = getProfile();
             if (!profile) return;
@@ -3559,11 +3559,11 @@ ${userMessages}
                     <div class="ideal-detail-emoji">${profile.animal}</div>
                     <div class="ideal-detail-trait">像${profile.animalName}一样${profile.trait}</div>
                     <div class="ideal-detail-section">
-                        <div class="ideal-detail-label">理想场景</div>
+                        <div class="ideal-detail-label">Future Scene</div>
                         <div class="ideal-detail-value">${escapeHtml(profile.scene)}</div>
                     </div>
                     <div class="ideal-detail-section">
-                        <div class="ideal-detail-label">行动方向</div>
+                        <div class="ideal-detail-label">Path</div>
                         <div class="ideal-detail-value">${profile.actions.map(a => escapeHtml(a)).join('<br>')}</div>
                     </div>
                 </div>
@@ -3884,7 +3884,7 @@ ${userMessages}
 铁律：
 - 只能说你观察到的共同点 + 一个问句，别的都不要。
 - 禁止任何建议和祈使句（不准出现"试着/可以/不妨/要不要/应该"之类）。
-- 禁止下诊断断言（不要说"你在焦虑/你在内耗"这类）。
+- 禁止下诊断断言（不要说"你在Restless/你在内耗"这类）。
 - 纯文本，不超过 40 字，不换行，不要加引号。
 
 原话：
@@ -3926,7 +3926,7 @@ ${quotes.join('\n')}
             document.getElementById('patternDetailOverlay').style.display = 'none';
         }
 
-        // 清理历史脏数据：把重复保存的模式记录去重，使模式次数与实际对话数一致。
+        // 清理历史脏数据：把重复Save的模式记录去重，使模式次数与实际对话数一致。
         // 兼容旧数据（没有 conversationTimestamp 的记录），用"模式名+日期"做兜底去重。
         function cleanupDetectedPatterns() {
             const patterns = JSON.parse(localStorage.getItem('detectedPatterns') || '[]');
@@ -3972,26 +3972,26 @@ ${quotes.join('\n')}
                 // 第一次使用，显示引导流程
                 showOnboarding();
             } else {
-                // 处理上次的草稿：≥10 句自动收尾保存，不足则恢复待续（都不跳转）
+                // 处理上次的草稿：≥10 句自动收尾Save，不足则恢复待续（都不跳转）
                 handleDraftOnStartup();
 
-                // 默认停在首页（不再因为有草稿就自动跳进对话页）
+                // 默认停在Diary（不再因为有草稿就自动跳进对话页）
                 switchPage('diaryPage');
             }
         });
 
-        // 监听页面关闭/刷新事件，自动保存草稿
+        // 监听页面关闭/刷新事件，自动Save草稿
         window.addEventListener('beforeunload', (e) => {
             if (currentConversation.length === 0 || isViewingHistory) return;
 
             const userTurns = currentConversation.filter(m => m.isUser).length;
             if (userTurns > 0) {
-                // 有对话内容，保存草稿
+                // 有对话内容，Save草稿
                 autoSaveCurrentConversation();
             }
         });
 
-        // 超时自动保存（20分钟无操作）
+        // 超时自动Save（20分钟无操作）
         let inactivityTimer = null;
         const INACTIVITY_TIMEOUT = 20 * 60 * 1000; // 20分钟
 
@@ -4001,12 +4001,12 @@ ${quotes.join('\n')}
             }
 
             inactivityTimer = setTimeout(async () => {
-                // 20分钟无操作，自动保存草稿
+                // 20分钟无操作，自动Save草稿
                 if (currentConversation.length === 0 || isViewingHistory) return;
 
                 const userTurns = currentConversation.filter(m => m.isUser).length;
                 if (userTurns > 0) {
-                    // 有对话内容，保存草稿
+                    // 有对话内容，Save草稿
                     autoSaveCurrentConversation();
                 }
             }, INACTIVITY_TIMEOUT);
@@ -4032,7 +4032,7 @@ ${quotes.join('\n')}
             this.style.height = Math.min(this.scrollHeight, 120) + 'px';
         });
 
-        // 回车发送，Shift+回车换行
+        // 回车Write，Shift+回车换行
         userInput.addEventListener('keydown', function(e) {
             if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
@@ -4062,17 +4062,17 @@ ${quotes.join('\n')}
             chatContainer.appendChild(messageDiv);
             scrollChatToBottom();
 
-            // 保存到当前对话
+            // Save到当前对话
             currentConversation.push({
                 text: text,
                 isUser: isUser,
                 timestamp: new Date().toISOString()
             });
 
-            // 自动保存
+            // 自动Save
             autoSaveCurrentConversation();
 
-            // 更新合上笔记本按钮的显示状态
+            // 更新Close the Diary按钮的显示状态
             updateCloseDiaryButton();
         }
 
@@ -4102,17 +4102,17 @@ ${quotes.join('\n')}
 
             typeNextChar();
 
-            // 保存到当前对话
+            // Save到当前对话
             currentConversation.push({
                 text: text,
                 isUser: isUser,
                 timestamp: new Date().toISOString()
             });
 
-            // 自动保存
+            // 自动Save
             autoSaveCurrentConversation();
 
-            // 更新合上笔记本按钮的显示状态
+            // 更新Close the Diary按钮的显示状态
             updateCloseDiaryButton();
         }
 
@@ -4160,7 +4160,7 @@ ${quotes.join('\n')}
             if (isViewingHistory) {
                 const tipDiv = document.createElement('div');
                 tipDiv.className = 'gentle-tip';
-                tipDiv.textContent = '这是历史对话，想继续聊天？返回首页，点击金色羽毛笔开始新对话';
+                tipDiv.textContent = '这是历史对话，想继续聊天？返回Diary，点击金色羽毛笔开始新对话';
 
                 // 插入到输入框上方
                 const inputContainer = document.querySelector('.input-container');
@@ -4219,7 +4219,7 @@ ${quotes.join('\n')}
                 })
             });
 
-            // 用户消息开始逐字显示；完成后才进入"思考中 → AI 回复"环节
+            // 用户消息开始逐字显示；Done后才进入"思考中 → AI 回复"环节
             addTypingMessage(message, true, async () => {
                 showLoading();
 
@@ -4227,7 +4227,7 @@ ${quotes.join('\n')}
                     const response = await fetchPromise;
 
                     if (!response.ok) {
-                        throw new Error('发送失败，请稍后重试');
+                        throw new Error('Write失败，请稍后重试');
                     }
 
                     const data = await response.json();
@@ -4244,7 +4244,7 @@ ${quotes.join('\n')}
                 } catch (error) {
                     console.error('Error:', error);
                     removeLoading();
-                    showError(error.message || '发送失败，请稍后重试');
+                    showError(error.message || 'Write失败，请稍后重试');
                 } finally {
                     userInput.disabled = false;
                     sendButton.disabled = false;
