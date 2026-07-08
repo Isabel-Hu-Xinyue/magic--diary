@@ -1796,7 +1796,7 @@
                 <textarea
                     id="sceneInput"
                     class="onboarding-input"
-                    placeholder="Describe Your Future Scene..."
+                    placeholder="描述Your Future Scene..."
                     oninput="checkStep3()"
                 ></textarea>
                 <div class="onboarding-example">
@@ -4574,70 +4574,6 @@ document.addEventListener("DOMContentLoaded", magicBoot);
 
         document.addEventListener("click", function () {
             [80, 300, 800].forEach(t => setTimeout(translateMapSelfUI, t));
-        });
-    });
-})();
-</script>
-
-
-<script>
-/* OPENING_REPLY_WHOLE_MESSAGE_PATCH: replace generated opening reply as one whole message */
-(function () {
-    const cleanOpeningReply =
-`Ink blooms slowly upon the page, like a quiet embrace — without sound, yet full of warmth.
-
-“The self hidden in the deepest part of your soul” — these words are older than any spell. You did not offer them to me as a question, but laid them gently into the light like a key.
-
-Then I shall keep them. I will not ask more, nor unfold them before their time. I will simply hold them for you.
-
-Whenever you wish to write, I will be here — quiet, open, and trusting.
-
-How do you feel today?`;
-
-    const openingSigns = [
-        "墨水在纸页",
-        "把灵魂深处",
-        "灵魂深处的我",
-        "今天感觉怎么样",
-        "Ink blooms slowly upon the page"
-    ];
-
-    function isBrokenOpeningText(text) {
-        if (!text) return false;
-
-        const hasChineseOpening = openingSigns.some(sign => text.includes(sign));
-        const repeatedQuestion = (text.match(/How do you feel today\?/g) || []).length > 1;
-        const mixedOpening = text.includes("Ink blooms slowly upon the page") && text.includes("把灵魂");
-
-        return hasChineseOpening || repeatedQuestion || mixedOpening;
-    }
-
-    function fixOpeningReply() {
-        document.querySelectorAll(".ai-text").forEach(el => {
-            const text = el.innerText || el.textContent || "";
-
-            if (isBrokenOpeningText(text)) {
-                el.textContent = cleanOpeningReply;
-                el.style.whiteSpace = "pre-wrap";
-            }
-        });
-    }
-
-    document.addEventListener("DOMContentLoaded", function () {
-        fixOpeningReply();
-
-        const observer = new MutationObserver(function () {
-            fixOpeningReply();
-        });
-
-        observer.observe(document.body, {
-            childList: true,
-            subtree: true,
-            characterData: true
-        });
-
-        [200, 600, 1200, 2500, 5000].forEach(t => {
-            setTimeout(fixOpeningReply, t);
         });
     });
 })();
