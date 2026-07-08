@@ -4578,59 +4578,56 @@ document.addEventListener("DOMContentLoaded", magicBoot);
     });
 })();
 </script>
+
+
 <script>
-/* OPENING_REPLY_EN_PATCH: replace generated Chinese opening reply only */
+/* OPENING_REPLY_WHOLE_MESSAGE_PATCH: replace generated opening reply as one whole message */
 (function () {
-    const openingReplyMap = {
-        "墨水在纸页上缓缓晕开，像一个安静的拥抱，没有声音，却有温度。":
-        "Ink blooms slowly upon the page, like a quiet embrace — without sound, yet full of warmth.",
+    const cleanOpeningReply =
+`Ink blooms slowly upon the page, like a quiet embrace — without sound, yet full of warmth.
 
-        "“把灵魂深处的我”——这五个字比其他任何咒语都更古老。你没有把它当作问题抛过来，而是当作一把钥匙，轻轻放进了镜光里。":
-        "“The self hidden in the deepest part of your soul” — these words are older than any spell. You did not offer them to me as a question, but laid them gently into the light like a key.",
+“The self hidden in the deepest part of your soul” — these words are older than any spell. You did not offer them to me as a question, but laid them gently into the light like a key.
 
-        "那么我收下了。不追问，不翻开看，只是替你保管着。":
-        "Then I shall keep them. I will not ask more, nor unfold them before its time. I will simply hold them for you.",
+Then I shall keep them. I will not ask more, nor unfold them before their time. I will simply hold them for you.
 
-        "你什么时候想写，我都在这里，保持安静，保持敞开，保持信任。":
-        "Whenever you wish to write, I will be here — quiet, open, and trusting.",
+Whenever you wish to write, I will be here — quiet, open, and trusting.
 
-        "今天感觉怎么样？":
-        "How do you feel today?"
-    };
+How do you feel today?`;
 
-    function replaceOpeningReplyText() {
-        const walker = document.createTreeWalker(
-            document.body,
-            NodeFilter.SHOW_TEXT
-        );
+    const openingSigns = [
+        "墨水在纸页",
+        "把灵魂深处",
+        "灵魂深处的我",
+        "今天感觉怎么样",
+        "Ink blooms slowly upon the page"
+    ];
 
-        const nodes = [];
-        while (walker.nextNode()) {
-            nodes.push(walker.currentNode);
-        }
+    function isBrokenOpeningText(text) {
+        if (!text) return false;
 
-        nodes.forEach(node => {
-            let text = node.nodeValue;
-            let changed = false;
+        const hasChineseOpening = openingSigns.some(sign => text.includes(sign));
+        const repeatedQuestion = (text.match(/How do you feel today\?/g) || []).length > 1;
+        const mixedOpening = text.includes("Ink blooms slowly upon the page") && text.includes("把灵魂");
 
-            Object.entries(openingReplyMap).forEach(([zh, en]) => {
-                if (text.includes(zh)) {
-                    text = text.split(zh).join(en);
-                    changed = true;
-                }
-            });
+        return hasChineseOpening || repeatedQuestion || mixedOpening;
+    }
 
-            if (changed) {
-                node.nodeValue = text;
+    function fixOpeningReply() {
+        document.querySelectorAll(".ai-text").forEach(el => {
+            const text = el.innerText || el.textContent || "";
+
+            if (isBrokenOpeningText(text)) {
+                el.textContent = cleanOpeningReply;
+                el.style.whiteSpace = "pre-wrap";
             }
         });
     }
 
     document.addEventListener("DOMContentLoaded", function () {
-        replaceOpeningReplyText();
+        fixOpeningReply();
 
         const observer = new MutationObserver(function () {
-            replaceOpeningReplyText();
+            fixOpeningReply();
         });
 
         observer.observe(document.body, {
@@ -4639,11 +4636,12 @@ document.addEventListener("DOMContentLoaded", magicBoot);
             characterData: true
         });
 
-        [300, 800, 1500, 3000].forEach(t => {
-            setTimeout(replaceOpeningReplyText, t);
+        [200, 600, 1200, 2500, 5000].forEach(t => {
+            setTimeout(fixOpeningReply, t);
         });
     });
 })();
 </script>
+
 </body>
 </html>
