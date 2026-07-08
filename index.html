@@ -1833,12 +1833,12 @@
 
                     <div style="margin-bottom: 16px;">
                         <p style="font-size: 14px; color: #666; margin-bottom: 8px;">Is there one thing you have wanted to do but have not done?</p>
-                        <input type="text" id="painPoint1Input" class="onboarding-input" style="min-height: auto; margin-bottom: 4px;" placeholder="比如：想做个作品集，但每次打开电脑就刷手机">
+                        <input type="text" id="painPoint1Input" class="onboarding-input" style="min-height: auto; margin-bottom: 4px;" placeholder="For example: I want to build a portfolio, but I end up scrolling whenever I open my laptop.">
                     </div>
 
                     <div>
                         <p style="font-size: 14px; color: #666; margin-bottom: 8px;">Is there a sentence you often say to yourself?</p>
-                        <input type="text" id="painPoint2Input" class="onboarding-input" style="min-height: auto; margin-bottom: 4px;" placeholder="比如：我总觉得自己不够好">
+                        <input type="text" id="painPoint2Input" class="onboarding-input" style="min-height: auto; margin-bottom: 4px;" placeholder="For example: I often feel I am not good enough.">
                     </div>
                 </div>
 
@@ -1923,7 +1923,7 @@
             }
             // 动物特质
             if (profile.animalName && profile.trait) {
-                desc += `你像${profile.animalName}一样${profile.trait}。`;
+                desc += `你${profile.animalName} - ${profile.trait}。`;
             }
             // Path改写成状态
             const stateDesc = convertActionsToState(profile.actions);
@@ -2614,7 +2614,7 @@ ${lines}
                 patternIdeal.style.textAlign = 'center';
                 patternIdeal.innerHTML = `
                     <div style="font-size:52px; margin-bottom:10px;">${profile.animal}</div>
-                    <div style="font-size:16px; color:#333;">像${profile.animalName}一样${profile.trait}</div>
+                    <div style="font-size:16px; color:#333;">${profile.animalName} - ${profile.trait}</div>
                     <div id="idealChevron" style="font-size:12px; color:#D4A574; margin-top:10px; letter-spacing:2px;">↓</div>
                 `;
                 const idealDetails = document.getElementById('idealDetails');
@@ -2663,9 +2663,9 @@ ${lines}
             if (totalHighlights === 0) {
                 highlightsInnerHTML = `
                     <div class="highlights-empty">
-                        还没有记录到正向的时刻<br><br>
-                        当你在对话中有所觉察、接纳自己、或采取行动时<br>
-                        这里会记录下来
+                        No positive moments have been recorded yet<br><br>
+                        When you notice something, accept yourself, or take action in conversation,<br>
+                        it will be recorded here.
                     </div>
                 `;
             } else {
@@ -2705,9 +2705,9 @@ ${lines}
             if (validPatterns.length === 0) {
                 patternsInnerHTML = `
                     <div class="highlights-empty">
-                        还没有浮现出模式<br><br>
-                        多聊几次，反复出现的卡点<br>
-                        会在这里慢慢显现
+                        No pattern has emerged yet<br><br>
+                        After a few more entries, repeated sticking points<br>
+                        will slowly appear here.
                     </div>
                 `;
             } else {
@@ -2740,7 +2740,7 @@ ${lines}
                 if (sortedPatterns.length === 0) {
                     patternsInnerHTML = `
                         <div class="highlights-empty">
-                            还没有浮现出模式<br><br>
+                            No pattern has emerged yet<br><br>
                             模式需要在多次对话中<br>
                             反复出现才能确认
                         </div>
@@ -2781,12 +2781,12 @@ ${lines}
             patternList.innerHTML = `
                 <div style="background:#FFFFFF;border-radius:12px;box-shadow:0 1px 3px rgba(139,111,71,0.12),0 4px 8px rgba(139,111,71,0.08);overflow:hidden;">
                     <div style="padding:20px 20px 16px;">
-                        <div class="highlights-title">✨ 你在一点点靠近</div>
+                        <div class="highlights-title">✨ You are drawing closer, little by little</div>
                         ${highlightsInnerHTML}
                     </div>
                     <div style="height:1px;background:rgba(212,165,116,0.18);margin:0 20px;"></div>
                     <div style="padding:16px 20px 20px;">
-                        <div class="highlights-title" style="font-size:14px;color:#C0A898;">🌫️ 需要觉察</div>
+                        <div class="highlights-title" style="font-size:14px;color:#C0A898;">🌫️ Needs Awareness</div>
                         ${patternsInnerHTML}
                     </div>
                 </div>
@@ -3557,7 +3557,7 @@ ${userMessages}
                 <div class="ideal-detail-container" onclick="event.stopPropagation()">
                     <button class="ideal-detail-close" onclick="this.closest('.ideal-detail-overlay').remove()">×</button>
                     <div class="ideal-detail-emoji">${profile.animal}</div>
-                    <div class="ideal-detail-trait">像${profile.animalName}一样${profile.trait}</div>
+                    <div class="ideal-detail-trait">${profile.animalName} - ${profile.trait}</div>
                     <div class="ideal-detail-section">
                         <div class="ideal-detail-label">Future Scene</div>
                         <div class="ideal-detail-value">${escapeHtml(profile.scene)}</div>
@@ -3615,7 +3615,7 @@ ${userMessages}
             const reflectionMap = {
                 '觉察': '你在一点点看清自己',
                 '接纳': '你在学会对自己温柔',
-                '行动': '你在一点点靠近'
+                '行动': 'You are drawing closer, little by little'
             };
 
             const emoji = emojiMap[highlightType];
@@ -4484,5 +4484,100 @@ function magicBoot() {
 
 document.addEventListener("DOMContentLoaded", magicBoot);
 </script>
+
+<script>
+/* MAP_SELF_TRANSLATE_PATCH: clean remaining dynamic Map/Self UI text only */
+(function () {
+    const MAP_SELF_TRANSLATIONS = {
+        "像Eagle一样": "Eagle - ",
+        "像Tiger一样": "Tiger - ",
+        "像Panther一样": "Panther - ",
+        "像Elephant一样": "Elephant - ",
+        "像Fox一样": "Fox - ",
+        "像Wolf一样": "Wolf - ",
+        "像Deer一样": "Deer - ",
+        "像Bear一样": "Bear - ",
+
+        "你在一点点靠近": "You are drawing closer, little by little",
+        "还没有记录到正向的时刻": "No positive moments have been recorded yet",
+        "当你在对话中有所觉察、接纳自己、或采取行动时": "When you notice something, accept yourself, or take action in conversation,",
+        "这里会记录下来": "it will be recorded here.",
+        "需要觉察": "Needs Awareness",
+        "还没有浮现出模式": "No pattern has emerged yet",
+        "多聊几次，反复出现的卡点": "After a few more entries, repeated sticking points",
+        "会在这里慢慢显现": "will slowly appear here.",
+
+        "比如：想做个作品集，但每次打开电脑就刷手机": "For example: I want to build a portfolio, but I end up scrolling whenever I open my laptop.",
+        "比如：我总觉得自己不够好": "For example: I often feel I am not good enough.",
+        "比如：": "For example: ",
+
+        "不拖延，说做就做": "Stop delaying. Act when the thought appears.",
+        "坚持创作/写作": "Keep creating or writing.",
+        "照顾好身体（运动、睡眠、饮食）": "Care for the body: movement, sleep, food.",
+        "建立边界，学会拒绝": "Build boundaries. Learn to refuse.",
+        "减少自我攻击，对自己温柔": "Speak less harshly to yourself.",
+        "断舍离，简化生活": "Let go. Simplify life.",
+        "深度工作，减少分心": "Work deeply. Reduce distraction.",
+        "建立稳定的关系": "Build steady relationships.",
+        "探索新的可能性": "Explore new possibilities."
+    };
+
+    function translateText(text) {
+        let result = text;
+
+        Object.entries(MAP_SELF_TRANSLATIONS).forEach(([zh, en]) => {
+            result = result.split(zh).join(en);
+        });
+
+        result = result.replace(/像\s*([A-Za-z][A-Za-z\s-]*)\s*一样\s*/g, "$1 - ");
+
+        return result;
+    }
+
+    function shouldSkip(node) {
+        const parent = node.parentElement;
+        if (!parent) return true;
+
+        return Boolean(parent.closest(
+            "#chatContainer, .message, .user-text, .ai-text, #magicArchiveContent, script, style"
+        ));
+    }
+
+    function translateMapSelfUI() {
+        const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+        const nodes = [];
+
+        while (walker.nextNode()) {
+            nodes.push(walker.currentNode);
+        }
+
+        nodes.forEach(node => {
+            if (shouldSkip(node)) return;
+
+            const oldText = node.nodeValue;
+            const newText = translateText(oldText);
+
+            if (oldText !== newText) {
+                node.nodeValue = newText;
+            }
+        });
+
+        document.querySelectorAll("input, textarea").forEach(el => {
+            if (el.placeholder) {
+                el.placeholder = translateText(el.placeholder);
+            }
+        });
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        [80, 300, 800, 1500].forEach(t => setTimeout(translateMapSelfUI, t));
+
+        document.addEventListener("click", function () {
+            [80, 300, 800].forEach(t => setTimeout(translateMapSelfUI, t));
+        });
+    });
+})();
+</script>
+
 </body>
 </html>
