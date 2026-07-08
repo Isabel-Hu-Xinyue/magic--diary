@@ -3,14 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>理想的自己 v3</title>
+    <title>魔法日记本</title>
     <!-- 移动端调试控制台，右下角小齿轮可打开 -->
     <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
     <script>eruda.init();</script>
     <style>
         @import url('https://cdn.jsdelivr.net/npm/lxgw-wenkai-webfont@1.1.0/style.css');
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap');
-
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Great+Vibes&family=Long+Cang&family=Zhi+Mang+Xing&display=swap');
+        
         * {
             margin: 0;
             padding: 0;
@@ -1423,6 +1424,33 @@
             line-height: 2;
             margin-bottom: 40px;
         }
+
+/* ========== 魔法日记本字体设置 ========== */
+
+/* 输入框：你正在写下的字 */
+#userInput {
+    font-family: "Cinzel Decorative", "Zhi Mang Xing", "Long Cang", cursive !important;
+    font-size: 20px !important;
+    letter-spacing: 0.5px;
+    color: #2A1A12 !important;
+}
+
+/* 你发送出去的文字 */
+.user-text {
+    font-family: "Cinzel Decorative", "Zhi Mang Xing", "Long Cang", cursive !important;
+    font-size: 21px !important;
+    color: #2B1A12 !important;
+    letter-spacing: 0.4px;
+}
+
+/* 日记本回应你的文字 */
+.ai-text {
+    font-family: "Great Vibes", "Zhi Mang Xing", "Long Cang", cursive !important;
+    font-size: 25px !important;
+    color: #5B1F1F !important;
+    letter-spacing: 0.3px;
+    text-shadow: 0 0 4px rgba(91, 31, 31, 0.25);
+}
     </style>
 </head>
 <body>
