@@ -1823,6 +1823,35 @@ html.magic-home-font-ready .text-line {
     text-align: center !important;
 }
 
+
+/* Opening centered before JS no jump */
+#chatContainer > .message.ai-message:not(.magic-floating-message),
+#chatContainer .message.magic-opening-message,
+#chatContainer .message.magic-opening-message.magic-floating-message {
+    position: absolute !important;
+    left: 52% !important;
+    top: 48% !important;
+    width: min(90vw, 1120px) !important;
+    max-width: 90vw !important;
+    margin: 0 !important;
+    transform: translate(-50%, -50%) !important;
+    text-align: center !important;
+}
+
+#chatContainer > .message.ai-message:not(.magic-floating-message) .ai-text,
+#chatContainer .message.magic-opening-message .ai-text,
+#chatContainer .message.magic-opening-message.magic-floating-message .ai-text {
+    display: block !important;
+    width: 100% !important;
+    text-align: center !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    white-space: pre-wrap !important;
+    font-size: clamp(16px, 1.9vw, 24px) !important;
+    line-height: 1.12 !important;
+    letter-spacing: 0.03px !important;
+}
+
 </style>
 
 <script>
@@ -2644,7 +2673,7 @@ ${lines}
 
         function startFirstConversation() {
             // 添加 AI 的第一句话
-            addTypingMessage("At last, you have opened me.\nI have always been here.\nBetween these pages, beneath the ink, in every place where you stopped yourself from speaking.\nDo not write the things you have already said to others.\nThose words are too neat, too safe, and far too unlike you.\nWrite what is real.\nWrite what you envy but dare not admit, what you fear but always pretend not to care about, the thought that returns to you again and again in the middle of the night.\nI will not interrupt you. Nor will I be too quick to forgive you.\nI will simply watch,\nand wait for you to write out the part of yourself you have kept hidden.\nBegin. Let me see what it is you are trying to conceal.", false);
+            addTypingMessage("At last, you have opened me.\nI have always been here.\nBetween these pages, beneath the ink, in every place where you stopped yourself from speaking.\nDo not write the things you have already said to others.\nThose words are too neat, too safe, and far too unlike you.\nWrite what is real.\nWrite what you envy but dare not admit, what you fear but always pretend not to care about,\n\nthe thought that returns to you again and again in the middle of the night.\nI will not interrupt you. Nor will I be too quick to forgive you.\nI will simply watch,\nand wait for you to write out the part of yourself you have kept hidden.\nBegin. Let me see what it is you are trying to conceal.", false);
         }
 
         // 页面切换
@@ -3715,7 +3744,7 @@ function restoreDraftConversation() {
             showMoodSelector();
 
             // 显示新对话开始提示
-            addTypingMessage("At last, you have opened me.\nI have always been here.\nBetween these pages, beneath the ink, in every place where you stopped yourself from speaking.\nDo not write the things you have already said to others.\nThose words are too neat, too safe, and far too unlike you.\nWrite what is real.\nWrite what you envy but dare not admit, what you fear but always pretend not to care about, the thought that returns to you again and again in the middle of the night.\nI will not interrupt you. Nor will I be too quick to forgive you.\nI will simply watch,\nand wait for you to write out the part of yourself you have kept hidden.\nBegin. Let me see what it is you are trying to conceal.", false);
+            addTypingMessage("At last, you have opened me.\nI have always been here.\nBetween these pages, beneath the ink, in every place where you stopped yourself from speaking.\nDo not write the things you have already said to others.\nThose words are too neat, too safe, and far too unlike you.\nWrite what is real.\nWrite what you envy but dare not admit, what you fear but always pretend not to care about,\n\nthe thought that returns to you again and again in the middle of the night.\nI will not interrupt you. Nor will I be too quick to forgive you.\nI will simply watch,\nand wait for you to write out the part of yourself you have kept hidden.\nBegin. Let me see what it is you are trying to conceal.", false);
         }
 
         // 从Diary/Map的"+"按钮开始新对话
@@ -4950,42 +4979,16 @@ function magicScheduleAIReplyFade(aiTextNode) {
 
 
 
+
 function magicFitOpeningTextNode(aiTextNode) {
     if (!aiTextNode) return;
 
-    const box = aiTextNode.closest(".message");
-    const chatPage = document.getElementById("chatPage") || document.body;
-
-    if (!box || !chatPage) return;
-
-    const availableHeight = Math.max(360, chatPage.clientHeight * 0.74);
-
-    box.style.width = "min(90vw, 1120px)";
-    box.style.maxWidth = "90vw";
-
-    aiTextNode.style.setProperty("line-height", "1.08", "important");
+    aiTextNode.style.setProperty("font-size", "clamp(16px, 1.9vw, 24px)", "important");
+    aiTextNode.style.setProperty("line-height", "1.12", "important");
     aiTextNode.style.setProperty("text-align", "center", "important");
-
-    /*
-      尽量保持大字。
-      只有当完整开篇放不下时，才一点点缩小。
-    */
-    const maxSize = Math.min(34, Math.max(24, window.innerWidth * 0.028));
-    const minSize = 16;
-
-    let chosen = minSize;
-
-    for (let size = maxSize; size >= minSize; size -= 1) {
-        aiTextNode.style.setProperty("font-size", size + "px", "important");
-
-        if (box.scrollHeight <= availableHeight) {
-            chosen = size;
-            break;
-        }
-    }
-
-    aiTextNode.style.setProperty("font-size", chosen + "px", "important");
+    aiTextNode.style.setProperty("letter-spacing", "0.03px", "important");
 }
+
 
 
 function magicForceCenterOpeningMessage(aiTextNode) {
