@@ -1953,6 +1953,180 @@ html.magic-home-font-ready .text-line {
 }
 /* End opening size one step smaller and no jump */
 
+
+/* Archive list-detail redesign */
+#diaryList {
+    display: none !important;
+}
+
+#magicArchiveButton {
+    position: fixed !important;
+    top: 24px !important;
+    left: 24px !important;
+    z-index: 9999 !important;
+    padding: 14px 30px !important;
+    border-radius: 999px !important;
+    border: none !important;
+    background: rgba(45, 31, 27, 0.96) !important;
+    color: #f6ead7 !important;
+    font-family: "Cinzel Decorative", serif !important;
+    font-size: 16px !important;
+    letter-spacing: 0.5px !important;
+    cursor: pointer !important;
+    box-shadow: 0 8px 24px rgba(45, 31, 27, 0.18) !important;
+}
+
+#magicArchiveOverlay {
+    display: none;
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 20000 !important;
+    background: rgba(31, 22, 18, 0.42) !important;
+    overflow-y: auto !important;
+    padding: 42px 24px !important;
+    box-sizing: border-box !important;
+}
+
+#magicArchivePanel {
+    width: min(880px, 92vw) !important;
+    margin: 0 auto !important;
+    min-height: 70vh !important;
+    background: rgba(247, 239, 222, 0.97) !important;
+    border: 1px solid rgba(105, 72, 54, 0.22) !important;
+    border-radius: 28px !important;
+    box-shadow: 0 24px 70px rgba(34, 24, 19, 0.32) !important;
+    padding: 34px !important;
+    color: #4b2e26 !important;
+    font-family: "LXGW WenKai", serif !important;
+    box-sizing: border-box !important;
+}
+
+.magic-archive-head {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    gap: 16px !important;
+    margin-bottom: 24px !important;
+}
+
+.magic-archive-title {
+    font-family: "Cinzel Decorative", serif !important;
+    font-size: 30px !important;
+    color: #3b241f !important;
+}
+
+.magic-archive-close,
+.magic-archive-back,
+.magic-archive-delete {
+    border: 1px solid rgba(83, 55, 43, 0.22) !important;
+    background: rgba(255, 255, 255, 0.55) !important;
+    color: #5b3b31 !important;
+    border-radius: 999px !important;
+    padding: 9px 16px !important;
+    cursor: pointer !important;
+    font-size: 14px !important;
+}
+
+.magic-archive-list {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 12px !important;
+}
+
+.magic-archive-row {
+    border: 1px solid rgba(105, 72, 54, 0.16) !important;
+    background: rgba(255, 250, 239, 0.72) !important;
+    border-radius: 18px !important;
+    padding: 16px 18px !important;
+    cursor: pointer !important;
+    transition: transform 0.18s ease, box-shadow 0.18s ease !important;
+}
+
+.magic-archive-row:hover {
+    transform: translateY(-1px) !important;
+    box-shadow: 0 8px 22px rgba(77, 53, 42, 0.11) !important;
+}
+
+.magic-archive-date {
+    font-family: "Cinzel Decorative", serif !important;
+    color: #8a6a58 !important;
+    font-size: 13px !important;
+    margin-bottom: 6px !important;
+}
+
+.magic-archive-snippet {
+    color: #3e2a24 !important;
+    font-size: 18px !important;
+    line-height: 1.45 !important;
+}
+
+.magic-archive-empty {
+    text-align: center !important;
+    color: #8b7a70 !important;
+    font-size: 18px !important;
+    padding: 70px 20px !important;
+    line-height: 1.6 !important;
+}
+
+.magic-archive-detail-meta {
+    font-family: "Cinzel Decorative", serif !important;
+    color: #8a6a58 !important;
+    font-size: 14px !important;
+    margin-bottom: 22px !important;
+}
+
+.magic-archive-section {
+    margin: 24px 0 !important;
+}
+
+.magic-archive-label {
+    font-family: "Cinzel Decorative", serif !important;
+    font-size: 14px !important;
+    color: #8a6a58 !important;
+    margin-bottom: 8px !important;
+}
+
+.magic-archive-text {
+    white-space: pre-wrap !important;
+    line-height: 1.7 !important;
+    font-size: 18px !important;
+    color: #3b241f !important;
+    background: rgba(255, 252, 244, 0.54) !important;
+    border-radius: 16px !important;
+    padding: 18px !important;
+}
+
+#magicArchiveOverlay .magic-letter,
+#magicArchiveOverlay .magic-letter-faded,
+#magicArchiveOverlay .magic-reply-drying,
+#magicArchiveOverlay .magic-ink-drying {
+    opacity: 1 !important;
+    filter: none !important;
+    transform: none !important;
+    transition: none !important;
+    animation: none !important;
+}
+
+@media (max-width: 768px) {
+    #magicArchiveOverlay {
+        padding: 24px 14px !important;
+    }
+
+    #magicArchivePanel {
+        padding: 24px 18px !important;
+        border-radius: 22px !important;
+    }
+
+    .magic-archive-title {
+        font-size: 24px !important;
+    }
+
+    .magic-archive-snippet,
+    .magic-archive-text {
+        font-size: 16px !important;
+    }
+}
+
 </style>
 
 <script>
@@ -5198,34 +5372,233 @@ function magicInstallSendInterceptors() {
     }
 }
 
+
 function magicCreateArchiveUI() {
-    if (document.getElementById("magicArchiveButton")) return;
+    const oldButton = document.getElementById("magicArchiveButton");
+    const oldOverlay = document.getElementById("magicArchiveOverlay");
+
+    if (oldButton) oldButton.remove();
+    if (oldOverlay) oldOverlay.remove();
 
     const button = document.createElement("button");
     button.id = "magicArchiveButton";
-    button.textContent = "Archive";
+    button.textContent = "ARCHIVE";
     document.body.appendChild(button);
 
     const overlay = document.createElement("div");
     overlay.id = "magicArchiveOverlay";
     overlay.innerHTML = `
         <div id="magicArchivePanel">
-            <div id="magicArchiveHeader">
-                <h2>Diary Archive</h2>
-                <button id="magicArchiveClose">×</button>
+            <div class="magic-archive-head">
+                <div class="magic-archive-title">Archive</div>
+                <button class="magic-archive-close" type="button">Close</button>
             </div>
             <div id="magicArchiveContent"></div>
         </div>
     `;
     document.body.appendChild(overlay);
 
-    button.addEventListener("click", magicOpenArchive);
-    overlay.addEventListener("click", function(e) {
-        if (e.target === overlay) magicCloseArchive();
+    const content = overlay.querySelector("#magicArchiveContent");
+    const closeButton = overlay.querySelector(".magic-archive-close");
+
+    function escapeHTML(value) {
+        return String(value || "")
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+
+    function readHistory() {
+        try {
+            const raw = localStorage.getItem(MAGIC_HISTORY_KEY) || "[]";
+            const parsed = JSON.parse(raw);
+            return Array.isArray(parsed) ? parsed : [];
+        } catch (e) {
+            return [];
+        }
+    }
+
+    function writeHistory(history) {
+        localStorage.setItem(MAGIC_HISTORY_KEY, JSON.stringify(history));
+    }
+
+    function cleanArchiveText(text) {
+        let value = String(text || "");
+
+        value = value.replace(/^Reply in English only\.[\s\S]*?The user's real entry is:\s*/i, "");
+        value = value.replace(/^Please reply in English only\.[\s\S]*?The user's real entry is:\s*/i, "");
+        value = value.replace(/^Reply in Chinese only\.[\s\S]*?The user's real entry is:\s*/i, "");
+        value = value.replace(/^请只用中文回应。[\s\S]*?用户真正写下的是：\s*/i, "");
+        value = value.replace(/^请只用中文回复。[\s\S]*?用户真正写下的是：\s*/i, "");
+        value = value.replace(/^The user's real entry is:\s*/i, "");
+        value = value.replace(/^用户真正写下的是：\s*/i, "");
+
+        return value.trim();
+    }
+
+    function getMessageText(msg) {
+        if (!msg) return "";
+        return msg.text || msg.content || msg.message || "";
+    }
+
+    function normalizeEntry(entry) {
+        const messages = Array.isArray(entry && entry.messages) ? entry.messages : [];
+
+        let user = entry && (
+            entry.user ||
+            entry.userText ||
+            entry.realText ||
+            entry.prompt ||
+            entry.input
+        );
+
+        let ai = entry && (
+            entry.ai ||
+            entry.reply ||
+            entry.assistant ||
+            entry.aiText ||
+            entry.response
+        );
+
+        if (!user && messages.length) {
+            const userMsg = messages.find(msg => msg && (msg.isUser === true || msg.role === "user"));
+            user = getMessageText(userMsg);
+        }
+
+        if (!ai && messages.length) {
+            const aiMsg = [...messages].reverse().find(msg => msg && (msg.isUser === false || msg.role === "assistant"));
+            ai = getMessageText(aiMsg);
+        }
+
+        const time = (entry && (entry.time || entry.createdAt || entry.date || entry.timestamp)) || new Date().toISOString();
+
+        return {
+            time,
+            user: cleanArchiveText(user),
+            ai: cleanArchiveText(ai)
+        };
+    }
+
+    function formatDate(value) {
+        const date = new Date(value);
+        if (Number.isNaN(date.getTime())) return "";
+
+        const y = date.getFullYear();
+        const m = String(date.getMonth() + 1).padStart(2, "0");
+        const d = String(date.getDate()).padStart(2, "0");
+        const hh = String(date.getHours()).padStart(2, "0");
+        const mm = String(date.getMinutes()).padStart(2, "0");
+
+        return `${y}/${m}/${d} ${hh}:${mm}`;
+    }
+
+    function makeSnippet(text) {
+        const oneLine = cleanArchiveText(text).replace(/\s+/g, " ").trim();
+        if (!oneLine) return "Untitled entry";
+        return oneLine.length > 82 ? oneLine.slice(0, 82) + "..." : oneLine;
+    }
+
+    function renderList() {
+        const history = readHistory();
+
+        const rows = history
+            .map((entry, index) => ({ entry, index, fields: normalizeEntry(entry) }))
+            .filter(item => item.fields.user || item.fields.ai);
+
+        if (!rows.length) {
+            content.innerHTML = `
+                <div class="magic-archive-empty">
+                    This archive is still empty.<br>
+                    Write something on the page, and it will be kept here.
+                </div>
+            `;
+            return;
+        }
+
+        content.innerHTML = `
+            <div class="magic-archive-list">
+                ${rows.map(item => `
+                    <div class="magic-archive-row" data-index="${item.index}">
+                        <div class="magic-archive-date">${escapeHTML(formatDate(item.fields.time))}</div>
+                        <div class="magic-archive-snippet">${escapeHTML(makeSnippet(item.fields.user || item.fields.ai))}</div>
+                    </div>
+                `).join("")}
+            </div>
+        `;
+
+        content.querySelectorAll(".magic-archive-row").forEach(row => {
+            row.addEventListener("click", () => {
+                const index = Number(row.dataset.index);
+                renderDetail(index);
+            });
+        });
+    }
+
+    function renderDetail(index) {
+        const history = readHistory();
+        const entry = history[index];
+
+        if (!entry) {
+            renderList();
+            return;
+        }
+
+        const fields = normalizeEntry(entry);
+
+        content.innerHTML = `
+            <div class="magic-archive-head">
+                <button class="magic-archive-back" type="button">Back</button>
+                <button class="magic-archive-delete" type="button">Delete</button>
+            </div>
+
+            <div class="magic-archive-detail-meta">${escapeHTML(formatDate(fields.time))}</div>
+
+            ${fields.user ? `
+                <div class="magic-archive-section">
+                    <div class="magic-archive-label">You wrote</div>
+                    <div class="magic-archive-text">${escapeHTML(fields.user)}</div>
+                </div>
+            ` : ""}
+
+            ${fields.ai ? `
+                <div class="magic-archive-section">
+                    <div class="magic-archive-label">The diary answered</div>
+                    <div class="magic-archive-text">${escapeHTML(fields.ai)}</div>
+                </div>
+            ` : ""}
+        `;
+
+        content.querySelector(".magic-archive-back").addEventListener("click", renderList);
+
+        content.querySelector(".magic-archive-delete").addEventListener("click", () => {
+            const ok = confirm("Delete this archive entry?");
+            if (!ok) return;
+
+            const next = readHistory();
+            next.splice(index, 1);
+            writeHistory(next);
+            renderList();
+        });
+    }
+
+    button.addEventListener("click", () => {
+        overlay.style.display = "block";
+        renderList();
     });
 
-    document.getElementById("magicArchiveClose").addEventListener("click", magicCloseArchive);
+    closeButton.addEventListener("click", () => {
+        overlay.style.display = "none";
+    });
+
+    overlay.addEventListener("click", event => {
+        if (event.target === overlay) {
+            overlay.style.display = "none";
+        }
+    });
 }
+
 
 function magicOpenArchive() {
     const overlay = document.getElementById("magicArchiveOverlay");
