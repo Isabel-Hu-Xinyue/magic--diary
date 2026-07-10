@@ -1461,7 +1461,7 @@
 
 /* 用户写下的字：像墨水被纸吸收、吹干、消散 */
 .magic-ink-drying {
-    animation: inkDryAway 2.4s ease-in-out forwards;
+    animation: inkDryAway 13s ease-in-out forwards;
     transform-origin: left center;
 }
 
@@ -1473,24 +1473,31 @@
         letter-spacing: 0.4px;
     }
 
-    35% {
-        opacity: 0.75;
-        filter: blur(0.8px);
-        transform: translateY(-1px) scale(1.01);
+    23% {
+        opacity: 1;
+        filter: blur(0);
+        transform: translateY(0) scale(1);
+        letter-spacing: 0.4px;
+    }
+
+    55% {
+        opacity: 0.65;
+        filter: blur(1.2px);
+        transform: translateY(-2px) scale(1.01);
         letter-spacing: 1.2px;
     }
 
-    70% {
+    80% {
         opacity: 0.28;
-        filter: blur(2.5px);
-        transform: translateY(-5px) scale(0.99);
-        letter-spacing: 2px;
+        filter: blur(3px);
+        transform: translateY(-6px) scale(0.98);
+        letter-spacing: 2.2px;
     }
 
     100% {
         opacity: 0;
-        filter: blur(6px);
-        transform: translateY(-10px) scale(0.96);
+        filter: blur(7px);
+        transform: translateY(-12px) scale(0.96);
         letter-spacing: 3px;
     }
 }
@@ -4357,7 +4364,7 @@ function magicAnimateAndHideUserMessage(userTextNode) {
 
     setTimeout(() => {
         box.style.display = "none";
-    }, 2500);
+    }, 13200);
 }
 
 function magicMaybeSaveAI(aiTextNode) {
