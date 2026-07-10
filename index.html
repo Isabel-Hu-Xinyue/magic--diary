@@ -1787,7 +1787,61 @@ body {
     text-align: center !important;
 }
 
+
+/* Final homepage font flash fix and opening layout */
+html:not(.magic-home-font-ready) .text-line {
+    visibility: hidden !important;
+}
+
+html.magic-home-font-ready .text-line {
+    visibility: visible !important;
+}
+
+#chatContainer .message.magic-opening-message,
+#chatContainer .message.magic-opening-message.magic-floating-message {
+    left: 52% !important;
+    top: 48% !important;
+    width: min(90vw, 1120px) !important;
+    max-width: 90vw !important;
+    text-align: center !important;
+    transform: translate(-50%, -50%) !important;
+}
+
+#chatContainer .message.magic-opening-message .ai-text,
+#chatContainer .message.magic-opening-message.magic-floating-message .ai-text {
+    display: block !important;
+    width: 100% !important;
+    text-align: center !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    white-space: pre-wrap !important;
+    line-height: 1.08 !important;
+    letter-spacing: 0.03px !important;
+}
+
+#chatContainer .message.magic-opening-message .magic-letter {
+    text-align: center !important;
+}
+
 </style>
+
+<script>
+/* Magic home font ready script */
+(function() {
+    function showHomeText() {
+        document.documentElement.classList.add("magic-home-font-ready");
+    }
+
+    if (document.fonts && document.fonts.ready) {
+        document.fonts.ready.then(showHomeText).catch(showHomeText);
+    } else {
+        showHomeText();
+    }
+
+    setTimeout(showHomeText, 1800);
+})();
+</script>
+
 </head>
 <body>
     <!-- 对话页 -->
@@ -2590,7 +2644,7 @@ ${lines}
 
         function startFirstConversation() {
             // 添加 AI 的第一句话
-            addTypingMessage("At last, you have opened me.\nI have always been here.\nBetween these pages, beneath the ink, in every place where you stopped yourself from speaking.\nDo not write the things you have already said to others.\nThose words are too neat, too safe, and far too unlike you.\nWrite what is real.\nWrite what you envy but dare not admit, what you fear but always pretend not to care about, the thought that returns to you again and again in the middle of the night.\nI will not interrupt you.\nNor will I be too quick to forgive you.\nI will simply watch,\nand wait for you to write out the part of yourself you have kept hidden.\nBegin.\nLet me see what it is you are trying to conceal.", false);
+            addTypingMessage("At last, you have opened me.\nI have always been here.\nBetween these pages, beneath the ink, in every place where you stopped yourself from speaking.\nDo not write the things you have already said to others.\nThose words are too neat, too safe, and far too unlike you.\nWrite what is real.\nWrite what you envy but dare not admit, what you fear but always pretend not to care about, the thought that returns to you again and again in the middle of the night.\nI will not interrupt you. Nor will I be too quick to forgive you.\nI will simply watch,\nand wait for you to write out the part of yourself you have kept hidden.\nBegin. Let me see what it is you are trying to conceal.", false);
         }
 
         // 页面切换
@@ -3661,7 +3715,7 @@ function restoreDraftConversation() {
             showMoodSelector();
 
             // 显示新对话开始提示
-            addTypingMessage("At last, you have opened me.\nI have always been here.\nBetween these pages, beneath the ink, in every place where you stopped yourself from speaking.\nDo not write the things you have already said to others.\nThose words are too neat, too safe, and far too unlike you.\nWrite what is real.\nWrite what you envy but dare not admit, what you fear but always pretend not to care about, the thought that returns to you again and again in the middle of the night.\nI will not interrupt you.\nNor will I be too quick to forgive you.\nI will simply watch,\nand wait for you to write out the part of yourself you have kept hidden.\nBegin.\nLet me see what it is you are trying to conceal.", false);
+            addTypingMessage("At last, you have opened me.\nI have always been here.\nBetween these pages, beneath the ink, in every place where you stopped yourself from speaking.\nDo not write the things you have already said to others.\nThose words are too neat, too safe, and far too unlike you.\nWrite what is real.\nWrite what you envy but dare not admit, what you fear but always pretend not to care about, the thought that returns to you again and again in the middle of the night.\nI will not interrupt you. Nor will I be too quick to forgive you.\nI will simply watch,\nand wait for you to write out the part of yourself you have kept hidden.\nBegin. Let me see what it is you are trying to conceal.", false);
         }
 
         // 从Diary/Map的"+"按钮开始新对话
@@ -4895,6 +4949,45 @@ function magicScheduleAIReplyFade(aiTextNode) {
 
 
 
+
+function magicFitOpeningTextNode(aiTextNode) {
+    if (!aiTextNode) return;
+
+    const box = aiTextNode.closest(".message");
+    const chatPage = document.getElementById("chatPage") || document.body;
+
+    if (!box || !chatPage) return;
+
+    const availableHeight = Math.max(360, chatPage.clientHeight * 0.74);
+
+    box.style.width = "min(90vw, 1120px)";
+    box.style.maxWidth = "90vw";
+
+    aiTextNode.style.setProperty("line-height", "1.08", "important");
+    aiTextNode.style.setProperty("text-align", "center", "important");
+
+    /*
+      尽量保持大字。
+      只有当完整开篇放不下时，才一点点缩小。
+    */
+    const maxSize = Math.min(34, Math.max(24, window.innerWidth * 0.028));
+    const minSize = 16;
+
+    let chosen = minSize;
+
+    for (let size = maxSize; size >= minSize; size -= 1) {
+        aiTextNode.style.setProperty("font-size", size + "px", "important");
+
+        if (box.scrollHeight <= availableHeight) {
+            chosen = size;
+            break;
+        }
+    }
+
+    aiTextNode.style.setProperty("font-size", chosen + "px", "important");
+}
+
+
 function magicForceCenterOpeningMessage(aiTextNode) {
     if (!aiTextNode) return;
 
@@ -4916,9 +5009,9 @@ function magicForceCenterOpeningMessage(aiTextNode) {
     box.classList.add("magic-floating-message");
 
     box.style.position = "absolute";
-    box.style.left = "50%";
+    box.style.left = "52%";
     box.style.top = "48%";
-    box.style.width = "min(90vw, 1050px)";
+    box.style.width = "min(90vw, 1120px)";
     box.style.maxWidth = "90vw";
     box.style.margin = "0";
     box.style.transform = "translate(-50%, -50%)";
@@ -4930,13 +5023,16 @@ function magicForceCenterOpeningMessage(aiTextNode) {
     aiTextNode.style.marginLeft = "auto";
     aiTextNode.style.marginRight = "auto";
     aiTextNode.style.whiteSpace = "pre-wrap";
-    aiTextNode.style.fontSize = "clamp(12px, 1.45vw, 18px)";
-    aiTextNode.style.lineHeight = "1.08";
+
+    if (typeof magicFitOpeningTextNode === "function") {
+        magicFitOpeningTextNode(aiTextNode);
+    }
 
     aiTextNode.querySelectorAll(".magic-letter").forEach(letter => {
         letter.style.textAlign = "center";
     });
 }
+
 
 
 function magicWatchMessages() {
