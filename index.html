@@ -1759,6 +1759,42 @@ body {
     }
 }
 
+
+/* Center opening text away from tree */
+#chatContainer .message.magic-opening-message {
+    left: 55% !important;
+    top: 48% !important;
+    width: min(84vw, 980px) !important;
+    max-width: 84vw !important;
+    text-align: center !important;
+    transform: translate(-50%, -50%) !important;
+}
+
+#chatContainer .message.magic-opening-message .ai-text {
+    text-align: center !important;
+    font-size: clamp(12px, 1.45vw, 18px) !important;
+    line-height: 1.08 !important;
+    letter-spacing: 0.03px !important;
+    white-space: pre-wrap !important;
+}
+
+#chatContainer .message.magic-opening-message .magic-letter {
+    text-align: center !important;
+}
+
+@media (max-width: 768px) {
+    #chatContainer .message.magic-opening-message {
+        left: 52% !important;
+        width: 88vw !important;
+        max-width: 88vw !important;
+    }
+
+    #chatContainer .message.magic-opening-message .ai-text {
+        font-size: clamp(10.5px, 2.7vw, 14.5px) !important;
+        line-height: 1.06 !important;
+    }
+}
+
 </style>
 </head>
 <body>
@@ -2562,7 +2598,7 @@ ${lines}
 
         function startFirstConversation() {
             // 添加 AI 的第一句话
-            addTypingMessage("At last, you have opened me.\nI have always been here.\nBetween these pages, beneath the ink, in every place where you stopped yourself from speaking.\nDo not write the things you have already said to others.\nThose words are too neat, too safe, and far too unlike you.\nWrite what is real.\nWrite what you envy but dare not admit, what you fear but always pretend not to care about, the thought that returns to you again and again in the middle of the night.\nI will not interrupt you.\nNor will I be too quick to forgive you.\nI will simply watch,\nand wait for you to write out the part of yourself you have kept hidden.\nBegin.\nLet me see what it is you are trying to conceal.", false);
+            addTypingMessage("At last, you have opened me.\nI have always been here.\nBetween these pages, beneath the ink, in every place where you stopped yourself from speaking.\nDo not write the things you have already said to others.\nThose words are too neat, too safe, and far too unlike you.\nWrite what is real.\nWrite what you envy but dare not admit, what you fear but always pretend not to care about, the thought that returns to you again and again in the middle of the night.\nI will not interrupt you. Nor will I be too quick to forgive you.\nI will simply watch,\nand wait for you to write out the part of yourself you have kept hidden.\nBegin. Let me see what it is you are trying to conceal.", false);
         }
 
         // 页面切换
@@ -3633,7 +3669,7 @@ function restoreDraftConversation() {
             showMoodSelector();
 
             // 显示新对话开始提示
-            addTypingMessage("At last, you have opened me.\nI have always been here.\nBetween these pages, beneath the ink, in every place where you stopped yourself from speaking.\nDo not write the things you have already said to others.\nThose words are too neat, too safe, and far too unlike you.\nWrite what is real.\nWrite what you envy but dare not admit, what you fear but always pretend not to care about, the thought that returns to you again and again in the middle of the night.\nI will not interrupt you.\nNor will I be too quick to forgive you.\nI will simply watch,\nand wait for you to write out the part of yourself you have kept hidden.\nBegin.\nLet me see what it is you are trying to conceal.", false);
+            addTypingMessage("At last, you have opened me.\nI have always been here.\nBetween these pages, beneath the ink, in every place where you stopped yourself from speaking.\nDo not write the things you have already said to others.\nThose words are too neat, too safe, and far too unlike you.\nWrite what is real.\nWrite what you envy but dare not admit, what you fear but always pretend not to care about, the thought that returns to you again and again in the middle of the night.\nI will not interrupt you. Nor will I be too quick to forgive you.\nI will simply watch,\nand wait for you to write out the part of yourself you have kept hidden.\nBegin. Let me see what it is you are trying to conceal.", false);
         }
 
         // 从Diary/Map的"+"按钮开始新对话
