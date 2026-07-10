@@ -4486,7 +4486,7 @@ function magicStartLetterFade(textNode, kind) {
 
     const weight = magicVisualTextWeight(original);
 
-    const holdMs = kind === "ai" ? 6000 : 3000;
+    const holdMs = kind === "ai" ? 4000 : 2000;
 
     const fadeMs = kind === "ai"
         ? magicClampNumber(weight * 48, 5200, 15000)
