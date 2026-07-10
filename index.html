@@ -2141,36 +2141,31 @@ html.magic-home-font-ready .text-line {
 }
 
 
-/* Home page Tom Riddle opening and hint */
-#diaryPage {
-    position: relative !important;
+/* Center home hint under opening text */
+#magicHomeHint {
+    left: 50% !important;
+    bottom: 115px !important;
+    transform: translateX(-50%) !important;
+    max-width: min(760px, 82vw) !important;
+    width: auto !important;
+    text-align: center !important;
+    line-height: 1.45 !important;
 }
 
-#magicHomeHint {
-    position: fixed !important;
-    left: 7.5vw !important;
-    bottom: 115px !important;
-    z-index: 20 !important;
-    max-width: min(440px, 42vw) !important;
-    color: rgba(80, 48, 39, 0.78) !important;
-    font-family: "Cinzel Decorative", "LXGW WenKai", serif !important;
-    font-size: clamp(15px, 1.45vw, 20px) !important;
-    line-height: 1.45 !important;
-    letter-spacing: 0.2px !important;
-    text-align: left !important;
-    pointer-events: none !important;
+#magicHomeHint div {
+    text-align: center !important;
 }
 
 @media (max-width: 768px) {
     #magicHomeHint {
-        left: 7vw !important;
+        left: 50% !important;
         bottom: 105px !important;
-        max-width: 72vw !important;
-        font-size: clamp(13px, 3.2vw, 17px) !important;
-        line-height: 1.35 !important;
+        transform: translateX(-50%) !important;
+        max-width: 82vw !important;
+        text-align: center !important;
     }
 }
-/* End home page Tom Riddle opening and hint */
+/* End center home hint under opening text */
 
 </style>
 
@@ -2248,16 +2243,10 @@ html.magic-home-font-ready .text-line {
             </svg>
 
             <div class="text-line line-1">Do you remember Tom Riddle's diary in Harry Potter?</div>
-            <div class="text-line line-2" style="margin-top: 1em;">You write down what you dare not say aloud,</div>
-            <div class="text-line line-3">and the page writes back.</div>
-            <div class="text-line line-4" style="margin-top: 1em;">But this time, the one answering you</div>
-            <div class="text-line line-5">is already waiting in the ink.</div>
-
-            <div id="magicHomeHint" class="magic-home-hint">
-                <div>This diary has not yet chosen to answer.</div>
-                <div style="margin-top: 0.9em;">Touch the golden quill.</div>
-                <div>Write first, and see what writes back.</div>
-            </div>
+            <div class="text-line line-2" style="margin-top: 1em;">You write down your troubles, and it responds to you.</div>
+            <div class="text-line line-3" style="margin-top: 1em;">But this time, the one responding to you is not Voldemort,</div>
+            <div class="text-line line-4">but your ideal self.</div>
+            <div class="text-line line-5" style="margin-top: 1em;">A gentle, accepting, and nonjudgmental version of you.</div>
         </div>
         <div class="diary-list" id="diaryList">
             <!-- 对话记录会动态添加到这里 -->
