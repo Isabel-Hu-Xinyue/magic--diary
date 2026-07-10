@@ -1535,6 +1535,7 @@
     width: min(760px, 92vw);
     max-height: 82vh;
     overflow-y: auto;
+    overflow-x: hidden !important;
     background: #F3E4C3;
     border: 1px solid rgba(91, 31, 31, 0.35);
     border-radius: 22px;
@@ -2077,6 +2078,8 @@ html.magic-home-font-ready .text-line {
 
 .magic-archive-section {
     margin: 24px 0 !important;
+    width: 100% !important;
+    min-width: 0 !important;
 }
 
 .magic-archive-label {
@@ -2087,13 +2090,22 @@ html.magic-home-font-ready .text-line {
 }
 
 .magic-archive-text {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
     white-space: pre-wrap !important;
+    overflow-wrap: break-word !important;
+    word-break: break-word !important;
+    line-break: auto !important;
     line-height: 1.7 !important;
     font-size: 18px !important;
     color: #3b241f !important;
     background: rgba(255, 252, 244, 0.54) !important;
     border-radius: 16px !important;
     padding: 18px !important;
+    overflow-x: hidden !important;
 }
 
 #magicArchiveOverlay .magic-letter,
@@ -2115,6 +2127,7 @@ html.magic-home-font-ready .text-line {
     #magicArchivePanel {
         padding: 24px 18px !important;
         border-radius: 22px !important;
+        overflow-x: hidden !important;
     }
 
     .magic-archive-title {
