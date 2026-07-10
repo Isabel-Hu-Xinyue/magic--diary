@@ -4314,6 +4314,10 @@ ${quotes.join('\n')}
 
             // 用户消息开始逐字显示；Done后才进入"思考中 → AI 回复"环节
             addTypingMessage(message, true, async () => {
+                if (typeof magicWaitForLatestUserFadeComplete === "function") {
+                    await magicWaitForLatestUserFadeComplete();
+                }
+
                 showLoading();
 
                 try {
@@ -4482,11 +4486,11 @@ function magicStartLetterFade(textNode, kind) {
 
     const weight = magicVisualTextWeight(original);
 
-    const holdMs = kind === "ai" ? 8000 : 3000;
+    const holdMs = kind === "ai" ? 6000 : 3000;
 
     const fadeMs = kind === "ai"
-        ? magicClampNumber(weight * 55, 6500, 18000)
-        : magicClampNumber(weight * 85, 4200, 11500);
+        ? magicClampNumber(weight * 48, 5200, 15000)
+        : magicClampNumber(weight * 70, 3200, 9000);
 
     const stepMs = letters.length > 1 ? fadeMs / (letters.length - 1) : 0;
     const transitionMs = kind === "ai"
@@ -4510,6 +4514,53 @@ function magicStartLetterFade(textNode, kind) {
         }, fadeMs + transitionMs + 500);
     }, holdMs);
 }
+
+
+function magicWaitForLatestUserFadeComplete() {
+    const chatContainer = document.getElementById("chatContainer");
+    if (!chatContainer) return Promise.resolve();
+
+    const userNodes = Array.from(chatContainer.querySelectorAll(".user-text"));
+    const userTextNode = userNodes.reverse().find(node => {
+        const box = node.closest(".message");
+        return box && box.style.display !== "none" && !box.closest("#magicArchiveOverlay") && !box.closest("#magicArchiveContent");
+    });
+
+    if (!userTextNode) return Promise.resolve();
+
+    const box = userTextNode.closest(".message");
+    if (!box) return Promise.resolve();
+
+    magicScheduleLetterFade(userTextNode, "user");
+
+    return new Promise(resolve => {
+        let finished = false;
+        const start = Date.now();
+
+        function finish() {
+            if (finished) return;
+            finished = true;
+            resolve();
+        }
+
+        function check() {
+            if (!box.isConnected || box.style.display === "none") {
+                finish();
+                return;
+            }
+
+            if (Date.now() - start > 22000) {
+                finish();
+                return;
+            }
+
+            setTimeout(check, 100);
+        }
+
+        check();
+    });
+}
+
 
 function magicScheduleLetterFade(textNode, kind) {
     const chatContainer = document.getElementById("chatContainer");
