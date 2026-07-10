@@ -1651,6 +1651,31 @@
     transform: none !important;
 }
 
+
+/* Letter-by-letter ink fading */
+.magic-letter {
+    display: inline-block;
+    white-space: pre;
+    will-change: opacity, filter, transform;
+    transition-property: opacity, filter, transform;
+    transition-timing-function: ease-in-out;
+}
+
+.magic-letter-faded {
+    opacity: 0;
+    filter: blur(6px);
+    transform: translateY(-8px) scale(0.96);
+}
+
+/* Archive must never fade */
+#magicArchiveOverlay .magic-letter,
+#magicArchiveContent .magic-letter {
+    opacity: 1 !important;
+    filter: none !important;
+    transform: none !important;
+    transition: none !important;
+}
+
 </style>
 </head>
 <body>
@@ -4399,19 +4424,144 @@ function magicRestoreDisplayedUserText(userTextNode) {
     }
 }
 
-function magicAnimateAndHideUserMessage(userTextNode) {
-    const box = userTextNode.closest(".message") || userTextNode.parentElement;
-    if (!box || box.dataset.magicInkDone === "true") return;
 
-    box.dataset.magicInkDone = "true";
-    magicRestoreDisplayedUserText(userTextNode);
+function magicClampNumber(value, min, max) {
+    return Math.max(min, Math.min(max, value));
+}
 
-    box.classList.add("magic-ink-drying");
+function magicVisualTextWeight(text) {
+    return Array.from(text || "").reduce((sum, ch) => {
+        if (ch === "\n") return sum + 5;
+        if (ch === " ") return sum + 0.35;
+        if (/[\u4e00-\u9fff]/.test(ch)) return sum + 1.25;
+        if (/[A-Z]/.test(ch)) return sum + 0.9;
+        if (/[a-z0-9]/.test(ch)) return sum + 0.7;
+        return sum + 0.8;
+    }, 0);
+}
+
+function magicWrapLetters(textNode) {
+    if (!textNode || textNode.dataset.magicLettersReady === "true") return;
+
+    const original = textNode.textContent || "";
+    textNode.dataset.magicOriginalText = original;
+    textNode.textContent = "";
+
+    Array.from(original).forEach(ch => {
+        if (ch === "\n") {
+            textNode.appendChild(document.createElement("br"));
+            return;
+        }
+
+        const span = document.createElement("span");
+        span.className = "magic-letter";
+        span.textContent = ch === " " ? "\u00A0" : ch;
+        textNode.appendChild(span);
+    });
+
+    textNode.dataset.magicLettersReady = "true";
+}
+
+function magicStartLetterFade(textNode, kind) {
+    const chatContainer = document.getElementById("chatContainer");
+    if (!chatContainer) return;
+
+    const box = textNode.closest(".message");
+    if (!box) return;
+
+    if (!chatContainer.contains(box)) return;
+    if (box.closest("#magicArchiveOverlay") || box.closest("#magicArchiveContent")) return;
+
+    const original = textNode.textContent || "";
+    if (!original.trim()) return;
+
+    magicWrapLetters(textNode);
+
+    const letters = Array.from(textNode.querySelectorAll(".magic-letter"));
+    if (!letters.length) return;
+
+    const weight = magicVisualTextWeight(original);
+
+    const holdMs = kind === "ai" ? 8000 : 3000;
+
+    const fadeMs = kind === "ai"
+        ? magicClampNumber(weight * 55, 6500, 18000)
+        : magicClampNumber(weight * 85, 4200, 11500);
+
+    const stepMs = letters.length > 1 ? fadeMs / (letters.length - 1) : 0;
+    const transitionMs = kind === "ai"
+        ? magicClampNumber(stepMs * 4, 700, 1600)
+        : magicClampNumber(stepMs * 4, 650, 1400);
+
+    letters.forEach((letter, index) => {
+        letter.style.transitionDuration = Math.round(transitionMs) + "ms";
+        letter.style.transitionDelay = Math.round(index * stepMs) + "ms";
+    });
 
     setTimeout(() => {
-        box.style.display = "none";
-    }, 13200);
+        letters.forEach(letter => {
+            letter.classList.add("magic-letter-faded");
+        });
+
+        setTimeout(() => {
+            if (box.isConnected) {
+                box.style.display = "none";
+            }
+        }, fadeMs + transitionMs + 500);
+    }, holdMs);
 }
+
+function magicScheduleLetterFade(textNode, kind) {
+    const chatContainer = document.getElementById("chatContainer");
+    if (!chatContainer) return;
+
+    const box = textNode.closest(".message");
+    if (!box) return;
+
+    if (!chatContainer.contains(box)) return;
+    if (box.closest("#magicArchiveOverlay") || box.closest("#magicArchiveContent")) return;
+
+    const text = textNode.textContent || "";
+    if (!text.trim()) return;
+
+    const prefix = kind === "ai" ? "magicAI" : "magicUser";
+    const startedKey = prefix + "LetterFadeStarted";
+    const lastTextKey = prefix + "LastText";
+    const waitingKey = prefix + "WaitingForStableText";
+    const timerKey = prefix + "StableTimer";
+
+    if (box.dataset[startedKey] === "true") return;
+
+    if (box.dataset[lastTextKey] === text && box.dataset[waitingKey] === "true") {
+        return;
+    }
+
+    box.dataset[lastTextKey] = text;
+    box.dataset[waitingKey] = "true";
+
+    clearTimeout(box[timerKey]);
+
+    box[timerKey] = setTimeout(() => {
+        const finalText = textNode.textContent || "";
+
+        if (finalText !== box.dataset[lastTextKey]) {
+            box.dataset[waitingKey] = "false";
+            return;
+        }
+
+        if (box.dataset[startedKey] === "true") return;
+
+        box.dataset[startedKey] = "true";
+        box.dataset[waitingKey] = "false";
+
+        magicStartLetterFade(textNode, kind);
+    }, kind === "ai" ? 1600 : 900);
+}
+
+function magicAnimateAndHideUserMessage(userTextNode) {
+    magicScheduleLetterFade(userTextNode, "user");
+}
+
 
 function magicMaybeSaveAI(aiTextNode) {
     if (!aiTextNode || aiTextNode.dataset.magicSaved === "true") return;
@@ -4439,51 +4589,12 @@ function magicMaybeSaveAI(aiTextNode) {
 }
 
 
+
 function magicScheduleAIReplyFade(aiTextNode) {
-    const chatContainer = document.getElementById("chatContainer");
-    if (!chatContainer) return;
-
-    const box = aiTextNode.closest(".message");
-    if (!box) return;
-
-    /* Only fade messages in the current chat area, never Archive or history views */
-    if (!chatContainer.contains(box)) return;
-    if (box.closest("#magicArchiveOverlay") || box.closest("#magicArchiveContent")) return;
-
-    const text = (aiTextNode.textContent || "").trim();
-    if (text.length < 2) return;
-
-    /* If the text is still typing, keep resetting the timer */
-    if (box.dataset.magicReplyLastText !== text) {
-        box.dataset.magicReplyLastText = text;
-        box.dataset.magicReplyFadeScheduled = "false";
-        clearTimeout(box.magicReplyStableTimer);
-        clearTimeout(box.magicReplyHoldTimer);
-    }
-
-    if (box.dataset.magicReplyFadeScheduled === "true") return;
-
-    clearTimeout(box.magicReplyStableTimer);
-    box.magicReplyStableTimer = setTimeout(() => {
-        if (box.dataset.magicReplyFadeScheduled === "true") return;
-
-        box.dataset.magicReplyFadeScheduled = "true";
-
-        /* Wait 30 seconds after the reply finishes, then fade for 12 seconds */
-        box.magicReplyHoldTimer = setTimeout(() => {
-            if (!box.isConnected) return;
-            if (!chatContainer.contains(box)) return;
-
-            box.classList.add("magic-reply-drying");
-
-            setTimeout(() => {
-                if (box.isConnected && box.classList.contains("magic-reply-drying")) {
-                    box.style.display = "none";
-                }
-            }, 12300);
-        }, 30000);
-    }, 1800);
+    magicScheduleLetterFade(aiTextNode, "ai");
 }
+
+
 
 
 function magicWatchMessages() {
@@ -4496,6 +4607,7 @@ function magicWatchMessages() {
         magicScheduleAIReplyFade(node);
     });
 }
+
 
 function magicInstallSendInterceptors() {
     const sendButton = document.getElementById("sendButton");
