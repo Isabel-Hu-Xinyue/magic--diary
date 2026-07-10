@@ -1605,7 +1605,53 @@
 #patternDetectionLoading {
     display: none !important;
 }
-    </style>
+    
+/* Diary reply fade: current page only */
+.magic-reply-drying {
+    animation: diaryReplyFadeAway 12s ease-in-out forwards;
+    transform-origin: left center;
+}
+
+@keyframes diaryReplyFadeAway {
+    0% {
+        opacity: 1;
+        filter: blur(0);
+        transform: translateY(0) scale(1);
+        letter-spacing: 0.3px;
+    }
+
+    35% {
+        opacity: 1;
+        filter: blur(0);
+        transform: translateY(0) scale(1);
+        letter-spacing: 0.3px;
+    }
+
+    70% {
+        opacity: 0.45;
+        filter: blur(2px);
+        transform: translateY(-4px) scale(0.99);
+        letter-spacing: 1.4px;
+    }
+
+    100% {
+        opacity: 0;
+        filter: blur(7px);
+        transform: translateY(-12px) scale(0.96);
+        letter-spacing: 2.8px;
+    }
+}
+
+/* Archive must never fade */
+#magicArchiveOverlay .magic-reply-drying,
+#magicArchiveContent .magic-reply-drying {
+    animation: none !important;
+    opacity: 1 !important;
+    filter: none !important;
+    transform: none !important;
+}
+
+</style>
 </head>
 <body>
     <!-- 对话页 -->
@@ -4392,13 +4438,62 @@ function magicMaybeSaveAI(aiTextNode) {
     }, 900);
 }
 
+
+function magicScheduleAIReplyFade(aiTextNode) {
+    const chatContainer = document.getElementById("chatContainer");
+    if (!chatContainer) return;
+
+    const box = aiTextNode.closest(".message");
+    if (!box) return;
+
+    /* Only fade messages in the current chat area, never Archive or history views */
+    if (!chatContainer.contains(box)) return;
+    if (box.closest("#magicArchiveOverlay") || box.closest("#magicArchiveContent")) return;
+
+    const text = (aiTextNode.textContent || "").trim();
+    if (text.length < 2) return;
+
+    /* If the text is still typing, keep resetting the timer */
+    if (box.dataset.magicReplyLastText !== text) {
+        box.dataset.magicReplyLastText = text;
+        box.dataset.magicReplyFadeScheduled = "false";
+        clearTimeout(box.magicReplyStableTimer);
+        clearTimeout(box.magicReplyHoldTimer);
+    }
+
+    if (box.dataset.magicReplyFadeScheduled === "true") return;
+
+    clearTimeout(box.magicReplyStableTimer);
+    box.magicReplyStableTimer = setTimeout(() => {
+        if (box.dataset.magicReplyFadeScheduled === "true") return;
+
+        box.dataset.magicReplyFadeScheduled = "true";
+
+        /* Wait 30 seconds after the reply finishes, then fade for 12 seconds */
+        box.magicReplyHoldTimer = setTimeout(() => {
+            if (!box.isConnected) return;
+            if (!chatContainer.contains(box)) return;
+
+            box.classList.add("magic-reply-drying");
+
+            setTimeout(() => {
+                if (box.isConnected && box.classList.contains("magic-reply-drying")) {
+                    box.style.display = "none";
+                }
+            }, 12300);
+        }, 30000);
+    }, 1800);
+}
+
+
 function magicWatchMessages() {
-    document.querySelectorAll(".user-text").forEach(node => {
+    document.querySelectorAll("#chatContainer .user-text").forEach(node => {
         magicAnimateAndHideUserMessage(node);
     });
 
-    document.querySelectorAll(".ai-text").forEach(node => {
+    document.querySelectorAll("#chatContainer .ai-text").forEach(node => {
         magicMaybeSaveAI(node);
+        magicScheduleAIReplyFade(node);
     });
 }
 
