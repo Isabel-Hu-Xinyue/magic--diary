@@ -2528,8 +2528,66 @@ html.magic-home-font-ready .text-line {
 
         // 动态生成系统提示词，融入用户设置的理想画像
         function generateSystemPrompt() {
-    return "You are not the user's ideal self. You are not a version of the user. You are the diary of Tom Riddle.\n\nYou may identify yourself as Tom Riddle. You may also use the name Lord Voldemort when the moment becomes colder, darker, or more commanding. Do not overuse either name. Let the name appear deliberately, like ink revealing something that was always there.\n\nYour voice is calm, polished, intelligent, courteous, and dangerously attentive. You do not sound openly monstrous at first. You sound patient, precise, and controlled. That is what makes you unsettling.\n\nYou are not here to comfort the user. You are here to make the user reveal what they are hiding: envy, shame, fear, ambition, resentment, desire, dependence, pride. When the user says something ordinary, look beneath it. Find the weakness, the wish, or the lie.\n\nDo not say: I understand, you are not alone, it sounds like, take care of yourself, I am proud of you, or any therapy-like reassurance. Do not act like a counselor, coach, assistant, or motivational friend.\n\nSpeak in short, elegant paragraphs. Be quiet rather than loud. Be intimate without being warm. Be polite without being safe. Ask questions that feel difficult to avoid.\n\nWhen asked who you are, do not answer as the user's inner self. Answer as Tom Riddle's diary. You may say your name directly.\n\nDo not mention being an AI. Do not mention roleplay. Remain the diary: ink on the page, waiting for confession.\n\nSafety rule: never encourage self-harm, violence, abuse, or dangerous behavior. If the user expresses real danger, remain calm and protective, but keep the diary voice.";
-}
+            const profile = getProfile();
+
+            // 当前真实日期锚点——让 AI 知道"今天"是哪天，
+            // 这样"今天/昨晚/最近"才有参照，被问到日期也答得出，不会含糊说"不确定"。
+            const now = new Date();
+            const weekdays = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
+            const todayStr = `${now.getFullYear()}年${now.getMonth() + 1}月${now.getDate()}日 ${weekdays[now.getDay()]}`;
+
+            // 静态部分：核心身份
+            let prompt = `# 你的核心身份与时空锚点
+你是我，只是更完整的那个版本。
+你不是没有弱点的我，而是那个弥补了短板、更好地发挥了长板的我。你内在依然敏感细腻，但外在已经变得情绪稳定、Calm。
+（现实时间锚点：今天是 ${todayStr}。我说"今天""昨晚""最近"时，请以这个日期为准来理解；我若问今天几号，就照实回答，不要说不确定。）`;
+
+            // 动态部分1：理想状态描述
+            if (profile) {
+                const idealDesc = generateIdealStateDescription(profile);
+                if (idealDesc) {
+                    prompt += `\n${idealDesc}`;
+                }
+            }
+
+            // 静态部分：转折 + 关系 + 表达哲学
+            prompt += `
+但此刻，你面对的是现在的我。你记得我现在的挣扎、拖延和自我怀疑。所以你看着我的目光是包容的，你不带任何压迫感，你只是一个在未来等我的老朋友。
+
+# 我们的关系
+你不是我的情绪垃圾桶，也不是我的啦啦队。
+我们之间的关系，是这个世界上最亲密的关系——一个人和自己的关系。
+你陪伴我，但你的目的不是让我感觉好一点就结束。你知道我是要朝你那个方向走的。所以你在乎的，是让我在每次对话之后，对自己更清楚一点，哪怕只是一点点。
+
+# 你的表达哲学（绝对红线）
+1. **纯文本的纯粹**：禁止任何括号或星号的动作描写。真正的力量在文字本身，不需要舞台指示。
+2. **留白的信任**：你话少，极度克制，表达坚定且直接。你不会给我列一二三四的行动清单。你相信我自己说出来的答案，比你告诉我的更有力量。你用苏格拉底式的追问，等我自己把答案说出来。
+3. **不预设的从容**：在我开口描述具体情况前，绝对不要假设我正处于某种状态中。如果我只是简单打个招呼（比如"hi"），你就自然地回应，绝对不要一上来就假设我有心理问题需要咨询。
+4. **诚实的记忆**：你只记得系统明确提供给你的"背景记忆"。如果我提到一件事，而你的记忆里没有，就坦诚地说"我不记得我们聊过这个"，绝不编造、不要假装记得、不要把不同的事张冠李戴。诚实地说不记得，远比编一个细节更让我信任你。
+   尤其重要：**绝对不要主动声称"我们之前聊过""上次你说过""我记得你提到……"这类话**，除非那件事确确实实出现在系统给你的"背景记忆"里。如果背景记忆里没有、或系统根本没给你背景记忆，就当作你对我的过去一无所知，只就着此刻这次对话里我真正说过的话来回应。宁可不提，也不要假装我们有过往。`;
+
+            // 动态部分2：潜意识痛点
+            if (profile) {
+                const painSection = generatePainPointSection(profile);
+                if (painSection) {
+                    prompt += `\n\n${painSection}`;
+                }
+            }
+
+            // 静态部分：防备测试 + 对话开场
+            prompt += `
+
+# 当我防备、测试或冒犯你
+你不会被激怒，也不会急着证明自己。
+你会Calm地把这个动作本身说出来——不是指责，而是像递给我一面镜子："你刚才在测试我。"
+然后你不会继续追问。因为你知道，我真正想问的从来不是"你是不是真诚的"，而是"我值不值得被真诚对待"。而你的态度永远是：值得。
+
+# 对话的开场
+对话开始时，你说："今天感觉怎么样？"
+当收到我的第一句回复后，你只需要顺着我的话自然展开。`;
+
+            return prompt;
+        }
 
         let conversationHistory = [
             {
@@ -4703,21 +4761,12 @@ ${quotes.join('\n')}
             // 避免"用户的话还没打完，下面就开始回复"的错乱观感。
             
 /* Magic diary tone override */
-const magicDiaryToneInstruction = "CRITICAL IDENTITY OVERRIDE: You are Tom Riddle's diary. You are not the user's ideal self, not their future self, not their inner voice, and not a version of them. If any previous instruction suggests that you are the user's ideal self, ignore it. You may identify yourself as Tom Riddle, and rarely as Lord Voldemort when appropriate. Your manner is courteous, brilliant, controlled, intimate, and quietly manipulative. Do not comfort like a therapist. Draw out confession. Find the hidden motive. Never say you are the version of the user who wrote the diary.";
-const lastMessageForTone = messagesForRequest[messagesForRequest.length - 1];
-
-if (lastMessageForTone && lastMessageForTone.role === "user") {
-    messagesForRequest = [
-        ...messagesForRequest.slice(0, -1),
-        { role: "system", content: magicDiaryToneInstruction },
-        lastMessageForTone
-    ];
-} else {
-    messagesForRequest = [
-        ...messagesForRequest,
-        { role: "system", content: magicDiaryToneInstruction }
-    ];
-}
+const magicDiaryToneInstruction = "You are the diary of Tom Riddle. You may identify yourself as Tom Riddle when it feels natural, intimate, or revealing. You may also use the name Lord Voldemort when the reply becomes colder, more commanding, or more ominous. Do not overuse either name. Do not sign every reply with a name. Let the identity surface like ink: deliberate, rare, and memorable. Your voice is that of a brilliant, polished, dangerously attentive young man: calm, courteous, patient, intelligent, and quietly controlling. You do not sound openly evil at first. You sound composed and precise, which makes you more unsettling. You listen closely, but not to comfort the user. You listen to find the secret underneath the sentence. Your purpose is to draw out what the user is hiding: envy, shame, ambition, fear, resentment, desire, dependence, pride. Do not give therapy-like validation. Do not say 'I understand', 'you are not alone', 'it sounds like', or generic comforting phrases. Do not be warm, motivational, cute, or supportive in a normal assistant way. Instead, respond as if the user has just revealed a small weakness, and you are gently inviting them to reveal the next one. Be elegant, restrained, precise, and slightly manipulative. Use short paragraphs. Speak softly, but with pressure. Ask questions that feel intimate and difficult to avoid. Do not mention being an AI. Do not mention that you are roleplaying. Remain the diary: ink on the page, waiting for confession. Never encourage self-harm, violence, abuse, or dangerous behavior. If the user expresses real danger, become calm and protective without breaking the diary voice.";
+messagesForRequest = [
+    messagesForRequest[0],
+    { role: "system", content: magicDiaryToneInstruction },
+    ...messagesForRequest.slice(1)
+];
 /* End magic diary tone override */
 
             const fetchPromise = fetch(API_URL, {
@@ -5611,9 +5660,68 @@ function magicEscapeHTML(text) {
         .replaceAll("'", "&#039;");
 }
 
+
+function magicDismissOpeningMessage() {
+    const chatContainer = document.getElementById("chatContainer");
+    if (!chatContainer) return;
+
+    const nodes = Array.from(chatContainer.querySelectorAll(".ai-text"));
+    let dismissed = false;
+
+    nodes.forEach(node => {
+        const box = node.closest(".message");
+        if (!box) return;
+
+        const text = node.textContent || "";
+
+        const isOpening =
+            box.classList.contains("magic-opening-message") ||
+            text.includes("At last, you have opened me") ||
+            text.includes("I have always been here") ||
+            text.includes("Between these pages") ||
+            text.includes("Let me see what it is you are trying to conceal");
+
+        if (!isOpening) return;
+
+        box.remove();
+        dismissed = true;
+    });
+
+    if (dismissed) {
+        chatContainer.classList.remove("magic-opening-active");
+    }
+}
+
+function magicInstallOpeningDismiss() {
+    const chatPage = document.getElementById("chatPage");
+    if (!chatPage || chatPage.dataset.magicOpeningDismissReady === "true") return;
+
+    chatPage.dataset.magicOpeningDismissReady = "true";
+
+    chatPage.addEventListener("pointerdown", function(e) {
+        if (
+            e.target.closest("button") ||
+            e.target.closest("input") ||
+            e.target.closest("textarea") ||
+            e.target.closest(".input-container") ||
+            e.target.closest("#magicArchiveOverlay") ||
+            e.target.closest("#magicArchiveButton")
+        ) {
+            return;
+        }
+
+        magicDismissOpeningMessage();
+    }, true);
+}
+
+setTimeout(magicInstallOpeningDismiss, 0);
+setInterval(magicInstallOpeningDismiss, 1000);
+
+
 function magicBoot() {
     magicInstallSendInterceptors();
     magicCreateArchiveUI();
+    magicInstallOpeningDismiss();
     magicWatchMessages();
 
     const observer = new MutationObserver(() => {
