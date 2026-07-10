@@ -4332,7 +4332,12 @@ ${quotes.join('\n')}
 
                     removeLoading();
 
-                    addTypingMessage(aiMessage, false);
+                    if (typeof magicTypeAIInLatestUserSpot === "function") {
+                        magicTypeAIInLatestUserSpot(aiMessage);
+                    } else {
+                        addTypingMessage(aiMessage, false);
+                    }
+
                     conversationHistory.push({
                         role: "assistant",
                         content: aiMessage
@@ -4513,6 +4518,80 @@ function magicStartLetterFade(textNode, kind) {
             }
         }, fadeMs + transitionMs + 500);
     }, holdMs);
+}
+
+
+
+function magicTypeAIInLatestUserSpot(text) {
+    const chatContainer = document.getElementById("chatContainer");
+    if (!chatContainer) {
+        addTypingMessage(text, false);
+        return;
+    }
+
+    const userTextNodes = Array.from(chatContainer.querySelectorAll(".user-text"));
+    const targetUserText = userTextNodes.reverse().find(node => {
+        const box = node.closest(".message");
+        return box && !box.closest("#magicArchiveOverlay") && !box.closest("#magicArchiveContent");
+    });
+
+    if (!targetUserText) {
+        addTypingMessage(text, false);
+        return;
+    }
+
+    const box = targetUserText.closest(".message");
+    if (!box) {
+        addTypingMessage(text, false);
+        return;
+    }
+
+    box.style.display = "";
+    box.classList.remove("magic-ink-drying", "magic-reply-drying");
+    box.classList.remove("user-message");
+    box.classList.add("ai-message");
+
+    [
+        "magicUserLetterFadeStarted",
+        "magicUserLastText",
+        "magicUserWaitingForStableText",
+        "magicAILetterFadeStarted",
+        "magicAILastText",
+        "magicAIWaitingForStableText",
+        "magicReplyFadeScheduled",
+        "magicReplyLastText"
+    ].forEach(key => {
+        delete box.dataset[key];
+    });
+
+    box.innerHTML = "";
+
+    const aiTextDiv = document.createElement("div");
+    aiTextDiv.className = "ai-text";
+    box.appendChild(aiTextDiv);
+
+    const chars = Array.from(text || "");
+    let index = 0;
+
+    function typeNextChar() {
+        if (index >= chars.length) {
+            if (typeof magicScheduleAIReplyFade === "function") {
+                magicScheduleAIReplyFade(aiTextDiv);
+            }
+            return;
+        }
+
+        aiTextDiv.textContent += chars[index];
+        index += 1;
+
+        if (typeof scrollChatToBottom === "function") {
+            scrollChatToBottom();
+        }
+
+        setTimeout(typeNextChar, 28);
+    }
+
+    typeNextChar();
 }
 
 
