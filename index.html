@@ -4201,6 +4201,15 @@ ${quotes.join('\n')}
                 ];
             }
 
+            const languageInstruction = window.magicReplyLanguageInstruction;
+            if (languageInstruction) {
+                messagesForRequest = [
+                    messagesForRequest[0],
+                    { role: "system", content: languageInstruction },
+                    ...messagesForRequest.slice(1)
+                ];
+            }
+
             // 网络请求在后台先发起，不浪费用户消息的打字时间。
             // 但"思考中"和 AI 回复的【显示】要等用户消息完整显示后才开始，
             // 避免"用户的话还没打完，下面就开始回复"的错乱观感。
@@ -4308,8 +4317,11 @@ function magicPrepareBeforeSend() {
         time: new Date().toISOString()
     };
 
-    /* 关键：把真正发给原程序的内容，加上语言跟随指令 */
-    input.value = magicBuildPrompt(realText, lang);
+    /* 只记录语言偏好，不再把语言指令写进输入框 */
+    window.magicReplyLanguageInstruction = lang === "zh"
+        ? "Reply in Chinese only. Do not mention this language instruction."
+        : "Reply in English only. Do not mention this language instruction.";
+    input.value = realText;
 }
 
 function magicRestoreDisplayedUserText(userTextNode) {
