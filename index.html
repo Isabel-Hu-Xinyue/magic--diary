@@ -3383,52 +3383,17 @@ ${userMessages}
         }
 
         // 恢复草稿对话
-        function restoreDraftConversation() {
-            const draft = localStorage.getItem('currentConversationDraft');
-            if (!draft) return false;
+        
+function restoreDraftConversation() {
+    try {
+        localStorage.removeItem('currentConversationDraft');
+    } catch (e) {
+        console.warn('Could not clear old draft:', e);
+    }
 
-            try {
-                const draftData = JSON.parse(draft);
-                currentConversation = draftData.messages || [];
-                currentConversationId = draftData.id;
-                currentMood = draftData.mood || null;
+    return false;
+}
 
-                // 恢复草稿时，明确设置为非历史查看模式
-                isViewingHistory = false;
-
-                // 恢复到界面
-                chatContainer.innerHTML = '';
-                currentConversation.forEach(msg => {
-                    const messageDiv = document.createElement('div');
-                    messageDiv.className = 'message';
-
-                    const textDiv = document.createElement('div');
-                    textDiv.className = `message-text ${msg.isUser ? 'user-text' : 'ai-text'}`;
-                    textDiv.textContent = msg.text;
-
-                    messageDiv.appendChild(textDiv);
-                    chatContainer.appendChild(messageDiv);
-                });
-
-                // 恢复到 conversationHistory
-                conversationHistory = [{
-                    role: "system",
-                    content: generateSystemPrompt()
-                }];
-                currentConversation.forEach(msg => {
-                    conversationHistory.push({
-                        role: msg.isUser ? "user" : "assistant",
-                        content: msg.text
-                    });
-                });
-
-                scrollChatToBottom();
-                return true;
-            } catch (e) {
-                console.error('恢复草稿失败:', e);
-                return false;
-            }
-        }
 
         // 清除草稿
         function clearDraftConversation() {
