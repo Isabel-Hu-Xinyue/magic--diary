@@ -1885,6 +1885,58 @@ html.magic-home-font-ready .text-line {
     max-width: none !important;
 }
 
+
+/* Opening layout tune: move up, larger, wider */
+#chatContainer .message.magic-opening-message,
+#chatContainer .message.magic-opening-message.magic-floating-message,
+#chatContainer .message:has(.ai-text).magic-opening-message {
+    left: 52% !important;
+    top: 41% !important;
+    width: min(94vw, 1320px) !important;
+    max-width: 94vw !important;
+    margin: 0 !important;
+    transform: translate(-50%, -50%) !important;
+    text-align: center !important;
+}
+
+#chatContainer .message.magic-opening-message .ai-text,
+#chatContainer .message.magic-opening-message.magic-floating-message .ai-text,
+#chatContainer .message:has(.ai-text).magic-opening-message .ai-text {
+    display: block !important;
+    width: 100% !important;
+    text-align: center !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    white-space: pre-wrap !important;
+    font-size: clamp(26px, 2.9vw, 40px) !important;
+    line-height: 1.17 !important;
+    letter-spacing: 0.02px !important;
+}
+
+#chatContainer .message.magic-opening-message .magic-letter,
+#chatContainer .message.magic-opening-message.magic-floating-message .magic-letter {
+    text-align: center !important;
+}
+
+@media (max-width: 768px) {
+    #chatContainer .message.magic-opening-message,
+    #chatContainer .message.magic-opening-message.magic-floating-message,
+    #chatContainer .message:has(.ai-text).magic-opening-message {
+        left: 50% !important;
+        top: 38% !important;
+        width: 94vw !important;
+        max-width: 94vw !important;
+    }
+
+    #chatContainer .message.magic-opening-message .ai-text,
+    #chatContainer .message.magic-opening-message.magic-floating-message .ai-text,
+    #chatContainer .message:has(.ai-text).magic-opening-message .ai-text {
+        font-size: clamp(19px, 4.6vw, 28px) !important;
+        line-height: 1.14 !important;
+    }
+}
+/* End opening layout tune */
+
 </style>
 
 <script>
