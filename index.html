@@ -2544,6 +2544,16 @@ html.magic-home-font-ready .text-line {
 
 
 
+
+/* Click dismiss visible diary writing */
+#chatContainer .message.magic-click-dismissed {
+    opacity: 0 !important;
+    filter: blur(3px) !important;
+    pointer-events: none !important;
+    transition: opacity 140ms ease, filter 140ms ease !important;
+}
+/* End click dismiss visible diary writing */
+
 </style>
 
 <script>
@@ -5751,6 +5761,14 @@ function magicRevealStableQueue(revealQueue, done, speed) {
     let index = 0;
 
     function revealNext() {
+        const firstNode = revealQueue && revealQueue.length ? revealQueue[0] : null;
+        const box = firstNode ? firstNode.closest(".message") : null;
+
+        if (box && box.dataset.magicManuallyDismissed === "true") {
+            if (done) done();
+            return;
+        }
+
         if (index >= revealQueue.length) {
             if (done) done();
             return;
@@ -6623,6 +6641,11 @@ document.addEventListener("DOMContentLoaded", magicBoot);
 
 <script>
 
+
+
+</script>
+<script>
+
 /* Click dismiss visible diary writing */
 (function() {
     function isControlTarget(target) {
@@ -6646,6 +6669,15 @@ document.addEventListener("DOMContentLoaded", magicBoot);
                text.includes("Begin. Let me see");
     }
 
+    function isVisibleBox(box) {
+        if (!box) return false;
+        if (box.style.display === "none") return false;
+        if (box.dataset.magicManuallyDismissed === "true") return false;
+
+        const rect = box.getBoundingClientRect();
+        return rect.width > 0 && rect.height > 0;
+    }
+
     function magicDismissVisibleDiaryWriting() {
         const chatContainer = document.getElementById("chatContainer");
         if (!chatContainer) return false;
@@ -6654,15 +6686,12 @@ document.addEventListener("DOMContentLoaded", magicBoot);
             chatContainer.querySelectorAll(".user-text, .ai-text")
         ).filter(node => {
             const box = node.closest(".message");
-            if (!box) return false;
+            if (!isVisibleBox(box)) return false;
             if (box.closest("#magicArchiveOverlay") || box.closest("#magicArchiveContent")) return false;
-            if (box.style.display === "none") return false;
-            if (box.classList.contains("magic-click-dismissed")) return false;
 
             const text = (node.textContent || "").trim();
             if (!text) return false;
 
-            // 开篇文字继续交给原来的点击消失逻辑，不混在这里
             if (isOpeningText(node)) return false;
 
             return true;
@@ -6670,28 +6699,38 @@ document.addEventListener("DOMContentLoaded", magicBoot);
 
         if (!nodes.length) return false;
 
-        nodes.forEach(node => {
-            const box = node.closest(".message");
-            if (!box) return;
+        /*
+          更清楚的逻辑：
+          只处理当前页面上最后出现的一段文字。
+          如果 AI 正在写，点一下就终止它。
+          如果用户文字还没消散，点一下也终止它。
+        */
+        const latest = nodes[nodes.length - 1];
+        const box = latest.closest(".message");
+        if (!box) return false;
 
-            // 防止旧的打字/消散计时器继续干扰
-            node.dataset.magicTyping = "false";
-            node.dataset.magicReplyFadeScheduled = "true";
-            node.dataset.magicInkFadeScheduled = "true";
-            node.dataset.magicUserLetterFadeStarted = "true";
-            node.dataset.magicAILetterFadeStarted = "true";
+        box.dataset.magicManuallyDismissed = "true";
 
-            // 如果是 AI 回复，尽量先触发保存，避免 Archive 逻辑卡住
-            if (node.classList.contains("ai-text") && typeof magicMaybeSaveAI === "function") {
-                try { magicMaybeSaveAI(node); } catch (e) {}
-            }
+        latest.dataset.magicTyping = "false";
+        latest.dataset.magicReplyFadeScheduled = "true";
+        latest.dataset.magicInkFadeScheduled = "true";
+        latest.dataset.magicUserLetterFadeStarted = "true";
+        latest.dataset.magicAILetterFadeStarted = "true";
+        latest.dataset.magicDismissedByClick = "true";
 
-            box.classList.add("magic-click-dismissed");
+        // 如果是 AI 回复，先保存，避免点掉后 Archive 丢失
+        if (latest.classList.contains("ai-text") && typeof magicMaybeSaveAI === "function") {
+            try { magicMaybeSaveAI(latest); } catch (e) {}
+        }
 
-            setTimeout(() => {
-                box.style.setProperty("display", "none", "important");
-            }, 280);
-        });
+        // 立刻终止视觉显示，不再等旧的消散计时器
+        box.classList.add("magic-click-dismissed");
+
+        setTimeout(() => {
+            box.style.setProperty("display", "none", "important");
+            box.style.setProperty("opacity", "0", "important");
+            box.style.setProperty("visibility", "hidden", "important");
+        }, 150);
 
         return true;
     }
@@ -6700,10 +6739,9 @@ document.addEventListener("DOMContentLoaded", magicBoot);
         const chatPage = document.getElementById("chatPage");
         if (!chatPage) return;
 
-        if (chatPage.dataset.magicDismissVisibleWritingInstalled === "true") return;
-        chatPage.dataset.magicDismissVisibleWritingInstalled = "true";
+        if (chatPage.dataset.magicDismissVisibleWritingInstalledV2 === "true") return;
+        chatPage.dataset.magicDismissVisibleWritingInstalledV2 = "true";
 
-        // 用 pointerdown，比 click 更早、更稳
         chatPage.addEventListener("pointerdown", function(e) {
             if (isControlTarget(e.target)) return;
 
