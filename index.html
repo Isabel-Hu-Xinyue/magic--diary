@@ -5,10 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Magic Diary</title>
     <!-- 移动端调试控制台，右下角小齿轮可打开 -->
-    <script src="https://cdn.jsdelivr.net/npm/eruda">
-
-
-</script>
+    <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
     <script>eruda.init();</script>
     <style>
         @import url('https://cdn.jsdelivr.net/npm/lxgw-wenkai-webfont@1.1.0/style.css');
@@ -2540,173 +2537,6 @@ html.magic-home-font-ready .text-line {
     opacity: 1 !important;
 }
 /* End brush reveal reply animation */
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/* Archive old row style daily override */
-
-/* 列表：不要大卡片，改成一条一条横向行 */
-#magicDailyArchiveList {
-    display: block !important;
-    width: 100% !important;
-}
-
-.magic-daily-card {
-    display: grid !important;
-    grid-template-columns: minmax(118px, 165px) minmax(70px, 95px) 1fr !important;
-    align-items: center !important;
-    gap: 14px !important;
-
-    width: 100% !important;
-    text-align: left !important;
-
-    border: none !important;
-    border-bottom: 1px solid rgba(88, 57, 43, 0.22) !important;
-    border-radius: 0 !important;
-    background: transparent !important;
-
-    padding: 15px 4px !important;
-    margin: 0 !important;
-
-    cursor: pointer !important;
-    color: #3b241f !important;
-    font-family: Georgia, "Times New Roman", serif !important;
-}
-
-.magic-daily-card:hover {
-    background: rgba(255, 248, 232, 0.42) !important;
-}
-
-.magic-daily-date {
-    font-size: 19px !important;
-    line-height: 1.35 !important;
-    font-weight: 600 !important;
-    margin: 0 !important;
-    white-space: nowrap !important;
-}
-
-.magic-daily-count {
-    font-size: 13px !important;
-    line-height: 1.4 !important;
-    opacity: 0.62 !important;
-    margin: 0 !important;
-    white-space: nowrap !important;
-}
-
-.magic-daily-snippet {
-    font-size: 15px !important;
-    line-height: 1.45 !important;
-    opacity: 0.78 !important;
-    margin: 0 !important;
-
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-    white-space: nowrap !important;
-}
-
-/* 详情页也改轻一点，不要大块卡片感 */
-.magic-daily-header {
-    display: flex !important;
-    justify-content: space-between !important;
-    gap: 12px !important;
-    margin-bottom: 14px !important;
-}
-
-.magic-daily-title {
-    font-size: 24px !important;
-    line-height: 1.35 !important;
-    font-weight: 600 !important;
-    margin: 0 0 14px !important;
-    color: #3b241f !important;
-}
-
-.magic-daily-exchange {
-    border-top: 1px solid rgba(88, 57, 43, 0.2) !important;
-    padding: 14px 0 16px !important;
-    margin: 0 !important;
-    background: transparent !important;
-}
-
-.magic-daily-time {
-    font-size: 12px !important;
-    opacity: 0.54 !important;
-    margin-bottom: 8px !important;
-}
-
-.magic-daily-label {
-    font-size: 12px !important;
-    letter-spacing: 0.08em !important;
-    text-transform: uppercase !important;
-    opacity: 0.58 !important;
-    margin: 8px 0 5px !important;
-    color: #3b241f !important;
-}
-
-.magic-daily-text {
-    display: block !important;
-    width: 100% !important;
-    max-width: 100% !important;
-
-    box-sizing: border-box !important;
-    white-space: pre-wrap !important;
-    overflow-wrap: break-word !important;
-    word-break: break-word !important;
-
-    line-height: 1.65 !important;
-    font-size: 17px !important;
-    color: #3b241f !important;
-
-    background: transparent !important;
-    border-radius: 0 !important;
-    padding: 0 !important;
-    overflow-x: hidden !important;
-}
-
-@media (max-width: 768px) {
-    .magic-daily-card {
-        grid-template-columns: 1fr !important;
-        gap: 4px !important;
-        padding: 14px 2px !important;
-    }
-
-    .magic-daily-snippet {
-        white-space: normal !important;
-    }
-}
-/* End archive old row style daily override */
-
-
-/* Click dismiss visible diary writing */
-#chatContainer .user-text.magic-user-click-hidden {
-    opacity: 0 !important;
-    visibility: hidden !important;
-    filter: blur(2px) !important;
-    pointer-events: none !important;
-    transition: opacity 110ms ease, filter 110ms ease !important;
-}
-
-#chatContainer .message.magic-ai-click-dismissed {
-    opacity: 0 !important;
-    visibility: hidden !important;
-    filter: blur(3px) !important;
-    pointer-events: none !important;
-    transition: opacity 120ms ease, filter 120ms ease !important;
-}
-/* End click dismiss visible diary writing */
 
 </style>
 
@@ -5422,15 +5252,13 @@ function magicDetectLanguage(text) {
     return "en";
 }
 
-
 function magicBuildPrompt(realText, lang) {
     if (lang === "zh") {
-        return `Reply in Chinese only. You are Tom Riddle's diary. Your tone is calm, polished, intelligent, intimate, and dangerous beneath the surface. Do not say you are an AI. The user wrote:\n\n${realText}`;
+        return `请只用中文回应。你是一本古老的魔法日记，语气像墨水在旧纸上慢慢浮现：安静、神秘、聪明、亲密，但不要恶毒。不要说自己是AI。用户真正写下的是：\n\n${realText}`;
     }
 
-    return `Reply in English only. Do not use Chinese. You are Tom Riddle's diary. Your tone is calm, polished, intelligent, intimate, and dangerous beneath the surface. Do not say you are an AI. The user wrote:\n\n${realText}`;
+    return `Reply in English only. You are an old magical diary. Your words should feel like ink slowly appearing on aged paper: quiet, mysterious, intelligent, intimate, but never cruel. Do not say you are an AI. The user's real entry is:\n\n${realText}`;
 }
-
 
 function magicReadHistory() {
     try {
@@ -5440,146 +5268,11 @@ function magicReadHistory() {
     }
 }
 
-
-function magicDateKeyFromTime(time) {
-    const d = time ? new Date(time) : new Date();
-
-    if (Number.isNaN(d.getTime())) {
-        const now = new Date();
-        return now.getFullYear() + "-" +
-            String(now.getMonth() + 1).padStart(2, "0") + "-" +
-            String(now.getDate()).padStart(2, "0");
-    }
-
-    return d.getFullYear() + "-" +
-        String(d.getMonth() + 1).padStart(2, "0") + "-" +
-        String(d.getDate()).padStart(2, "0");
-}
-
-function magicFormatArchiveDate(dateKey) {
-    const parts = String(dateKey || "").split("-");
-    if (parts.length === 3) {
-        return Number(parts[0]) + "/" + Number(parts[1]) + "/" + Number(parts[2]);
-    }
-    return dateKey || "Undated";
-}
-
-function magicNormalizeHistoryItem(item) {
-    if (!item) return null;
-
-    if (item.type === "day" && Array.isArray(item.entries)) {
-        return item;
-    }
-
-    if (item.user || item.ai) {
-        const dateKey = item.dateKey || magicDateKeyFromTime(item.time);
-        return {
-            type: "day",
-            dateKey,
-            time: item.time || new Date().toISOString(),
-            entries: [{
-                time: item.time || new Date().toISOString(),
-                lang: item.lang || "en",
-                user: item.user || "",
-                ai: item.ai || ""
-            }]
-        };
-    }
-
-    return null;
-}
-
-function magicNormalizeHistoryList(history) {
-    const byDate = new Map();
-
-    (history || []).forEach(raw => {
-        const item = magicNormalizeHistoryItem(raw);
-        if (!item) return;
-
-        const dateKey = item.dateKey || magicDateKeyFromTime(item.time);
-
-        if (!byDate.has(dateKey)) {
-            byDate.set(dateKey, {
-                type: "day",
-                dateKey,
-                time: item.time || new Date().toISOString(),
-                entries: []
-            });
-        }
-
-        const day = byDate.get(dateKey);
-
-        (item.entries || []).forEach(entry => {
-            if (!entry) return;
-
-            day.entries.push({
-                time: entry.time || item.time || new Date().toISOString(),
-                lang: entry.lang || item.lang || "en",
-                user: entry.user || "",
-                ai: entry.ai || ""
-            });
-        });
-
-        const latestTime = Math.max(
-            new Date(day.time || 0).getTime() || 0,
-            new Date(item.time || 0).getTime() || 0
-        );
-
-        if (latestTime) {
-            day.time = new Date(latestTime).toISOString();
-        }
-    });
-
-    return Array.from(byDate.values())
-        .map(day => {
-            day.entries.sort((a, b) => {
-                return (new Date(a.time).getTime() || 0) - (new Date(b.time).getTime() || 0);
-            });
-            return day;
-        })
-        .sort((a, b) => {
-            return String(b.dateKey).localeCompare(String(a.dateKey));
-        });
-}
-
 function magicSaveHistory(entry) {
-    const history = magicNormalizeHistoryList(magicReadHistory());
-    const dateKey = magicDateKeyFromTime(entry.time);
-
-    let day = history.find(item => item.type === "day" && item.dateKey === dateKey);
-
-    if (!day) {
-        day = {
-            type: "day",
-            dateKey,
-            time: entry.time || new Date().toISOString(),
-            entries: []
-        };
-        history.unshift(day);
-    }
-
-    day.entries.push({
-        time: entry.time || new Date().toISOString(),
-        lang: entry.lang || "en",
-        user: entry.user || "",
-        ai: entry.ai || ""
-    });
-
-    day.entries.sort((a, b) => {
-        return (new Date(a.time).getTime() || 0) - (new Date(b.time).getTime() || 0);
-    });
-
-    day.time = day.entries.length
-        ? day.entries[day.entries.length - 1].time
-        : (entry.time || new Date().toISOString());
-
-    const normalized = magicNormalizeHistoryList(history);
-
-    localStorage.setItem(MAGIC_HISTORY_KEY, JSON.stringify(normalized.slice(0, 120)));
+    const history = magicReadHistory();
+    history.unshift(entry);
+    localStorage.setItem(MAGIC_HISTORY_KEY, JSON.stringify(history.slice(0, 300)));
 }
-
-
-
 
 function magicPrepareBeforeSend() {
     const input = document.getElementById("userInput");
@@ -5590,7 +5283,6 @@ function magicPrepareBeforeSend() {
 
     const lang = magicDetectLanguage(realText);
     magicLastRealInput = realText;
-    window.magicLastReplyLanguage = lang;
 
     magicPendingEntry = {
         user: realText,
@@ -5598,14 +5290,12 @@ function magicPrepareBeforeSend() {
         time: new Date().toISOString()
     };
 
+    /* 只记录语言偏好，不再把语言指令写进输入框 */
     window.magicReplyLanguageInstruction = lang === "zh"
-        ? "Reply in Chinese only. Do not use English unless the user explicitly asks for translation. Do not mention this instruction."
-        : "Reply in English only. Do not use Chinese. Do not mention this instruction.";
-
+        ? "Reply in Chinese only. Do not mention this language instruction."
+        : "Reply in English only. Do not mention this language instruction.";
     input.value = realText;
 }
-
-
 
 function magicRestoreDisplayedUserText(userTextNode) {
     if (!userTextNode) return;
@@ -6055,14 +5745,6 @@ function magicRevealStableQueue(revealQueue, done, speed) {
     let index = 0;
 
     function revealNext() {
-        const firstNode = revealQueue && revealQueue.length ? revealQueue[0] : null;
-        const box = firstNode ? firstNode.closest(".message") : null;
-
-        if (box && box.dataset.magicManuallyDismissed === "true") {
-            if (done) done();
-            return;
-        }
-
         if (index >= revealQueue.length) {
             if (done) done();
             return;
@@ -6265,8 +5947,6 @@ function magicTypeAIInLatestUserSpot(text) {
 
 
 
-
-
 function magicWaitForLatestUserFadeComplete() {
     const chatContainer = document.getElementById("chatContainer");
     if (!chatContainer) return Promise.resolve();
@@ -6274,25 +5954,13 @@ function magicWaitForLatestUserFadeComplete() {
     const userNodes = Array.from(chatContainer.querySelectorAll(".user-text"));
     const userTextNode = userNodes.reverse().find(node => {
         const box = node.closest(".message");
-        return box &&
-            !box.closest("#magicArchiveOverlay") &&
-            !box.closest("#magicArchiveContent");
+        return box && box.style.display !== "none" && !box.closest("#magicArchiveOverlay") && !box.closest("#magicArchiveContent");
     });
 
     if (!userTextNode) return Promise.resolve();
 
     const box = userTextNode.closest(".message");
     if (!box) return Promise.resolve();
-
-    if (
-        userTextNode.dataset.magicUserDismissedOnly === "true" ||
-        userTextNode.classList.contains("magic-user-click-hidden") ||
-        userTextNode.style.visibility === "hidden" ||
-        userTextNode.style.opacity === "0" ||
-        box.style.display === "none"
-    ) {
-        return Promise.resolve();
-    }
 
     magicScheduleLetterFade(userTextNode, "user");
 
@@ -6307,32 +5975,22 @@ function magicWaitForLatestUserFadeComplete() {
         }
 
         function check() {
-            if (
-                !userTextNode.isConnected ||
-                !box.isConnected ||
-                userTextNode.dataset.magicUserDismissedOnly === "true" ||
-                userTextNode.classList.contains("magic-user-click-hidden") ||
-                userTextNode.style.visibility === "hidden" ||
-                userTextNode.style.opacity === "0" ||
-                box.style.display === "none"
-            ) {
+            if (!box.isConnected || box.style.display === "none") {
                 finish();
                 return;
             }
 
-            if (Date.now() - start > 4200) {
+            if (Date.now() - start > 22000) {
                 finish();
                 return;
             }
 
-            setTimeout(check, 80);
+            setTimeout(check, 100);
         }
 
         check();
     });
 }
-
-
 
 
 function magicScheduleLetterFade(textNode, kind) {
@@ -6431,31 +6089,9 @@ function magicMaybeSaveAI(aiTextNode) {
 
 
 
-
 function magicScheduleAIReplyFade(aiTextNode) {
-    if (!aiTextNode) return;
-
-    // 只保存 Archive，不让 AI 回复自动消散。
-    // 这样英文回复不会写到一半突然没了。
-    aiTextNode.dataset.magicReplyFadeScheduled = "true";
-    aiTextNode.dataset.magicInkFadeScheduled = "true";
-    aiTextNode.dataset.magicAutoFadeDisabled = "true";
-
-    if (aiTextNode.magicFadeTimer) {
-        clearTimeout(aiTextNode.magicFadeTimer);
-    }
-
-    if (aiTextNode.magicLetterFadeTimer) {
-        clearTimeout(aiTextNode.magicLetterFadeTimer);
-    }
-
-    if (typeof magicMaybeSaveAI === "function") {
-        try {
-            magicMaybeSaveAI(aiTextNode);
-        } catch (e) {}
-    }
+    magicScheduleLetterFade(aiTextNode, "ai");
 }
-
 
 
 
@@ -6769,116 +6405,28 @@ function magicCreateArchiveUI() {
 }
 
 
-
 function magicOpenArchive() {
     const overlay = document.getElementById("magicArchiveOverlay");
     const content = document.getElementById("magicArchiveContent");
-    if (!overlay || !content) return;
-
-    const history = magicNormalizeHistoryList(magicReadHistory());
-
-    // 顺手把旧的一问一答历史迁移成按天合并的新结构
-    localStorage.setItem(MAGIC_HISTORY_KEY, JSON.stringify(history.slice(0, 120)));
+    const history = magicReadHistory();
 
     if (!history.length) {
         content.innerHTML = `<div id="magicArchiveEmpty">No entries have been written into the archive yet.</div>`;
-        overlay.style.display = "flex";
-        return;
+    } else {
+        content.innerHTML = history.map(item => {
+            const time = new Date(item.time).toLocaleString();
+            return `
+                <div class="magic-archive-entry">
+                    <div class="magic-archive-time">${time}</div>
+                    <div class="magic-archive-user">${magicEscapeHTML(item.user)}</div>
+                    <div class="magic-archive-ai">${magicEscapeHTML(item.ai)}</div>
+                </div>
+            `;
+        }).join("");
     }
-
-    content.innerHTML = `
-        <div id="magicDailyArchiveList">
-            ${history.map((day, index) => {
-                const count = (day.entries || []).length;
-                const last = (day.entries || [])[count - 1] || {};
-                const snippet = magicEscapeHTML((last.user || last.ai || "").slice(0, 90));
-
-                return `
-                    <button class="magic-daily-archive-card" data-index="${index}">
-                        <div class="magic-daily-archive-date">${magicFormatArchiveDate(day.dateKey)}</div>
-                        <div class="magic-daily-archive-count">${count} exchange${count === 1 ? "" : "s"}</div>
-                        <div class="magic-daily-archive-snippet">${snippet}</div>
-                    </button>
-                `;
-            }).join("")}
-        </div>
-    `;
-
-    content.querySelectorAll(".magic-daily-archive-card").forEach(button => {
-        button.addEventListener("click", () => {
-            const index = Number(button.dataset.index);
-            magicOpenDailyArchiveDetail(index);
-        });
-    });
 
     overlay.style.display = "flex";
 }
-
-function magicOpenDailyArchiveDetail(index) {
-    const content = document.getElementById("magicArchiveContent");
-    if (!content) return;
-
-    const history = magicNormalizeHistoryList(magicReadHistory());
-    const day = history[index];
-
-    if (!day) {
-        magicOpenArchive();
-        return;
-    }
-
-    const entries = day.entries || [];
-
-    content.innerHTML = `
-        <div id="magicDailyArchiveDetail">
-            <div class="magic-archive-detail-header">
-                <button id="magicArchiveBackButton" type="button">Back</button>
-                <button id="magicArchiveDeleteDayButton" type="button">Delete</button>
-            </div>
-
-            <div class="magic-archive-detail-date">${magicFormatArchiveDate(day.dateKey)}</div>
-
-            <div class="magic-archive-detail-body">
-                ${entries.map(entry => {
-                    const time = new Date(entry.time).toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit"
-                    });
-
-                    return `
-                        <div class="magic-archive-exchange">
-                            <div class="magic-archive-exchange-time">${time}</div>
-
-                            <div class="magic-archive-label">You wrote</div>
-                            <div class="magic-archive-text magic-archive-user">${magicEscapeHTML(entry.user || "")}</div>
-
-                            <div class="magic-archive-label">The diary answered</div>
-                            <div class="magic-archive-text magic-archive-ai">${magicEscapeHTML(entry.ai || "")}</div>
-                        </div>
-                    `;
-                }).join("")}
-            </div>
-        </div>
-    `;
-
-    const back = document.getElementById("magicArchiveBackButton");
-    if (back) {
-        back.addEventListener("click", magicOpenArchive);
-    }
-
-    const del = document.getElementById("magicArchiveDeleteDayButton");
-    if (del) {
-        del.addEventListener("click", () => {
-            const ok = confirm("Delete this day from the archive?");
-            if (!ok) return;
-
-            const next = magicNormalizeHistoryList(magicReadHistory());
-            next.splice(index, 1);
-            localStorage.setItem(MAGIC_HISTORY_KEY, JSON.stringify(next));
-            magicOpenArchive();
-        });
-    }
-}
-
 
 function magicCloseArchive() {
     const overlay = document.getElementById("magicArchiveOverlay");
@@ -7067,544 +6615,5 @@ document.addEventListener("DOMContentLoaded", magicBoot);
 })();
 </script>
 
-<script>
-
-
-
-</script>
-<script>
-
-
-
-</script>
-<script>
-
-/* Force stable daily archive */
-(function() {
-    const KEY = "magicDiaryArchive_v1";
-
-    function escapeHTML(text) {
-        return String(text || "")
-            .replaceAll("&", "&amp;")
-            .replaceAll("<", "&lt;")
-            .replaceAll(">", "&gt;")
-            .replaceAll('"', "&quot;")
-            .replaceAll("'", "&#039;");
-    }
-
-    function readRawHistory() {
-        try {
-            const raw = localStorage.getItem(KEY);
-            const parsed = JSON.parse(raw || "[]");
-            return Array.isArray(parsed) ? parsed : [];
-        } catch (e) {
-            return [];
-        }
-    }
-
-    function writeRawHistory(history) {
-        localStorage.setItem(KEY, JSON.stringify(history || []));
-    }
-
-    function dateKeyFromTime(time) {
-        const d = time ? new Date(time) : new Date();
-
-        if (Number.isNaN(d.getTime())) {
-            const now = new Date();
-            return now.getFullYear() + "-" +
-                String(now.getMonth() + 1).padStart(2, "0") + "-" +
-                String(now.getDate()).padStart(2, "0");
-        }
-
-        return d.getFullYear() + "-" +
-            String(d.getMonth() + 1).padStart(2, "0") + "-" +
-            String(d.getDate()).padStart(2, "0");
-    }
-
-    function formatDateKey(dateKey) {
-        const parts = String(dateKey || "").split("-");
-        if (parts.length === 3) {
-            return Number(parts[0]) + "/" + Number(parts[1]) + "/" + Number(parts[2]);
-        }
-        return dateKey || "Undated";
-    }
-
-    function normalizeHistory(rawHistory) {
-        const byDay = new Map();
-
-        function ensureDay(dateKey, time) {
-            if (!byDay.has(dateKey)) {
-                byDay.set(dateKey, {
-                    type: "day",
-                    dateKey,
-                    time: time || new Date().toISOString(),
-                    entries: []
-                });
-            }
-            return byDay.get(dateKey);
-        }
-
-        (rawHistory || []).forEach(item => {
-            if (!item) return;
-
-            if (item.type === "day" && Array.isArray(item.entries)) {
-                const dateKey = item.dateKey || dateKeyFromTime(item.time);
-                const day = ensureDay(dateKey, item.time);
-
-                item.entries.forEach(entry => {
-                    if (!entry) return;
-                    day.entries.push({
-                        time: entry.time || item.time || new Date().toISOString(),
-                        lang: entry.lang || item.lang || "en",
-                        user: entry.user || "",
-                        ai: entry.ai || ""
-                    });
-                });
-            } else if (item.user || item.ai) {
-                const dateKey = item.dateKey || dateKeyFromTime(item.time);
-                const day = ensureDay(dateKey, item.time);
-
-                day.entries.push({
-                    time: item.time || new Date().toISOString(),
-                    lang: item.lang || "en",
-                    user: item.user || "",
-                    ai: item.ai || ""
-                });
-            }
-        });
-
-        return Array.from(byDay.values()).map(day => {
-            day.entries.sort((a, b) => {
-                return (new Date(a.time).getTime() || 0) - (new Date(b.time).getTime() || 0);
-            });
-
-            if (day.entries.length) {
-                day.time = day.entries[day.entries.length - 1].time;
-            }
-
-            return day;
-        }).sort((a, b) => String(b.dateKey).localeCompare(String(a.dateKey)));
-    }
-
-    function saveDailyEntry(entry) {
-        const history = normalizeHistory(readRawHistory());
-        const dateKey = dateKeyFromTime(entry.time);
-        let day = history.find(item => item.dateKey === dateKey);
-
-        if (!day) {
-            day = {
-                type: "day",
-                dateKey,
-                time: entry.time || new Date().toISOString(),
-                entries: []
-            };
-            history.unshift(day);
-        }
-
-        day.entries.push({
-            time: entry.time || new Date().toISOString(),
-            lang: entry.lang || "en",
-            user: entry.user || "",
-            ai: entry.ai || ""
-        });
-
-        day.entries.sort((a, b) => {
-            return (new Date(a.time).getTime() || 0) - (new Date(b.time).getTime() || 0);
-        });
-
-        if (day.entries.length) {
-            day.time = day.entries[day.entries.length - 1].time;
-        }
-
-        writeRawHistory(normalizeHistory(history).slice(0, 120));
-    }
-
-    // 强制覆盖保存函数：以后保存一定按天合并
-    window.magicSaveHistory = saveDailyEntry;
-
-    function getArchiveElements() {
-        let overlay = document.getElementById("magicArchiveOverlay");
-        let content = document.getElementById("magicArchiveContent");
-
-        if (!overlay) {
-            overlay = document.createElement("div");
-            overlay.id = "magicArchiveOverlay";
-            overlay.style.display = "none";
-            document.body.appendChild(overlay);
-        }
-
-        if (!content) {
-            content = document.createElement("div");
-            content.id = "magicArchiveContent";
-            overlay.appendChild(content);
-        }
-
-        return { overlay, content };
-    }
-
-    function renderArchiveList() {
-        const { overlay, content } = getArchiveElements();
-        const history = normalizeHistory(readRawHistory());
-
-        if (!history.length) {
-            content.innerHTML = `<div id="magicArchiveEmpty">No entries have been written into the archive yet.</div>`;
-            overlay.style.display = "flex";
-            return;
-        }
-
-        content.innerHTML = `
-            <div id="magicDailyArchiveList">
-                ${history.map((day, index) => {
-                    const entries = day.entries || [];
-                    const count = entries.length;
-                    const last = entries[count - 1] || {};
-                    const snippet = escapeHTML((last.user || last.ai || "").slice(0, 100));
-
-                    return `
-                        <button class="magic-daily-card" data-index="${index}" type="button">
-                            <div class="magic-daily-date">${formatDateKey(day.dateKey)}</div>
-                            <div class="magic-daily-count">${count} exchange${count === 1 ? "" : "s"}</div>
-                            <div class="magic-daily-snippet">${snippet}</div>
-                        </button>
-                    `;
-                }).join("")}
-            </div>
-        `;
-
-        content.querySelectorAll(".magic-daily-card").forEach(button => {
-            button.addEventListener("click", () => {
-                renderArchiveDetail(Number(button.dataset.index));
-            });
-        });
-
-        overlay.style.display = "flex";
-    }
-
-    function renderArchiveDetail(index) {
-        const { content } = getArchiveElements();
-        const history = normalizeHistory(readRawHistory());
-        const day = history[index];
-
-        if (!day) {
-            renderArchiveList();
-            return;
-        }
-
-        const entries = day.entries || [];
-
-        content.innerHTML = `
-            <div class="magic-daily-header">
-                <button id="magicDailyBackButton" type="button">Back</button>
-                <button id="magicDailyDeleteButton" type="button">Delete</button>
-            </div>
-
-            <div class="magic-daily-title">${formatDateKey(day.dateKey)}</div>
-
-            <div class="magic-daily-body">
-                ${entries.map(entry => {
-                    const t = new Date(entry.time);
-                    const time = Number.isNaN(t.getTime())
-                        ? ""
-                        : t.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-
-                    return `
-                        <div class="magic-daily-exchange">
-                            <div class="magic-daily-time">${escapeHTML(time)}</div>
-
-                            <div class="magic-daily-label">You wrote</div>
-                            <div class="magic-daily-text">${escapeHTML(entry.user || "")}</div>
-
-                            <div class="magic-daily-label">The diary answered</div>
-                            <div class="magic-daily-text">${escapeHTML(entry.ai || "")}</div>
-                        </div>
-                    `;
-                }).join("")}
-            </div>
-        `;
-
-        const back = document.getElementById("magicDailyBackButton");
-        if (back) back.addEventListener("click", renderArchiveList);
-
-        const del = document.getElementById("magicDailyDeleteButton");
-        if (del) {
-            del.addEventListener("click", () => {
-                const ok = confirm("Delete this day from the archive?");
-                if (!ok) return;
-
-                const next = normalizeHistory(readRawHistory());
-                next.splice(index, 1);
-                writeRawHistory(next);
-                renderArchiveList();
-            });
-        }
-    }
-
-    window.magicOpenArchive = renderArchiveList;
-
-    function installArchiveButtonOverride() {
-        const button = document.getElementById("magicArchiveButton");
-        if (!button) return;
-
-        if (button.dataset.magicDailyArchiveForced === "true") return;
-        button.dataset.magicDailyArchiveForced = "true";
-
-        button.addEventListener("click", function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            renderArchiveList();
-        }, true);
-    }
-
-    function installOverlayClose() {
-        const { overlay } = getArchiveElements();
-
-        if (overlay.dataset.magicDailyCloseInstalled === "true") return;
-        overlay.dataset.magicDailyCloseInstalled = "true";
-
-        overlay.addEventListener("click", event => {
-            if (event.target === overlay) {
-                overlay.style.display = "none";
-            }
-        });
-    }
-
-    setTimeout(() => {
-        installArchiveButtonOverride();
-        installOverlayClose();
-    }, 0);
-
-    setInterval(() => {
-        installArchiveButtonOverride();
-        installOverlayClose();
-    }, 1200);
-})();
-/* End force stable daily archive */
-
-</script>
-<script>
-
-
-
-</script>
-<script>
-
-/* Click dismiss visible diary writing */
-(function() {
-    function isControlTarget(target) {
-        return !!(
-            target.closest("#closeDiaryButton") ||
-            target.closest("#magicArchiveButton") ||
-            target.closest("#magicArchiveOverlay") ||
-            target.closest("#magicArchiveContent") ||
-            target.closest(".input-container") ||
-            target.closest("#userInput") ||
-            target.closest("#magicPageWriteButton") ||
-            target.closest("#magicSurfaceWriter") ||
-            target.closest("#magicSurfaceInput")
-        );
-    }
-
-    function isOpeningText(node) {
-        const text = node.textContent || "";
-        return text.includes("At last, you have opened me") ||
-               text.includes("Between these pages") ||
-               text.includes("Begin. Let me see");
-    }
-
-    function getVisibleWritingNodes() {
-        const chatContainer = document.getElementById("chatContainer");
-        if (!chatContainer) return [];
-
-        return Array.from(chatContainer.querySelectorAll(".user-text, .ai-text")).filter(node => {
-            const box = node.closest(".message");
-            if (!box) return false;
-            if (box.closest("#magicArchiveOverlay") || box.closest("#magicArchiveContent")) return false;
-            if (isOpeningText(node)) return false;
-
-            if (node.classList.contains("magic-user-click-hidden")) return false;
-            if (box.classList.contains("magic-ai-click-dismissed")) return false;
-            if (box.style.display === "none") return false;
-
-            const text = (node.textContent || "").trim();
-            if (!text) return false;
-
-            const rect = box.getBoundingClientRect();
-            return rect.width > 0 && rect.height > 0;
-        });
-    }
-
-    function dismissLatestWriting() {
-        const nodes = getVisibleWritingNodes();
-        if (!nodes.length) return false;
-
-        const latest = nodes[nodes.length - 1];
-        const box = latest.closest(".message");
-        if (!box) return false;
-
-        if (latest.classList.contains("user-text")) {
-            /*
-              关键修复：
-              点掉自己的字，只是视觉隐藏。
-              不隐藏整个 box。
-              不设置 box.dataset.magicManuallyDismissed。
-              不清空 magicPendingEntry。
-              所以后面的 AI 回复会继续。
-            */
-            latest.dataset.magicUserDismissedOnly = "true";
-            latest.classList.add("magic-user-click-hidden");
-            return true;
-        }
-
-        if (latest.classList.contains("ai-text")) {
-            latest.dataset.magicTyping = "false";
-            latest.dataset.magicReplyFadeScheduled = "true";
-            latest.dataset.magicInkFadeScheduled = "true";
-            latest.dataset.magicDismissedByClick = "true";
-
-            // AI 被点掉前，尽量保存到 Archive
-            if (typeof magicMaybeSaveAI === "function") {
-                try { magicMaybeSaveAI(latest); } catch (e) {}
-            }
-
-            // 只有 AI 才终止整段 message box
-            box.dataset.magicManuallyDismissed = "true";
-            box.classList.add("magic-ai-click-dismissed");
-
-            setTimeout(() => {
-                box.style.setProperty("display", "none", "important");
-                box.style.setProperty("visibility", "hidden", "important");
-                box.style.setProperty("opacity", "0", "important");
-            }, 130);
-
-            return true;
-        }
-
-        return false;
-    }
-
-    function install() {
-        const chatPage = document.getElementById("chatPage");
-        if (!chatPage) return;
-
-        if (chatPage.dataset.magicSafeDismissInstalled === "true") return;
-        chatPage.dataset.magicSafeDismissInstalled = "true";
-
-        chatPage.addEventListener("pointerdown", function(e) {
-            if (isControlTarget(e.target)) return;
-
-            const dismissed = dismissLatestWriting();
-
-            if (dismissed) {
-                e.preventDefault();
-                e.stopPropagation();
-            }
-        }, true);
-    }
-
-    window.magicDismissVisibleDiaryWriting = dismissLatestWriting;
-
-    setTimeout(install, 0);
-    setInterval(install, 1200);
-})();
-/* End click dismiss visible diary writing */
-
-</script>
-<script>
-
-
-
-</script>
-<script>
-
-
-
-</script>
-<script>
-
-/* Magic language only guard */
-(function() {
-    if (window.magicLanguageOnlyGuardInstalled) return;
-    window.magicLanguageOnlyGuardInstalled = true;
-
-    function detectLang(text) {
-        text = String(text || "");
-
-        const zh = (text.match(/[\u4e00-\u9fff]/g) || []).length;
-        const en = (text.match(/[A-Za-z]/g) || []).length;
-
-        if (zh > en) return "zh";
-        if (en > 0) return "en";
-        return window.magicLastReplyLanguage || "en";
-    }
-
-    function getLatestUserText(messages) {
-        if (!Array.isArray(messages)) return "";
-
-        for (let i = messages.length - 1; i >= 0; i--) {
-            const m = messages[i];
-            if (!m || m.role !== "user") continue;
-
-            if (typeof m.content === "string") return m.content;
-
-            if (Array.isArray(m.content)) {
-                return m.content.map(part => {
-                    if (typeof part === "string") return part;
-                    if (part && typeof part.text === "string") return part.text;
-                    return "";
-                }).join(" ");
-            }
-        }
-
-        return "";
-    }
-
-    function directiveFor(lang) {
-        if (lang === "zh") {
-            return "LANGUAGE OVERRIDE: Reply in Chinese only. Do not use English unless the user explicitly asks for translation. Do not mention this rule.";
-        }
-
-        return "LANGUAGE OVERRIDE: Reply in English only. Do not use Chinese. Do not write Chinese characters. Do not mention this rule.";
-    }
-
-    const originalFetch = window.fetch;
-
-    window.fetch = function(input, init) {
-        try {
-            if (init && typeof init.body === "string" && init.body.includes('"messages"')) {
-                const data = JSON.parse(init.body);
-
-                if (data && Array.isArray(data.messages)) {
-                    const latestUserText = getLatestUserText(data.messages) || window.magicLastRealInput || "";
-                    const lang = detectLang(latestUserText);
-                    window.magicLastReplyLanguage = lang;
-
-                    const directive = directiveFor(lang);
-
-                    data.messages = data.messages.filter(m => {
-                        if (!m || m.role !== "system" || typeof m.content !== "string") return true;
-                        return !m.content.includes("LANGUAGE OVERRIDE:");
-                    });
-
-                    data.messages.unshift({
-                        role: "system",
-                        content: directive
-                    });
-
-                    init = {
-                        ...init,
-                        body: JSON.stringify(data)
-                    };
-                }
-            }
-        } catch (e) {
-            // 不让语言补丁影响原网页运行
-        }
-
-        return originalFetch.call(this, input, init);
-    };
-})();
-/* End magic language only guard */
-
-</script>
 </body>
 </html>
