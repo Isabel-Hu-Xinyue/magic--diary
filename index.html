@@ -2520,6 +2520,24 @@ html.magic-home-font-ready .text-line {
 }
 /* End fix CJK clipping only */
 
+
+/* Brush reveal reply animation */
+#chatContainer .ai-text .magic-brush-char {
+    display: inline-block !important;
+    overflow: visible !important;
+    will-change: opacity, filter, transform, clip-path, -webkit-clip-path, text-shadow;
+}
+
+#chatContainer .ai-text .magic-ink-alpha {
+    will-change: opacity, filter, transform, text-shadow;
+}
+
+#chatContainer .ai-text .magic-brush-revealed,
+#chatContainer .ai-text .magic-alpha-revealed {
+    opacity: 1 !important;
+}
+/* End brush reveal reply animation */
+
 </style>
 
 <script>
@@ -5633,6 +5651,7 @@ function magicMakeStableLines(text, targetDiv) {
     return lines;
 }
 
+
 function magicRenderStableInkText(targetDiv, text, options) {
     const align = options && options.align ? options.align : "left";
     const classPrefix = options && options.classPrefix ? options.classPrefix : "magic-ink";
@@ -5641,6 +5660,11 @@ function magicRenderStableInkText(targetDiv, text, options) {
     targetDiv.innerHTML = "";
 
     const lines = magicMakeStableLines(text, targetDiv);
+    const isReplyText = classPrefix === "magic-cjk-reply" || classPrefix === "magic-ink";
+
+    function isCJKChar(ch) {
+        return /[\u3400-\u9FFF\uF900-\uFAFF，。？！；：《》、“”‘’（）【】]/.test(ch);
+    }
 
     lines.forEach((lineTokens, lineIndex) => {
         const lineDiv = document.createElement("div");
@@ -5669,15 +5693,39 @@ function magicRenderStableInkText(targetDiv, text, options) {
             tokenSpan.style.display = "inline-block";
             tokenSpan.style.whiteSpace = "nowrap";
             tokenSpan.style.verticalAlign = "baseline";
+            tokenSpan.style.overflow = "visible";
 
             Array.from(token).forEach(ch => {
+                const isCJK = isCJKChar(ch);
+
                 const letter = document.createElement("span");
                 letter.className = classPrefix + "-stable-letter magic-ink-letter magic-letter";
                 letter.textContent = ch;
                 letter.style.opacity = "0";
-                letter.style.filter = "blur(1.2px)";
-                letter.style.transition = "opacity 520ms ease, filter 650ms ease";
+                letter.style.filter = "blur(1.1px)";
                 letter.style.whiteSpace = "pre";
+                letter.style.overflow = "visible";
+
+                if (isReplyText && isCJK) {
+                    letter.classList.add("magic-brush-char");
+                    letter.style.display = "inline-block";
+                    letter.style.transformOrigin = "left center";
+                    letter.style.transform = "translateY(0.04em) scale(1.035)";
+                    letter.style.webkitClipPath = "inset(-22% 108% -22% -12%)";
+                    letter.style.clipPath = "inset(-22% 108% -22% -12%)";
+                    letter.style.textShadow = "0 0 4px rgba(70, 20, 18, 0.28)";
+                    letter.style.transition = "opacity 520ms ease, filter 650ms ease, transform 560ms ease, clip-path 620ms cubic-bezier(0.22, 0.82, 0.22, 1), -webkit-clip-path 620ms cubic-bezier(0.22, 0.82, 0.22, 1), text-shadow 700ms ease";
+                } else if (isReplyText) {
+                    letter.classList.add("magic-ink-alpha");
+                    letter.style.display = "inline";
+                    letter.style.transform = "translateY(0.04em)";
+                    letter.style.textShadow = "0 0 3px rgba(70, 20, 18, 0.2)";
+                    letter.style.transition = "opacity 440ms ease, filter 540ms ease, transform 520ms ease, text-shadow 620ms ease";
+                } else {
+                    letter.style.display = "inline";
+                    letter.style.transition = "opacity 520ms ease, filter 650ms ease";
+                }
+
                 tokenSpan.appendChild(letter);
                 revealQueue.push(letter);
             });
@@ -5690,6 +5738,8 @@ function magicRenderStableInkText(targetDiv, text, options) {
 
     return revealQueue;
 }
+
+
 
 function magicRevealStableQueue(revealQueue, done, speed) {
     let index = 0;
@@ -5706,17 +5756,40 @@ function magicRevealStableQueue(revealQueue, done, speed) {
         span.style.opacity = "1";
         span.style.filter = "blur(0px)";
 
+        if (span.classList.contains("magic-brush-char")) {
+            span.classList.add("magic-brush-revealed");
+            span.style.transform = "translateY(0) scale(1)";
+            span.style.webkitClipPath = "inset(-22% -12% -22% -12%)";
+            span.style.clipPath = "inset(-22% -12% -22% -12%)";
+            span.style.textShadow = "0 0 0.55px rgba(70, 20, 18, 0.18)";
+        } else if (span.classList.contains("magic-ink-alpha")) {
+            span.classList.add("magic-alpha-revealed");
+            span.style.transform = "translateY(0)";
+            span.style.textShadow = "0 0 0.45px rgba(70, 20, 18, 0.16)";
+        }
+
         index += 1;
 
         let delay = speed || 50;
-        if ("，。？！；：,.!?;:".includes(ch)) delay = 120;
-        if (ch === " ") delay = 18;
+
+        if (span.classList.contains("magic-brush-char")) {
+            delay = 82;
+        }
+
+        if ("，。？！；：,.!?;:".includes(ch)) {
+            delay = 145;
+        }
+
+        if (ch === " ") {
+            delay = 18;
+        }
 
         setTimeout(revealNext, delay);
     }
 
     setTimeout(revealNext, 90);
 }
+
 
 
 
