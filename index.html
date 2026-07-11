@@ -2208,6 +2208,36 @@ html.magic-home-font-ready .text-line {
 }
 /* End final center home hint */
 
+
+/* Gentle text boundary patch */
+#chatContainer .message {
+    box-sizing: border-box !important;
+    max-width: min(86vw, 920px) !important;
+}
+
+#chatContainer .user-text,
+#chatContainer .ai-text {
+    box-sizing: border-box !important;
+    max-width: min(86vw, 920px) !important;
+    white-space: pre-wrap !important;
+    overflow-wrap: break-word !important;
+    word-break: normal !important;
+    line-break: auto !important;
+}
+
+#chatContainer .magic-letter {
+    white-space: pre-wrap !important;
+}
+
+@media (max-width: 768px) {
+    #chatContainer .message,
+    #chatContainer .user-text,
+    #chatContainer .ai-text {
+        max-width: 86vw !important;
+    }
+}
+/* End gentle text boundary patch */
+
 </style>
 
 <script>
