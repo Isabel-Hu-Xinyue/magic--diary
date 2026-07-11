@@ -2545,20 +2545,156 @@ html.magic-home-font-ready .text-line {
 
 
 
+
+
+
+
+
+
+
+
+
 /* Click dismiss visible diary writing */
 #chatContainer .message.magic-click-dismissed {
     opacity: 0 !important;
     filter: blur(3px) !important;
     pointer-events: none !important;
-    transition: opacity 140ms ease, filter 140ms ease !important;
+    transition: opacity 120ms ease, filter 120ms ease !important;
 }
 /* End click dismiss visible diary writing */
 
 
+/* Archive old row style daily override */
 
+/* 列表：不要大卡片，改成一条一条横向行 */
+#magicDailyArchiveList {
+    display: block !important;
+    width: 100% !important;
+}
 
+.magic-daily-card {
+    display: grid !important;
+    grid-template-columns: minmax(118px, 165px) minmax(70px, 95px) 1fr !important;
+    align-items: center !important;
+    gap: 14px !important;
 
+    width: 100% !important;
+    text-align: left !important;
 
+    border: none !important;
+    border-bottom: 1px solid rgba(88, 57, 43, 0.22) !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+
+    padding: 15px 4px !important;
+    margin: 0 !important;
+
+    cursor: pointer !important;
+    color: #3b241f !important;
+    font-family: Georgia, "Times New Roman", serif !important;
+}
+
+.magic-daily-card:hover {
+    background: rgba(255, 248, 232, 0.42) !important;
+}
+
+.magic-daily-date {
+    font-size: 19px !important;
+    line-height: 1.35 !important;
+    font-weight: 600 !important;
+    margin: 0 !important;
+    white-space: nowrap !important;
+}
+
+.magic-daily-count {
+    font-size: 13px !important;
+    line-height: 1.4 !important;
+    opacity: 0.62 !important;
+    margin: 0 !important;
+    white-space: nowrap !important;
+}
+
+.magic-daily-snippet {
+    font-size: 15px !important;
+    line-height: 1.45 !important;
+    opacity: 0.78 !important;
+    margin: 0 !important;
+
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+}
+
+/* 详情页也改轻一点，不要大块卡片感 */
+.magic-daily-header {
+    display: flex !important;
+    justify-content: space-between !important;
+    gap: 12px !important;
+    margin-bottom: 14px !important;
+}
+
+.magic-daily-title {
+    font-size: 24px !important;
+    line-height: 1.35 !important;
+    font-weight: 600 !important;
+    margin: 0 0 14px !important;
+    color: #3b241f !important;
+}
+
+.magic-daily-exchange {
+    border-top: 1px solid rgba(88, 57, 43, 0.2) !important;
+    padding: 14px 0 16px !important;
+    margin: 0 !important;
+    background: transparent !important;
+}
+
+.magic-daily-time {
+    font-size: 12px !important;
+    opacity: 0.54 !important;
+    margin-bottom: 8px !important;
+}
+
+.magic-daily-label {
+    font-size: 12px !important;
+    letter-spacing: 0.08em !important;
+    text-transform: uppercase !important;
+    opacity: 0.58 !important;
+    margin: 8px 0 5px !important;
+    color: #3b241f !important;
+}
+
+.magic-daily-text {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+
+    box-sizing: border-box !important;
+    white-space: pre-wrap !important;
+    overflow-wrap: break-word !important;
+    word-break: break-word !important;
+
+    line-height: 1.65 !important;
+    font-size: 17px !important;
+    color: #3b241f !important;
+
+    background: transparent !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+    overflow-x: hidden !important;
+}
+
+@media (max-width: 768px) {
+    .magic-daily-card {
+        grid-template-columns: 1fr !important;
+        gap: 4px !important;
+        padding: 14px 2px !important;
+    }
+
+    .magic-daily-snippet {
+        white-space: normal !important;
+    }
+}
+/* End archive old row style daily override */
 
 </style>
 
@@ -6110,6 +6246,7 @@ function magicTypeAIInLatestUserSpot(text) {
 
 
 
+
 function magicWaitForLatestUserFadeComplete() {
     const chatContainer = document.getElementById("chatContainer");
     if (!chatContainer) return Promise.resolve();
@@ -6117,13 +6254,23 @@ function magicWaitForLatestUserFadeComplete() {
     const userNodes = Array.from(chatContainer.querySelectorAll(".user-text"));
     const userTextNode = userNodes.reverse().find(node => {
         const box = node.closest(".message");
-        return box && box.style.display !== "none" && !box.closest("#magicArchiveOverlay") && !box.closest("#magicArchiveContent");
+        return box &&
+            !box.closest("#magicArchiveOverlay") &&
+            !box.closest("#magicArchiveContent");
     });
 
     if (!userTextNode) return Promise.resolve();
 
     const box = userTextNode.closest(".message");
     if (!box) return Promise.resolve();
+
+    if (
+        box.dataset.magicManuallyDismissed === "true" ||
+        box.classList.contains("magic-click-dismissed") ||
+        box.style.display === "none"
+    ) {
+        return Promise.resolve();
+    }
 
     magicScheduleLetterFade(userTextNode, "user");
 
@@ -6138,22 +6285,29 @@ function magicWaitForLatestUserFadeComplete() {
         }
 
         function check() {
-            if (!box.isConnected || box.style.display === "none") {
+            if (
+                !box.isConnected ||
+                box.style.display === "none" ||
+                box.dataset.magicManuallyDismissed === "true" ||
+                box.classList.contains("magic-click-dismissed")
+            ) {
                 finish();
                 return;
             }
 
-            if (Date.now() - start > 22000) {
+            // 不再等 22 秒，最多 4 秒，避免用户点掉后还卡住
+            if (Date.now() - start > 4000) {
                 finish();
                 return;
             }
 
-            setTimeout(check, 100);
+            setTimeout(check, 80);
         }
 
         check();
     });
 }
+
 
 
 function magicScheduleLetterFade(textNode, kind) {
@@ -6873,120 +7027,7 @@ document.addEventListener("DOMContentLoaded", magicBoot);
 </script>
 <script>
 
-/* Click dismiss visible diary writing */
-(function() {
-    function isControlTarget(target) {
-        return !!(
-            target.closest("#closeDiaryButton") ||
-            target.closest("#magicArchiveButton") ||
-            target.closest("#magicArchiveOverlay") ||
-            target.closest("#magicArchiveContent") ||
-            target.closest(".input-container") ||
-            target.closest("#userInput") ||
-            target.closest("#magicPageWriteButton") ||
-            target.closest("#magicSurfaceWriter") ||
-            target.closest("#magicSurfaceInput")
-        );
-    }
 
-    function isOpeningText(node) {
-        const text = node.textContent || "";
-        return text.includes("At last, you have opened me") ||
-               text.includes("Between these pages") ||
-               text.includes("Begin. Let me see");
-    }
-
-    function isVisibleBox(box) {
-        if (!box) return false;
-        if (box.style.display === "none") return false;
-        if (box.dataset.magicManuallyDismissed === "true") return false;
-
-        const rect = box.getBoundingClientRect();
-        return rect.width > 0 && rect.height > 0;
-    }
-
-    function magicDismissVisibleDiaryWriting() {
-        const chatContainer = document.getElementById("chatContainer");
-        if (!chatContainer) return false;
-
-        const nodes = Array.from(
-            chatContainer.querySelectorAll(".user-text, .ai-text")
-        ).filter(node => {
-            const box = node.closest(".message");
-            if (!isVisibleBox(box)) return false;
-            if (box.closest("#magicArchiveOverlay") || box.closest("#magicArchiveContent")) return false;
-
-            const text = (node.textContent || "").trim();
-            if (!text) return false;
-
-            if (isOpeningText(node)) return false;
-
-            return true;
-        });
-
-        if (!nodes.length) return false;
-
-        /*
-          更清楚的逻辑：
-          只处理当前页面上最后出现的一段文字。
-          如果 AI 正在写，点一下就终止它。
-          如果用户文字还没消散，点一下也终止它。
-        */
-        const latest = nodes[nodes.length - 1];
-        const box = latest.closest(".message");
-        if (!box) return false;
-
-        box.dataset.magicManuallyDismissed = "true";
-
-        latest.dataset.magicTyping = "false";
-        latest.dataset.magicReplyFadeScheduled = "true";
-        latest.dataset.magicInkFadeScheduled = "true";
-        latest.dataset.magicUserLetterFadeStarted = "true";
-        latest.dataset.magicAILetterFadeStarted = "true";
-        latest.dataset.magicDismissedByClick = "true";
-
-        // 如果是 AI 回复，先保存，避免点掉后 Archive 丢失
-        if (latest.classList.contains("ai-text") && typeof magicMaybeSaveAI === "function") {
-            try { magicMaybeSaveAI(latest); } catch (e) {}
-        }
-
-        // 立刻终止视觉显示，不再等旧的消散计时器
-        box.classList.add("magic-click-dismissed");
-
-        setTimeout(() => {
-            box.style.setProperty("display", "none", "important");
-            box.style.setProperty("opacity", "0", "important");
-            box.style.setProperty("visibility", "hidden", "important");
-        }, 150);
-
-        return true;
-    }
-
-    function install() {
-        const chatPage = document.getElementById("chatPage");
-        if (!chatPage) return;
-
-        if (chatPage.dataset.magicDismissVisibleWritingInstalledV2 === "true") return;
-        chatPage.dataset.magicDismissVisibleWritingInstalledV2 = "true";
-
-        chatPage.addEventListener("pointerdown", function(e) {
-            if (isControlTarget(e.target)) return;
-
-            const dismissed = magicDismissVisibleDiaryWriting();
-
-            if (dismissed) {
-                e.preventDefault();
-                e.stopPropagation();
-            }
-        }, true);
-    }
-
-    window.magicDismissVisibleDiaryWriting = magicDismissVisibleDiaryWriting;
-
-    setTimeout(install, 0);
-    setInterval(install, 1200);
-})();
-/* End click dismiss visible diary writing */
 
 </script>
 <script>
@@ -7291,6 +7332,119 @@ document.addEventListener("DOMContentLoaded", magicBoot);
     }, 1200);
 })();
 /* End force stable daily archive */
+
+</script>
+<script>
+
+/* Click dismiss visible diary writing */
+(function() {
+    function isControlTarget(target) {
+        return !!(
+            target.closest("#closeDiaryButton") ||
+            target.closest("#magicArchiveButton") ||
+            target.closest("#magicArchiveOverlay") ||
+            target.closest("#magicArchiveContent") ||
+            target.closest(".input-container") ||
+            target.closest("#userInput") ||
+            target.closest("#magicPageWriteButton") ||
+            target.closest("#magicSurfaceWriter") ||
+            target.closest("#magicSurfaceInput")
+        );
+    }
+
+    function isOpeningText(node) {
+        const text = node.textContent || "";
+        return text.includes("At last, you have opened me") ||
+               text.includes("Between these pages") ||
+               text.includes("Begin. Let me see");
+    }
+
+    function visibleWritingNodes() {
+        const chatContainer = document.getElementById("chatContainer");
+        if (!chatContainer) return [];
+
+        return Array.from(chatContainer.querySelectorAll(".user-text, .ai-text")).filter(node => {
+            const box = node.closest(".message");
+            if (!box) return false;
+            if (box.closest("#magicArchiveOverlay") || box.closest("#magicArchiveContent")) return false;
+            if (box.style.display === "none") return false;
+            if (box.dataset.magicManuallyDismissed === "true") return false;
+            if (isOpeningText(node)) return false;
+
+            const text = (node.textContent || "").trim();
+            if (!text) return false;
+
+            const rect = box.getBoundingClientRect();
+            return rect.width > 0 && rect.height > 0;
+        });
+    }
+
+    function dismissBox(box, node) {
+        if (!box || !node) return;
+
+        box.dataset.magicManuallyDismissed = "true";
+
+        // 用户文字：只隐藏视觉，不清空 pending entry，不影响 AI 回复继续生成
+        if (node.classList.contains("user-text")) {
+            node.dataset.magicUserDismissedOnly = "true";
+        }
+
+        // AI 文字：如果用户点掉，先保存，再隐藏
+        if (node.classList.contains("ai-text")) {
+            node.dataset.magicTyping = "false";
+            node.dataset.magicReplyFadeScheduled = "true";
+            node.dataset.magicInkFadeScheduled = "true";
+            node.dataset.magicDismissedByClick = "true";
+
+            if (typeof magicMaybeSaveAI === "function") {
+                try { magicMaybeSaveAI(node); } catch (e) {}
+            }
+        }
+
+        box.classList.add("magic-click-dismissed");
+
+        setTimeout(() => {
+            box.style.setProperty("display", "none", "important");
+            box.style.setProperty("visibility", "hidden", "important");
+            box.style.setProperty("opacity", "0", "important");
+        }, 130);
+    }
+
+    function magicDismissLatestVisibleWriting() {
+        const nodes = visibleWritingNodes();
+        if (!nodes.length) return false;
+
+        const latest = nodes[nodes.length - 1];
+        const box = latest.closest(".message");
+        dismissBox(box, latest);
+        return true;
+    }
+
+    function install() {
+        const chatPage = document.getElementById("chatPage");
+        if (!chatPage) return;
+
+        if (chatPage.dataset.magicDismissVisibleWritingInstalledV3 === "true") return;
+        chatPage.dataset.magicDismissVisibleWritingInstalledV3 = "true";
+
+        chatPage.addEventListener("pointerdown", function(e) {
+            if (isControlTarget(e.target)) return;
+
+            const dismissed = magicDismissLatestVisibleWriting();
+
+            if (dismissed) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+        }, true);
+    }
+
+    window.magicDismissVisibleDiaryWriting = magicDismissLatestVisibleWriting;
+
+    setTimeout(install, 0);
+    setInterval(install, 1200);
+})();
+/* End click dismiss visible diary writing */
 
 </script>
 </body>
