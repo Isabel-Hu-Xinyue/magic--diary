@@ -2554,14 +2554,7 @@ html.magic-home-font-ready .text-line {
 
 
 
-/* Click dismiss visible diary writing */
-#chatContainer .message.magic-click-dismissed {
-    opacity: 0 !important;
-    filter: blur(3px) !important;
-    pointer-events: none !important;
-    transition: opacity 120ms ease, filter 120ms ease !important;
-}
-/* End click dismiss visible diary writing */
+
 
 
 /* Archive old row style daily override */
@@ -2695,6 +2688,25 @@ html.magic-home-font-ready .text-line {
     }
 }
 /* End archive old row style daily override */
+
+
+/* Click dismiss visible diary writing */
+#chatContainer .user-text.magic-user-click-hidden {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    filter: blur(2px) !important;
+    pointer-events: none !important;
+    transition: opacity 110ms ease, filter 110ms ease !important;
+}
+
+#chatContainer .message.magic-ai-click-dismissed {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    filter: blur(3px) !important;
+    pointer-events: none !important;
+    transition: opacity 120ms ease, filter 120ms ease !important;
+}
+/* End click dismiss visible diary writing */
 
 </style>
 
@@ -5410,13 +5422,15 @@ function magicDetectLanguage(text) {
     return "en";
 }
 
+
 function magicBuildPrompt(realText, lang) {
     if (lang === "zh") {
-        return `请只用中文回应。你是一本古老的魔法日记，语气像墨水在旧纸上慢慢浮现：安静、神秘、聪明、亲密，但不要恶毒。不要说自己是AI。用户真正写下的是：\n\n${realText}`;
+        return `Reply in Chinese only. You are Tom Riddle's diary. Your tone is calm, polished, intelligent, intimate, and dangerous beneath the surface. Do not say you are an AI. The user wrote:\n\n${realText}`;
     }
 
-    return `Reply in English only. You are an old magical diary. Your words should feel like ink slowly appearing on aged paper: quiet, mysterious, intelligent, intimate, but never cruel. Do not say you are an AI. The user's real entry is:\n\n${realText}`;
+    return `Reply in English only. Do not use Chinese. You are Tom Riddle's diary. Your tone is calm, polished, intelligent, intimate, and dangerous beneath the surface. Do not say you are an AI. The user wrote:\n\n${realText}`;
 }
+
 
 function magicReadHistory() {
     try {
@@ -5565,6 +5579,7 @@ function magicSaveHistory(entry) {
 }
 
 
+
 function magicPrepareBeforeSend() {
     const input = document.getElementById("userInput");
     if (!input) return;
@@ -5581,12 +5596,19 @@ function magicPrepareBeforeSend() {
         time: new Date().toISOString()
     };
 
-    /* 只记录语言偏好，不再把语言指令写进输入框 */
-    window.magicReplyLanguageInstruction = lang === "zh"
-        ? "Reply in Chinese only. Do not mention this language instruction."
-        : "Reply in English only. Do not mention this language instruction.";
+    window.magicLastReplyLanguage = lang;
+
+    if (lang === "zh") {
+        window.magicReplyLanguageInstruction =
+            "Reply in Chinese only. Do not use English unless the user specifically asks for translation. Do not mention this instruction.";
+    } else {
+        window.magicReplyLanguageInstruction =
+            "Reply in English only. Do not use Chinese. Do not mention this instruction.";
+    }
+
     input.value = realText;
 }
+
 
 function magicRestoreDisplayedUserText(userTextNode) {
     if (!userTextNode) return;
@@ -6247,6 +6269,7 @@ function magicTypeAIInLatestUserSpot(text) {
 
 
 
+
 function magicWaitForLatestUserFadeComplete() {
     const chatContainer = document.getElementById("chatContainer");
     if (!chatContainer) return Promise.resolve();
@@ -6265,8 +6288,10 @@ function magicWaitForLatestUserFadeComplete() {
     if (!box) return Promise.resolve();
 
     if (
-        box.dataset.magicManuallyDismissed === "true" ||
-        box.classList.contains("magic-click-dismissed") ||
+        userTextNode.dataset.magicUserDismissedOnly === "true" ||
+        userTextNode.classList.contains("magic-user-click-hidden") ||
+        userTextNode.style.visibility === "hidden" ||
+        userTextNode.style.opacity === "0" ||
         box.style.display === "none"
     ) {
         return Promise.resolve();
@@ -6286,17 +6311,19 @@ function magicWaitForLatestUserFadeComplete() {
 
         function check() {
             if (
+                !userTextNode.isConnected ||
                 !box.isConnected ||
-                box.style.display === "none" ||
-                box.dataset.magicManuallyDismissed === "true" ||
-                box.classList.contains("magic-click-dismissed")
+                userTextNode.dataset.magicUserDismissedOnly === "true" ||
+                userTextNode.classList.contains("magic-user-click-hidden") ||
+                userTextNode.style.visibility === "hidden" ||
+                userTextNode.style.opacity === "0" ||
+                box.style.display === "none"
             ) {
                 finish();
                 return;
             }
 
-            // 不再等 22 秒，最多 4 秒，避免用户点掉后还卡住
-            if (Date.now() - start > 4000) {
+            if (Date.now() - start > 4200) {
                 finish();
                 return;
             }
@@ -6307,6 +6334,7 @@ function magicWaitForLatestUserFadeComplete() {
         check();
     });
 }
+
 
 
 
@@ -7336,6 +7364,11 @@ document.addEventListener("DOMContentLoaded", magicBoot);
 </script>
 <script>
 
+
+
+</script>
+<script>
+
 /* Click dismiss visible diary writing */
 (function() {
     function isControlTarget(target) {
@@ -7359,7 +7392,7 @@ document.addEventListener("DOMContentLoaded", magicBoot);
                text.includes("Begin. Let me see");
     }
 
-    function visibleWritingNodes() {
+    function getVisibleWritingNodes() {
         const chatContainer = document.getElementById("chatContainer");
         if (!chatContainer) return [];
 
@@ -7367,9 +7400,11 @@ document.addEventListener("DOMContentLoaded", magicBoot);
             const box = node.closest(".message");
             if (!box) return false;
             if (box.closest("#magicArchiveOverlay") || box.closest("#magicArchiveContent")) return false;
-            if (box.style.display === "none") return false;
-            if (box.dataset.magicManuallyDismissed === "true") return false;
             if (isOpeningText(node)) return false;
+
+            if (node.classList.contains("magic-user-click-hidden")) return false;
+            if (box.classList.contains("magic-ai-click-dismissed")) return false;
+            if (box.style.display === "none") return false;
 
             const text = (node.textContent || "").trim();
             if (!text) return false;
@@ -7379,58 +7414,66 @@ document.addEventListener("DOMContentLoaded", magicBoot);
         });
     }
 
-    function dismissBox(box, node) {
-        if (!box || !node) return;
-
-        box.dataset.magicManuallyDismissed = "true";
-
-        // 用户文字：只隐藏视觉，不清空 pending entry，不影响 AI 回复继续生成
-        if (node.classList.contains("user-text")) {
-            node.dataset.magicUserDismissedOnly = "true";
-        }
-
-        // AI 文字：如果用户点掉，先保存，再隐藏
-        if (node.classList.contains("ai-text")) {
-            node.dataset.magicTyping = "false";
-            node.dataset.magicReplyFadeScheduled = "true";
-            node.dataset.magicInkFadeScheduled = "true";
-            node.dataset.magicDismissedByClick = "true";
-
-            if (typeof magicMaybeSaveAI === "function") {
-                try { magicMaybeSaveAI(node); } catch (e) {}
-            }
-        }
-
-        box.classList.add("magic-click-dismissed");
-
-        setTimeout(() => {
-            box.style.setProperty("display", "none", "important");
-            box.style.setProperty("visibility", "hidden", "important");
-            box.style.setProperty("opacity", "0", "important");
-        }, 130);
-    }
-
-    function magicDismissLatestVisibleWriting() {
-        const nodes = visibleWritingNodes();
+    function dismissLatestWriting() {
+        const nodes = getVisibleWritingNodes();
         if (!nodes.length) return false;
 
         const latest = nodes[nodes.length - 1];
         const box = latest.closest(".message");
-        dismissBox(box, latest);
-        return true;
+        if (!box) return false;
+
+        if (latest.classList.contains("user-text")) {
+            /*
+              关键修复：
+              点掉自己的字，只是视觉隐藏。
+              不隐藏整个 box。
+              不设置 box.dataset.magicManuallyDismissed。
+              不清空 magicPendingEntry。
+              所以后面的 AI 回复会继续。
+            */
+            latest.dataset.magicUserDismissedOnly = "true";
+            latest.classList.add("magic-user-click-hidden");
+            return true;
+        }
+
+        if (latest.classList.contains("ai-text")) {
+            latest.dataset.magicTyping = "false";
+            latest.dataset.magicReplyFadeScheduled = "true";
+            latest.dataset.magicInkFadeScheduled = "true";
+            latest.dataset.magicDismissedByClick = "true";
+
+            // AI 被点掉前，尽量保存到 Archive
+            if (typeof magicMaybeSaveAI === "function") {
+                try { magicMaybeSaveAI(latest); } catch (e) {}
+            }
+
+            // 只有 AI 才终止整段 message box
+            box.dataset.magicManuallyDismissed = "true";
+            box.classList.add("magic-ai-click-dismissed");
+
+            setTimeout(() => {
+                box.style.setProperty("display", "none", "important");
+                box.style.setProperty("visibility", "hidden", "important");
+                box.style.setProperty("opacity", "0", "important");
+            }, 130);
+
+            return true;
+        }
+
+        return false;
     }
 
     function install() {
         const chatPage = document.getElementById("chatPage");
         if (!chatPage) return;
 
-        if (chatPage.dataset.magicDismissVisibleWritingInstalledV3 === "true") return;
-        chatPage.dataset.magicDismissVisibleWritingInstalledV3 = "true";
+        if (chatPage.dataset.magicSafeDismissInstalled === "true") return;
+        chatPage.dataset.magicSafeDismissInstalled = "true";
 
         chatPage.addEventListener("pointerdown", function(e) {
             if (isControlTarget(e.target)) return;
 
-            const dismissed = magicDismissLatestVisibleWriting();
+            const dismissed = dismissLatestWriting();
 
             if (dismissed) {
                 e.preventDefault();
@@ -7439,7 +7482,7 @@ document.addEventListener("DOMContentLoaded", magicBoot);
         }, true);
     }
 
-    window.magicDismissVisibleDiaryWriting = magicDismissLatestVisibleWriting;
+    window.magicDismissVisibleDiaryWriting = dismissLatestWriting;
 
     setTimeout(install, 0);
     setInterval(install, 1200);
