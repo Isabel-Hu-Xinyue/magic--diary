@@ -2254,6 +2254,25 @@ html.magic-home-font-ready .text-line {
 }
 /* End larger diary reply font */
 
+
+/* Force huge diary reply font */
+#chatContainer .ai-message .ai-text,
+#chatContainer .message.ai-message .ai-text,
+#chatContainer div.ai-text,
+#chatContainer .ai-text {
+    font-size: clamp(46px, 5vw, 76px) !important;
+    line-height: 1.42 !important;
+    letter-spacing: 0.35px !important;
+    font-weight: 500 !important;
+}
+
+#chatContainer .ai-text *,
+#chatContainer .ai-text .magic-letter {
+    font-size: inherit !important;
+    line-height: inherit !important;
+}
+/* End force huge diary reply font */
+
 </style>
 
 <script>
@@ -5235,6 +5254,10 @@ function magicTypeAIInLatestUserSpot(text) {
 
     const aiTextDiv = document.createElement("div");
     aiTextDiv.className = "ai-text";
+    aiTextDiv.style.setProperty("font-size", "clamp(46px, 5vw, 76px)", "important");
+    aiTextDiv.style.setProperty("line-height", "1.42", "important");
+    aiTextDiv.style.setProperty("letter-spacing", "0.35px", "important");
+    aiTextDiv.style.setProperty("font-weight", "500", "important");
     aiTextDiv.dataset.magicTyping = "true";
     box.appendChild(aiTextDiv);
 
