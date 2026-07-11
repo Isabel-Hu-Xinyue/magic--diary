@@ -7592,5 +7592,83 @@ document.addEventListener("DOMContentLoaded", magicBoot);
 /* End magic hard language fetch guard */
 
 </script>
+<script>
+
+/* Stop AI auto disappear */
+(function() {
+    if (window.magicStopAIAutoDisappearInstalled) return;
+    window.magicStopAIAutoDisappearInstalled = true;
+
+    const originalLetterFade = window.magicScheduleLetterFade;
+
+    window.magicScheduleLetterFade = function(textNode, type) {
+        // 关键修复：
+        // AI 回复不再自动消散，避免英文写到半截突然没了。
+        // 用户文字仍然保留原来的自动消散逻辑。
+        if (type === "ai") {
+            if (textNode) {
+                textNode.dataset.magicAutoFadeDisabled = "true";
+                textNode.dataset.magicReplyFadeScheduled = "true";
+                textNode.dataset.magicInkFadeScheduled = "true";
+
+                if (textNode.magicFadeTimer) clearTimeout(textNode.magicFadeTimer);
+                if (textNode.magicLetterFadeTimer) clearTimeout(textNode.magicLetterFadeTimer);
+                if (textNode.magicSaveTimer && typeof magicMaybeSaveAI === "function") {
+                    try { magicMaybeSaveAI(textNode); } catch (e) {}
+                }
+            }
+            return;
+        }
+
+        if (typeof originalLetterFade === "function") {
+            return originalLetterFade.apply(this, arguments);
+        }
+    };
+
+    try {
+        magicScheduleLetterFade = window.magicScheduleLetterFade;
+    } catch (e) {}
+
+    window.magicScheduleAIReplyFade = function(aiTextNode) {
+        if (!aiTextNode) return;
+
+        aiTextNode.dataset.magicAutoFadeDisabled = "true";
+        aiTextNode.dataset.magicReplyFadeScheduled = "true";
+        aiTextNode.dataset.magicInkFadeScheduled = "true";
+
+        if (aiTextNode.magicFadeTimer) clearTimeout(aiTextNode.magicFadeTimer);
+        if (aiTextNode.magicLetterFadeTimer) clearTimeout(aiTextNode.magicLetterFadeTimer);
+
+        // 只保存，不消失
+        if (typeof magicMaybeSaveAI === "function") {
+            try { magicMaybeSaveAI(aiTextNode); } catch (e) {}
+        }
+    };
+
+    try {
+        magicScheduleAIReplyFade = window.magicScheduleAIReplyFade;
+    } catch (e) {}
+
+    // 清理已经挂上的 AI 自动消散状态
+    function cleanExistingAINodes() {
+        document.querySelectorAll("#chatContainer .ai-text").forEach(node => {
+            if (node.dataset.magicOpening === "true") return;
+            if (node.dataset.magicDismissedByClick === "true") return;
+
+            node.dataset.magicAutoFadeDisabled = "true";
+            node.dataset.magicReplyFadeScheduled = "true";
+            node.dataset.magicInkFadeScheduled = "true";
+
+            if (node.magicFadeTimer) clearTimeout(node.magicFadeTimer);
+            if (node.magicLetterFadeTimer) clearTimeout(node.magicLetterFadeTimer);
+        });
+    }
+
+    setTimeout(cleanExistingAINodes, 0);
+    setInterval(cleanExistingAINodes, 1000);
+})();
+/* End stop AI auto disappear */
+
+</script>
 </body>
 </html>
