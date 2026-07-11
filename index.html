@@ -2297,6 +2297,22 @@ html.magic-home-font-ready .text-line {
 }
 /* End final handwritten ink reply style */
 
+
+/* Left anchored diary reply */
+#chatContainer .message.ai-message {
+    text-align: left !important;
+    transform-origin: top left !important;
+}
+
+#chatContainer .message.ai-message .ai-text {
+    text-align: left !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    white-space: pre-wrap !important;
+    overflow-wrap: break-word !important;
+}
+/* End left anchored diary reply */
+
 </style>
 
 <script>
@@ -5263,6 +5279,50 @@ function magicScheduleInkReplyFade(aiTextDiv) {
 
 
 
+
+function magicAnchorAIReplyFromLeft(box, point, text) {
+    if (!box) return;
+
+    const clamp = typeof magicClampNumber === "function"
+        ? magicClampNumber
+        : function(v, min, max) { return Math.max(min, Math.min(max, v)); };
+
+    const isSmall = window.innerWidth <= 768;
+    const weight = String(text || "").length;
+
+    const left = isSmall ? 8 : 13;
+    const width = isSmall ? "84vw" : (weight > 150 ? "min(76vw, 960px)" : "min(70vw, 900px)");
+
+    let topMax = 58;
+    if (weight > 180) topMax = 34;
+    else if (weight > 110) topMax = 42;
+    else if (weight > 60) topMax = 50;
+
+    const y = point && typeof point.y === "number" ? point.y : 30;
+    const top = clamp(y, 22, topMax);
+
+    box.style.position = "absolute";
+    box.style.margin = "0";
+    box.style.transform = "none";
+    box.style.left = left + "%";
+    box.style.top = top + "%";
+    box.style.width = width;
+    box.style.maxWidth = isSmall ? "84vw" : "960px";
+    box.style.boxSizing = "border-box";
+    box.style.textAlign = "left";
+
+    const aiText = box.querySelector(".ai-text");
+    if (aiText) {
+        aiText.style.setProperty("display", "block", "important");
+        aiText.style.setProperty("width", "100%", "important");
+        aiText.style.setProperty("max-width", "100%", "important");
+        aiText.style.setProperty("text-align", "left", "important");
+        aiText.style.setProperty("white-space", "pre-wrap", "important");
+        aiText.style.setProperty("overflow-wrap", "break-word", "important");
+    }
+}
+
+
 function magicTypeAIInLatestUserSpot(text) {
     const chatContainer = document.getElementById("chatContainer");
     if (!chatContainer) {
@@ -5322,7 +5382,9 @@ function magicTypeAIInLatestUserSpot(text) {
 
     box.appendChild(aiTextDiv);
 
-    magicSetFloatingMessagePosition(aiTextDiv, magicPickRandomReplyPoint(text));
+    const magicReplyPoint = magicPickRandomReplyPoint(text);
+    magicSetFloatingMessagePosition(aiTextDiv, magicReplyPoint);
+    magicAnchorAIReplyFromLeft(box, magicReplyPoint, text);
 
     const chars = Array.from(text || "");
     let index = 0;
