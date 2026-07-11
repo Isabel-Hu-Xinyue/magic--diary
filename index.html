@@ -2313,6 +2313,48 @@ html.magic-home-font-ready .text-line {
 }
 /* End left anchored diary reply */
 
+
+/* Stable word-safe diary writing */
+#chatContainer .message.ai-message {
+    text-align: left !important;
+    box-sizing: border-box !important;
+    max-width: 900px !important;
+}
+
+#chatContainer .message.ai-message .ai-text {
+    text-align: left !important;
+    white-space: normal !important;
+    overflow-wrap: normal !important;
+    word-break: normal !important;
+    hyphens: none !important;
+}
+
+#chatContainer .ai-text .magic-ink-word {
+    display: inline-block !important;
+    white-space: nowrap !important;
+    word-break: keep-all !important;
+}
+
+#chatContainer .ai-text .magic-ink-letter {
+    white-space: pre !important;
+}
+
+#chatContainer .magic-opening-message,
+#chatContainer .magic-opening-message .ai-text {
+    text-align: left !important;
+    white-space: pre-wrap !important;
+    overflow-wrap: normal !important;
+    word-break: normal !important;
+    hyphens: none !important;
+}
+
+@media (max-width: 768px) {
+    #chatContainer .message.ai-message {
+        max-width: 84vw !important;
+    }
+}
+/* End stable word-safe diary writing */
+
 </style>
 
 <script>
@@ -5280,6 +5322,7 @@ function magicScheduleInkReplyFade(aiTextDiv) {
 
 
 
+
 function magicAnchorAIReplyFromLeft(box, point, text) {
     if (!box) return;
 
@@ -5290,16 +5333,16 @@ function magicAnchorAIReplyFromLeft(box, point, text) {
     const isSmall = window.innerWidth <= 768;
     const weight = String(text || "").length;
 
-    const left = isSmall ? 8 : 13;
-    const width = isSmall ? "84vw" : (weight > 150 ? "min(76vw, 960px)" : "min(70vw, 900px)");
+    const left = isSmall ? 7 : 11;
+    const width = isSmall ? "82vw" : (weight > 150 ? "min(72vw, 900px)" : "min(66vw, 820px)");
 
     let topMax = 58;
-    if (weight > 180) topMax = 34;
-    else if (weight > 110) topMax = 42;
-    else if (weight > 60) topMax = 50;
+    if (weight > 180) topMax = 32;
+    else if (weight > 110) topMax = 40;
+    else if (weight > 60) topMax = 48;
 
     const y = point && typeof point.y === "number" ? point.y : 30;
-    const top = clamp(y, 22, topMax);
+    const top = clamp(y, 20, topMax);
 
     box.style.position = "absolute";
     box.style.margin = "0";
@@ -5307,9 +5350,10 @@ function magicAnchorAIReplyFromLeft(box, point, text) {
     box.style.left = left + "%";
     box.style.top = top + "%";
     box.style.width = width;
-    box.style.maxWidth = isSmall ? "84vw" : "960px";
+    box.style.maxWidth = isSmall ? "82vw" : "900px";
     box.style.boxSizing = "border-box";
     box.style.textAlign = "left";
+    box.style.overflow = "visible";
 
     const aiText = box.querySelector(".ai-text");
     if (aiText) {
@@ -5317,10 +5361,14 @@ function magicAnchorAIReplyFromLeft(box, point, text) {
         aiText.style.setProperty("width", "100%", "important");
         aiText.style.setProperty("max-width", "100%", "important");
         aiText.style.setProperty("text-align", "left", "important");
-        aiText.style.setProperty("white-space", "pre-wrap", "important");
-        aiText.style.setProperty("overflow-wrap", "break-word", "important");
+        aiText.style.setProperty("white-space", "normal", "important");
+        aiText.style.setProperty("overflow-wrap", "normal", "important");
+        aiText.style.setProperty("word-break", "normal", "important");
+        aiText.style.setProperty("hyphens", "none", "important");
     }
 }
+
+
 
 
 function magicTypeAIInLatestUserSpot(text) {
@@ -5377,8 +5425,10 @@ function magicTypeAIInLatestUserSpot(text) {
     aiTextDiv.style.setProperty("line-height", "1.56", "important");
     aiTextDiv.style.setProperty("letter-spacing", "0.2px", "important");
     aiTextDiv.style.setProperty("font-weight", "400", "important");
-    aiTextDiv.style.setProperty("white-space", "pre-wrap", "important");
-    aiTextDiv.style.setProperty("overflow-wrap", "break-word", "important");
+    aiTextDiv.style.setProperty("white-space", "normal", "important");
+    aiTextDiv.style.setProperty("overflow-wrap", "normal", "important");
+    aiTextDiv.style.setProperty("word-break", "normal", "important");
+    aiTextDiv.style.setProperty("hyphens", "none", "important");
 
     box.appendChild(aiTextDiv);
 
@@ -5386,11 +5436,40 @@ function magicTypeAIInLatestUserSpot(text) {
     magicSetFloatingMessagePosition(aiTextDiv, magicReplyPoint);
     magicAnchorAIReplyFromLeft(box, magicReplyPoint, text);
 
-    const chars = Array.from(text || "");
+    const tokens = String(text || "").match(/\S+|\s+/g) || [];
+    const revealQueue = [];
+
+    tokens.forEach(token => {
+        if (/^\s+$/.test(token)) {
+            aiTextDiv.appendChild(document.createTextNode(token));
+            return;
+        }
+
+        const wordSpan = document.createElement("span");
+        wordSpan.className = "magic-ink-word";
+        wordSpan.style.display = "inline-block";
+        wordSpan.style.whiteSpace = "nowrap";
+        wordSpan.style.verticalAlign = "baseline";
+
+        Array.from(token).forEach(ch => {
+            const letter = document.createElement("span");
+            letter.className = "magic-ink-letter magic-letter";
+            letter.textContent = ch;
+            letter.style.opacity = "0";
+            letter.style.filter = "blur(1.3px)";
+            letter.style.transition = "opacity 520ms ease, filter 650ms ease";
+            letter.style.whiteSpace = "pre";
+            wordSpan.appendChild(letter);
+            revealQueue.push(letter);
+        });
+
+        aiTextDiv.appendChild(wordSpan);
+    });
+
     let index = 0;
 
-    function typeNextChar() {
-        if (index >= chars.length) {
+    function revealNextLetter() {
+        if (index >= revealQueue.length) {
             aiTextDiv.dataset.magicTyping = "false";
 
             if (typeof magicMaybeSaveAI === "function") {
@@ -5404,34 +5483,23 @@ function magicTypeAIInLatestUserSpot(text) {
             return;
         }
 
-        const ch = chars[index];
+        const letter = revealQueue[index];
+        const ch = letter.textContent || "";
 
-        const span = document.createElement("span");
-        span.className = "magic-ink-letter magic-letter";
-        span.textContent = ch;
-        span.style.opacity = "0";
-        span.style.filter = "blur(2px)";
-        span.style.transition = "opacity 420ms ease, filter 520ms ease";
-        span.style.whiteSpace = "pre-wrap";
-
-        aiTextDiv.appendChild(span);
-
-        requestAnimationFrame(() => {
-            span.style.opacity = "1";
-            span.style.filter = "blur(0px)";
-        });
+        letter.style.opacity = "1";
+        letter.style.filter = "blur(0px)";
 
         index += 1;
 
-        let delay = 58;
-        if (ch === " ") delay = 28;
-        if (".,;:!?，。？！；：".includes(ch)) delay = 145;
+        let delay = 54;
+        if (".,;:!?，。？！；：".includes(ch)) delay = 135;
 
-        setTimeout(typeNextChar, delay);
+        setTimeout(revealNextLetter, delay);
     }
 
-    typeNextChar();
+    setTimeout(revealNextLetter, 80);
 }
+
 
 
 
@@ -5605,50 +5673,44 @@ function magicFitOpeningTextNode(aiTextNode) {
 
 
 
-function magicForceCenterOpeningMessage(aiTextNode) {
-    if (!aiTextNode) return;
 
-    const text = aiTextNode.textContent || "";
-    const box = aiTextNode.closest(".message");
-    const chatContainer = document.getElementById("chatContainer");
+function magicForceCenterOpeningMessage(node) {
+    if (!node) return;
 
-    if (!box || !chatContainer || !chatContainer.contains(box)) return;
-    if (box.closest("#magicArchiveOverlay") || box.closest("#magicArchiveContent")) return;
-
+    const text = node.textContent || "";
     const isOpening =
         text.includes("At last, you have opened me") ||
-        text.includes("I have always been here") ||
-        text.includes("Let me see what it is you are trying to conceal");
+        text.includes("Between these pages") ||
+        text.includes("Begin. Let me see");
 
     if (!isOpening) return;
 
+    const box = node.closest(".message");
+    if (!box) return;
+
+    const isSmall = window.innerWidth <= 768;
+
     box.classList.add("magic-opening-message");
-    box.classList.add("magic-floating-message");
-
     box.style.position = "absolute";
-    box.style.left = "52%";
-    box.style.top = "48%";
-    box.style.width = "min(90vw, 1120px)";
-    box.style.maxWidth = "90vw";
     box.style.margin = "0";
-    box.style.transform = "translate(-50%, -50%)";
-    box.style.textAlign = "center";
+    box.style.transform = "none";
+    box.style.left = isSmall ? "8%" : "14%";
+    box.style.top = isSmall ? "10%" : "11%";
+    box.style.width = isSmall ? "84vw" : "min(72vw, 900px)";
+    box.style.maxWidth = isSmall ? "84vw" : "900px";
+    box.style.textAlign = "left";
+    box.style.boxSizing = "border-box";
 
-    aiTextNode.style.display = "block";
-    aiTextNode.style.width = "100%";
-    aiTextNode.style.textAlign = "center";
-    aiTextNode.style.marginLeft = "auto";
-    aiTextNode.style.marginRight = "auto";
-    aiTextNode.style.whiteSpace = "pre-wrap";
-
-    if (typeof magicFitOpeningTextNode === "function") {
-        magicFitOpeningTextNode(aiTextNode);
-    }
-
-    aiTextNode.querySelectorAll(".magic-letter").forEach(letter => {
-        letter.style.textAlign = "center";
-    });
+    node.style.setProperty("display", "block", "important");
+    node.style.setProperty("width", "100%", "important");
+    node.style.setProperty("max-width", "100%", "important");
+    node.style.setProperty("text-align", "left", "important");
+    node.style.setProperty("white-space", "pre-wrap", "important");
+    node.style.setProperty("overflow-wrap", "normal", "important");
+    node.style.setProperty("word-break", "normal", "important");
+    node.style.setProperty("hyphens", "none", "important");
 }
+
 
 
 
