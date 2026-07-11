@@ -2400,6 +2400,84 @@ html.magic-home-font-ready .text-line {
 }
 /* End stable final layout reveal for CJK and opening */
 
+
+/* Fix CJK clipping and smaller opening */
+
+/* 中文回复：单独收小一点，并留出边距，避免汉字被裁切 */
+#chatContainer .ai-text .magic-cjk-reply-stable-line {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    padding-left: 0.18em !important;
+    padding-right: 0.35em !important;
+    line-height: 1.82 !important;
+    min-height: 1.82em !important;
+    overflow: visible !important;
+    white-space: nowrap !important;
+}
+
+#chatContainer .ai-text .magic-cjk-reply-stable-token,
+#chatContainer .ai-text .magic-cjk-reply-stable-letter {
+    font-size: clamp(24px, 2.55vw, 34px) !important;
+    line-height: 1.82 !important;
+    overflow: visible !important;
+}
+
+/* 普通中文回复容器也稍微收窄，防止贴右边 */
+#chatContainer .message.ai-message .ai-text:has(.magic-cjk-reply-stable-line) {
+    font-size: clamp(24px, 2.55vw, 34px) !important;
+    line-height: 1.82 !important;
+    padding-left: 0.15em !important;
+    padding-right: 0.35em !important;
+    box-sizing: border-box !important;
+    overflow: visible !important;
+}
+
+/* 开篇文字：独立字体大小，不再跟普通回复一样大 */
+#chatContainer .magic-opening-message {
+    width: min(78vw, 960px) !important;
+    max-width: 960px !important;
+}
+
+#chatContainer .magic-opening-text,
+#chatContainer .magic-opening-text .magic-opening-stable-line,
+#chatContainer .magic-opening-text .magic-opening-stable-token,
+#chatContainer .magic-opening-text .magic-opening-stable-letter {
+    font-size: clamp(17px, 1.55vw, 24px) !important;
+    line-height: 1.72 !important;
+    letter-spacing: 0.1px !important;
+}
+
+#chatContainer .magic-opening-text .magic-opening-stable-line {
+    min-height: 1.72em !important;
+    margin-top: 0.12em !important;
+    white-space: nowrap !important;
+    overflow: visible !important;
+}
+
+@media (max-width: 768px) {
+    #chatContainer .ai-text .magic-cjk-reply-stable-token,
+    #chatContainer .ai-text .magic-cjk-reply-stable-letter,
+    #chatContainer .message.ai-message .ai-text:has(.magic-cjk-reply-stable-line) {
+        font-size: clamp(22px, 6.2vw, 31px) !important;
+        line-height: 1.86 !important;
+    }
+
+    #chatContainer .magic-opening-message {
+        width: 86vw !important;
+        max-width: 86vw !important;
+    }
+
+    #chatContainer .magic-opening-text,
+    #chatContainer .magic-opening-text .magic-opening-stable-line,
+    #chatContainer .magic-opening-text .magic-opening-stable-token,
+    #chatContainer .magic-opening-text .magic-opening-stable-letter {
+        font-size: clamp(15px, 3.7vw, 20px) !important;
+        line-height: 1.68 !important;
+    }
+}
+/* End fix CJK clipping and smaller opening */
+
 </style>
 
 <script>
@@ -5633,6 +5711,10 @@ function magicAddOpeningMessage(text, callback) {
     textDiv.style.setProperty("line-break", "auto", "important");
     textDiv.style.setProperty("hyphens", "none", "important");
 
+    textDiv.style.setProperty("font-size", "clamp(17px, 1.55vw, 24px)", "important");
+    textDiv.style.setProperty("line-height", "1.72", "important");
+    textDiv.style.setProperty("letter-spacing", "0.1px", "important");
+
     const revealQueue = magicRenderStableInkText(textDiv, text, {
         align: "center",
         classPrefix: "magic-opening"
@@ -5714,6 +5796,13 @@ function magicTypeAIInLatestUserSpot(text) {
     const magicReplyPoint = magicPickRandomReplyPoint(text);
     magicSetFloatingMessagePosition(aiTextDiv, magicReplyPoint);
     magicAnchorAIReplyFromLeft(box, magicReplyPoint, text);
+
+    if (magicHasCJKText(text)) {
+        aiTextDiv.style.setProperty("font-size", "clamp(24px, 2.55vw, 34px)", "important");
+        aiTextDiv.style.setProperty("line-height", "1.82", "important");
+        aiTextDiv.style.setProperty("padding-left", "0.15em", "important");
+        aiTextDiv.style.setProperty("padding-right", "0.35em", "important");
+    }
 
     const revealQueue = magicRenderStableInkText(aiTextDiv, text, {
         align: "left",
