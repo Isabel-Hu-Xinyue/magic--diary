@@ -5219,6 +5219,7 @@ function magicTypeAIInLatestUserSpot(text) {
 
     const aiTextDiv = document.createElement("div");
     aiTextDiv.className = "ai-text";
+    aiTextDiv.dataset.magicTyping = "true";
     box.appendChild(aiTextDiv);
 
     magicSetFloatingMessagePosition(aiTextDiv, magicPickRandomReplyPoint(text));
@@ -5228,6 +5229,7 @@ function magicTypeAIInLatestUserSpot(text) {
 
     function typeNextChar() {
         if (index >= chars.length) {
+            aiTextDiv.dataset.magicTyping = "false";
             if (typeof magicScheduleAIReplyFade === "function") {
                 magicScheduleAIReplyFade(aiTextDiv);
             }
@@ -5237,7 +5239,7 @@ function magicTypeAIInLatestUserSpot(text) {
         aiTextDiv.textContent += chars[index];
         index += 1;
 
-        setTimeout(typeNextChar, 28);
+        setTimeout(typeNextChar, 72);
     }
 
     typeNextChar();
@@ -5469,6 +5471,10 @@ function magicWatchMessages() {
     document.querySelectorAll("#chatContainer .ai-text").forEach(node => {
         if (typeof magicForceCenterOpeningMessage === "function") {
             magicForceCenterOpeningMessage(node);
+        }
+
+        if (node.dataset.magicTyping === "true") {
+            return;
         }
 
         magicMaybeSaveAI(node);
