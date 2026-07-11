@@ -5,7 +5,73 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Magic Diary</title>
     <!-- 移动端调试控制台，右下角小齿轮可打开 -->
-    <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
+    <script src="https://cdn.jsdelivr.net/npm/eruda">
+/* Click to dismiss current diary reply */
+function magicDismissCurrentDiaryReply() {
+    const chatContainer = document.getElementById("chatContainer");
+    if (!chatContainer) return;
+
+    const aiNodes = Array.from(chatContainer.querySelectorAll(".ai-text")).filter(node => {
+        const box = node.closest(".message");
+        if (!box) return false;
+        if (box.closest("#magicArchiveOverlay") || box.closest("#magicArchiveContent")) return false;
+        if (box.style.display === "none") return false;
+
+        const text = (node.textContent || "").trim();
+        if (!text) return false;
+
+        return true;
+    });
+
+    if (!aiNodes.length) return;
+
+    const latest = aiNodes[aiNodes.length - 1];
+    const box = latest.closest(".message");
+    if (!box) return;
+
+    latest.dataset.magicTyping = "false";
+    latest.dataset.magicReplyFadeScheduled = "true";
+    latest.dataset.magicInkFadeScheduled = "true";
+
+    box.style.transition = "opacity 360ms ease, filter 360ms ease";
+    box.style.opacity = "0";
+    box.style.filter = "blur(3px)";
+
+    setTimeout(() => {
+        box.style.display = "none";
+    }, 380);
+}
+
+function magicInstallReplyClickDismiss() {
+    const chatPage = document.getElementById("chatPage");
+    if (!chatPage) return;
+
+    if (chatPage.dataset.magicReplyClickDismissInstalled === "true") return;
+    chatPage.dataset.magicReplyClickDismissInstalled = "true";
+
+    chatPage.addEventListener("click", function(e) {
+        if (
+            e.target.closest("#closeDiaryButton") ||
+            e.target.closest("#magicArchiveButton") ||
+            e.target.closest("#magicArchiveOverlay") ||
+            e.target.closest("#magicArchiveContent") ||
+            e.target.closest(".input-container") ||
+            e.target.closest("#magicPageWriteButton") ||
+            e.target.closest("#magicSurfaceWriter") ||
+            e.target.closest("#magicSurfaceInput")
+        ) {
+            return;
+        }
+
+        magicDismissCurrentDiaryReply();
+    }, true);
+}
+
+setTimeout(magicInstallReplyClickDismiss, 0);
+setInterval(magicInstallReplyClickDismiss, 1500);
+/* End click to dismiss current diary reply */
+
+</script>
     <script>eruda.init();</script>
     <style>
         @import url('https://cdn.jsdelivr.net/npm/lxgw-wenkai-webfont@1.1.0/style.css');
