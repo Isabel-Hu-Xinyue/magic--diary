@@ -2208,6 +2208,38 @@ html.magic-home-font-ready .text-line {
 }
 /* End final center home hint */
 
+
+/* Safe diary writing area */
+#chatContainer .message.magic-floating-message {
+    box-sizing: border-box !important;
+    max-width: min(86vw, 980px) !important;
+    overflow-wrap: break-word !important;
+    word-break: normal !important;
+    white-space: normal !important;
+}
+
+#chatContainer .message.magic-floating-message .user-text,
+#chatContainer .message.magic-floating-message .ai-text {
+    box-sizing: border-box !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    white-space: pre-wrap !important;
+    overflow-wrap: break-word !important;
+    word-break: normal !important;
+    line-break: auto !important;
+}
+
+#chatContainer .message.magic-floating-message .magic-letter {
+    white-space: pre-wrap !important;
+}
+
+@media (max-width: 768px) {
+    #chatContainer .message.magic-floating-message {
+        max-width: 88vw !important;
+    }
+}
+/* End safe diary writing area */
+
 </style>
 
 <script>
@@ -5075,6 +5107,70 @@ function magicRandomBetween(min, max) {
     return min + Math.random() * (max - min);
 }
 
+
+function magicGetDiarySafeRect() {
+    const chatPage = document.getElementById("chatPage");
+    const chatContainer = document.getElementById("chatContainer");
+    const rect = (chatContainer || chatPage || document.body).getBoundingClientRect();
+
+    const inputContainer = document.querySelector(".input-container");
+    const inputRect = inputContainer ? inputContainer.getBoundingClientRect() : null;
+
+    const topPad = 112;
+    const sidePad = Math.max(36, rect.width * 0.06);
+    const bottomLimit = inputRect ? Math.max(rect.top + 220, inputRect.top - 28) : rect.bottom - 110;
+
+    return {
+        container: rect,
+        left: rect.left + sidePad,
+        right: rect.right - sidePad,
+        top: rect.top + topPad,
+        bottom: Math.min(rect.bottom - 72, bottomLimit)
+    };
+}
+
+function magicClampPx(value, min, max) {
+    return Math.max(min, Math.min(max, value));
+}
+
+function magicKeepFloatingMessageInSafeArea(box) {
+    if (!box || !box.isConnected) return;
+
+    const safe = magicGetDiarySafeRect();
+    const container = safe.container;
+
+    if (!container.width || !container.height) return;
+
+    const boxRect = box.getBoundingClientRect();
+
+    let centerX = boxRect.left + boxRect.width / 2;
+    let centerY = boxRect.top + boxRect.height / 2;
+
+    const halfW = Math.min(boxRect.width / 2, (safe.right - safe.left) / 2);
+    const halfH = Math.min(boxRect.height / 2, (safe.bottom - safe.top) / 2);
+
+    centerX = magicClampPx(centerX, safe.left + halfW, safe.right - halfW);
+    centerY = magicClampPx(centerY, safe.top + halfH, safe.bottom - halfH);
+
+    const xPercent = ((centerX - container.left) / container.width) * 100;
+    const yPercent = ((centerY - container.top) / container.height) * 100;
+
+    box.style.left = xPercent + "%";
+    box.style.top = yPercent + "%";
+}
+
+function magicSafeTextWidthPercent(text) {
+    const weight = typeof magicVisualTextWeight === "function"
+        ? magicVisualTextWeight(text || "")
+        : String(text || "").length;
+
+    if (weight > 180) return 84;
+    if (weight > 110) return 76;
+    if (weight > 60) return 66;
+    return 54;
+}
+
+
 function magicSetFloatingMessagePosition(textNode, point) {
     const chatContainer = document.getElementById("chatContainer");
     if (!chatContainer || !textNode) return;
@@ -5085,30 +5181,68 @@ function magicSetFloatingMessagePosition(textNode, point) {
     if (!chatContainer.contains(box)) return;
     if (box.closest("#magicArchiveOverlay") || box.closest("#magicArchiveContent")) return;
 
+    const text = textNode.textContent || "";
     const safePoint = point || { x: 50, y: 48 };
+    const safe = magicGetDiarySafeRect();
+    const container = safe.container;
 
     box.classList.add("magic-floating-message");
-    box.style.left = magicClampNumber(safePoint.x, 18, 82) + "%";
-    box.style.top = magicClampNumber(safePoint.y, 20, 76) + "%";
+    box.style.position = "absolute";
+    box.style.margin = "0";
+    box.style.transform = "translate(-50%, -50%)";
+    box.style.boxSizing = "border-box";
+
+    const widthPercent = magicSafeTextWidthPercent(text);
+    box.style.width = "min(" + widthPercent + "vw, 980px)";
+    box.style.maxWidth = "min(86vw, 980px)";
+
+    const desiredX = container.left + (magicClampNumber(safePoint.x, 0, 100) / 100) * container.width;
+    const desiredY = container.top + (magicClampNumber(safePoint.y, 0, 100) / 100) * container.height;
+
+    const estimatedWidth = Math.min(container.width * widthPercent / 100, 980);
+    const estimatedHeight = Math.min(Math.max(80, text.length * 0.9), Math.max(120, safe.bottom - safe.top));
+
+    const centerX = magicClampPx(
+        desiredX,
+        safe.left + estimatedWidth / 2,
+        safe.right - estimatedWidth / 2
+    );
+
+    const centerY = magicClampPx(
+        desiredY,
+        safe.top + estimatedHeight / 2,
+        safe.bottom - estimatedHeight / 2
+    );
+
+    box.style.left = ((centerX - container.left) / container.width * 100) + "%";
+    box.style.top = ((centerY - container.top) / container.height * 100) + "%";
+
+    requestAnimationFrame(() => magicKeepFloatingMessageInSafeArea(box));
+    setTimeout(() => magicKeepFloatingMessageInSafeArea(box), 80);
+    setTimeout(() => magicKeepFloatingMessageInSafeArea(box), 260);
 }
+
+
 
 function magicPickRandomReplyPoint(text) {
     const weight = typeof magicVisualTextWeight === "function" ? magicVisualTextWeight(text || "") : (text || "").length;
 
     /*
-      Longer replies need a safer center area so the text does not run out of the page.
-      Short replies can appear more freely.
+      Use a safe page area:
+      longer replies stay closer to the center;
+      shorter replies can appear more freely.
     */
-    const xMin = weight > 80 ? 42 : 28;
-    const xMax = weight > 80 ? 58 : 72;
-    const yMin = 25;
-    const yMax = 70;
+    const xMin = weight > 120 ? 42 : 30;
+    const xMax = weight > 120 ? 58 : 70;
+    const yMin = 26;
+    const yMax = 62;
 
     return {
         x: magicRandomBetween(xMin, xMax),
         y: magicRandomBetween(yMin, yMax)
     };
 }
+
 
 function magicInstallFloatingPageMode() {
     const chatPage = document.getElementById("chatPage");
@@ -5439,6 +5573,11 @@ function magicWatchMessages() {
     document.querySelectorAll("#chatContainer .ai-text").forEach(node => {
         if (typeof magicForceCenterOpeningMessage === "function") {
             magicForceCenterOpeningMessage(node);
+        }
+
+        const box = node.closest(".message");
+        if (box && box.classList.contains("magic-floating-message") && typeof magicKeepFloatingMessageInSafeArea === "function") {
+            magicKeepFloatingMessageInSafeArea(box);
         }
 
         magicMaybeSaveAI(node);
