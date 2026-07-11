@@ -2241,10 +2241,16 @@ html.magic-home-font-ready .text-line {
 
 /* Larger diary reply font */
 #chatContainer .message.ai-message .ai-text,
+#chatContainer .message-text.ai-text,
 #chatContainer .ai-text {
-    font-size: clamp(27px, 2.65vw, 38px) !important;
-    line-height: 1.72 !important;
-    letter-spacing: 0.25px !important;
+    font-size: clamp(38px, 3.8vw, 56px) !important;
+    line-height: 1.55 !important;
+    letter-spacing: 0.3px !important;
+}
+
+#chatContainer .ai-text .magic-letter {
+    font-size: inherit !important;
+    line-height: inherit !important;
 }
 /* End larger diary reply font */
 
