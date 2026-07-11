@@ -2297,6 +2297,19 @@ html.magic-home-font-ready .text-line {
 }
 /* End final handwritten ink reply style */
 
+
+/* Ink bloom reveal refinement */
+#chatContainer .ai-text .magic-ink-letter {
+    display: inline;
+    will-change: opacity, filter, transform, text-shadow;
+    color: rgba(45, 24, 18, 0.92) !important;
+}
+
+#chatContainer .ai-text[data-magic-ink-mode="true"] {
+    color: rgba(45, 24, 18, 0.92) !important;
+}
+/* End ink bloom reveal refinement */
+
 </style>
 
 <script>
@@ -5347,9 +5360,11 @@ function magicTypeAIInLatestUserSpot(text) {
         const span = document.createElement("span");
         span.className = "magic-ink-letter magic-letter";
         span.textContent = ch;
-        span.style.opacity = "0";
-        span.style.filter = "blur(2px)";
-        span.style.transition = "opacity 420ms ease, filter 520ms ease";
+        span.style.opacity = "0.08";
+        span.style.filter = "blur(3.2px)";
+        span.style.transform = "translateY(1.5px) scale(1.045)";
+        span.style.textShadow = "0 0 5px rgba(45, 20, 15, 0.34)";
+        span.style.transition = "opacity 760ms ease, filter 900ms ease, transform 820ms ease, text-shadow 900ms ease";
         span.style.whiteSpace = "pre-wrap";
 
         aiTextDiv.appendChild(span);
@@ -5357,13 +5372,15 @@ function magicTypeAIInLatestUserSpot(text) {
         requestAnimationFrame(() => {
             span.style.opacity = "1";
             span.style.filter = "blur(0px)";
+            span.style.transform = "translateY(0px) scale(1)";
+            span.style.textShadow = "0 0 0.6px rgba(45, 20, 15, 0.22)";
         });
 
         index += 1;
 
-        let delay = 58;
-        if (ch === " ") delay = 28;
-        if (".,;:!?，。？！；：".includes(ch)) delay = 145;
+        let delay = 46;
+        if (ch === " ") delay = 22;
+        if (".,;:!?，。？！；：".includes(ch)) delay = 135;
 
         setTimeout(typeNextChar, delay);
     }
