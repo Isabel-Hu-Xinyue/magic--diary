@@ -2297,31 +2297,6 @@ html.magic-home-font-ready .text-line {
 }
 /* End final handwritten ink reply style */
 
-
-/* Ink bloom reveal refinement */
-#chatContainer .ai-text .magic-ink-letter {
-    display: inline;
-    will-change: opacity, filter, transform, text-shadow;
-    color: rgba(45, 24, 18, 0.92) !important;
-}
-
-#chatContainer .ai-text[data-magic-ink-mode="true"] {
-    color: rgba(45, 24, 18, 0.92) !important;
-}
-/* End ink bloom reveal refinement */
-
-
-/* Handwriting left-to-right reveal */
-#chatContainer .ai-text .magic-ink-word {
-    color: rgba(45, 24, 18, 0.94) !important;
-    will-change: clip-path, filter, text-shadow;
-}
-
-#chatContainer .ai-text[data-magic-ink-mode="true"] {
-    color: rgba(45, 24, 18, 0.94) !important;
-}
-/* End handwriting left-to-right reveal */
-
 </style>
 
 <script>
@@ -5288,7 +5263,6 @@ function magicScheduleInkReplyFade(aiTextDiv) {
 
 
 
-
 function magicTypeAIInLatestUserSpot(text) {
     const chatContainer = document.getElementById("chatContainer");
     if (!chatContainer) {
@@ -5350,11 +5324,11 @@ function magicTypeAIInLatestUserSpot(text) {
 
     magicSetFloatingMessagePosition(aiTextDiv, magicPickRandomReplyPoint(text));
 
-    const tokens = String(text || "").match(/\S+|\s+/g) || [];
+    const chars = Array.from(text || "");
     let index = 0;
 
-    function writeNextToken() {
-        if (index >= tokens.length) {
+    function typeNextChar() {
+        if (index >= chars.length) {
             aiTextDiv.dataset.magicTyping = "false";
 
             if (typeof magicMaybeSaveAI === "function") {
@@ -5368,48 +5342,34 @@ function magicTypeAIInLatestUserSpot(text) {
             return;
         }
 
-        const token = tokens[index];
-
-        if (/^\s+$/.test(token)) {
-            aiTextDiv.appendChild(document.createTextNode(token));
-            index += 1;
-            setTimeout(writeNextToken, 18);
-            return;
-        }
+        const ch = chars[index];
 
         const span = document.createElement("span");
-        span.className = "magic-ink-word magic-letter";
-        span.textContent = token;
-
-        span.style.display = "inline-block";
-        span.style.whiteSpace = "pre";
-        span.style.opacity = "1";
-        span.style.clipPath = "inset(0 100% 0 0)";
-        span.style.webkitClipPath = "inset(0 100% 0 0)";
-        span.style.filter = "blur(0.25px)";
-        span.style.textShadow = "0 0 1.4px rgba(45, 20, 15, 0.24)";
-        span.style.transition = "clip-path 720ms cubic-bezier(0.22, 0.8, 0.24, 1), -webkit-clip-path 720ms cubic-bezier(0.22, 0.8, 0.24, 1), filter 520ms ease, text-shadow 720ms ease";
+        span.className = "magic-ink-letter magic-letter";
+        span.textContent = ch;
+        span.style.opacity = "0";
+        span.style.filter = "blur(2px)";
+        span.style.transition = "opacity 420ms ease, filter 520ms ease";
+        span.style.whiteSpace = "pre-wrap";
 
         aiTextDiv.appendChild(span);
 
         requestAnimationFrame(() => {
-            span.style.clipPath = "inset(0 0 0 0)";
-            span.style.webkitClipPath = "inset(0 0 0 0)";
+            span.style.opacity = "1";
             span.style.filter = "blur(0px)";
-            span.style.textShadow = "0 0 0.4px rgba(45, 20, 15, 0.18)";
         });
 
         index += 1;
 
-        let delay = Math.min(360, Math.max(105, token.length * 42));
-        if (/[.,;:!?，。？！；：]$/.test(token)) delay += 120;
+        let delay = 58;
+        if (ch === " ") delay = 28;
+        if (".,;:!?，。？！；：".includes(ch)) delay = 145;
 
-        setTimeout(writeNextToken, delay);
+        setTimeout(typeNextChar, delay);
     }
 
-    writeNextToken();
+    typeNextChar();
 }
-
 
 
 
