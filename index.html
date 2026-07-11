@@ -6431,9 +6431,31 @@ function magicMaybeSaveAI(aiTextNode) {
 
 
 
+
 function magicScheduleAIReplyFade(aiTextNode) {
-    magicScheduleLetterFade(aiTextNode, "ai");
+    if (!aiTextNode) return;
+
+    // 只保存 Archive，不让 AI 回复自动消散。
+    // 这样英文回复不会写到一半突然没了。
+    aiTextNode.dataset.magicReplyFadeScheduled = "true";
+    aiTextNode.dataset.magicInkFadeScheduled = "true";
+    aiTextNode.dataset.magicAutoFadeDisabled = "true";
+
+    if (aiTextNode.magicFadeTimer) {
+        clearTimeout(aiTextNode.magicFadeTimer);
+    }
+
+    if (aiTextNode.magicLetterFadeTimer) {
+        clearTimeout(aiTextNode.magicLetterFadeTimer);
+    }
+
+    if (typeof magicMaybeSaveAI === "function") {
+        try {
+            magicMaybeSaveAI(aiTextNode);
+        } catch (e) {}
+    }
 }
+
 
 
 
