@@ -13,11 +13,54 @@ function magicInstallFullPageWritingInput() {
 
     if (!chatPage || !input) return;
 
+    // 把输入框移到 body，避免被原来的 input-container 隐藏/裁切
+    if (input.parentElement !== document.body) {
+        document.body.appendChild(input);
+    }
+
+    input.classList.add("magicFloatingPageInput");
     input.setAttribute("placeholder", "");
     input.setAttribute("autocomplete", "off");
     input.setAttribute("autocorrect", "off");
     input.setAttribute("autocapitalize", "off");
     input.setAttribute("spellcheck", "false");
+
+    function clamp(v, min, max) {
+        return Math.max(min, Math.min(max, v));
+    }
+
+    function placeInputAt(clientX, clientY) {
+        const rect = chatPage.getBoundingClientRect();
+        const isSmall = window.innerWidth <= 768;
+
+        const width = isSmall ? window.innerWidth * 0.82 : Math.min(window.innerWidth * 0.70, 760);
+        const left = clamp(clientX, rect.left + 36, rect.right - width - 36);
+        const top = clamp(clientY, rect.top + 90, rect.bottom - 210);
+
+        input.style.left = left + "px";
+        input.style.top = top + "px";
+        input.style.width = width + "px";
+
+        window.magicCurrentWritingPoint = {
+            x: clamp(((left - rect.left) / rect.width) * 100, 22, 78),
+            y: clamp(((top - rect.top) / rect.height) * 100, 24, 72)
+        };
+    }
+
+    function focusInput() {
+        try {
+            input.focus({ preventScroll: true });
+        } catch (e) {
+            input.focus();
+        }
+    }
+
+    // 初始放到纸面左下，不显示框，但可以打字
+    if (!input.dataset.magicPlacedOnce) {
+        const rect = chatPage.getBoundingClientRect();
+        placeInputAt(rect.left + rect.width * 0.18, rect.top + rect.height * 0.58);
+        input.dataset.magicPlacedOnce = "true";
+    }
 
     if (!document.getElementById("magicPageWriteButton")) {
         const btn = document.createElement("button");
@@ -28,6 +71,8 @@ function magicInstallFullPageWritingInput() {
         btn.addEventListener("click", function(e) {
             e.preventDefault();
             e.stopPropagation();
+
+            focusInput();
 
             if (typeof sendMessage === "function") {
                 sendMessage();
@@ -40,14 +85,6 @@ function magicInstallFullPageWritingInput() {
     if (input.dataset.magicFullPageInputInstalled === "true") return;
     input.dataset.magicFullPageInputInstalled = "true";
 
-    function focusHiddenInput() {
-        try {
-            input.focus({ preventScroll: true });
-        } catch (e) {
-            input.focus();
-        }
-    }
-
     chatPage.addEventListener("pointerdown", function(e) {
         if (
             e.target.closest("#closeDiaryButton") ||
@@ -58,20 +95,12 @@ function magicInstallFullPageWritingInput() {
             return;
         }
 
-        const rect = chatPage.getBoundingClientRect();
-        if (rect.width && rect.height) {
-            window.magicCurrentWritingPoint = {
-                x: Math.max(22, Math.min(78, ((e.clientX - rect.left) / rect.width) * 100)),
-                y: Math.max(24, Math.min(72, ((e.clientY - rect.top) / rect.height) * 100))
-            };
-        }
+        placeInputAt(e.clientX, e.clientY);
 
-        setTimeout(focusHiddenInput, 0);
+        setTimeout(focusInput, 0);
     }, true);
 
-    document.addEventListener("keydown", function(e) {
-        if (document.activeElement !== input) return;
-
+    input.addEventListener("keydown", function(e) {
         if (e.key === "Enter" && !e.shiftKey) {
             e.preventDefault();
 
@@ -81,7 +110,12 @@ function magicInstallFullPageWritingInput() {
         }
     }, true);
 
-    setTimeout(focusHiddenInput, 300);
+    input.addEventListener("input", function() {
+        input.style.height = "auto";
+        input.style.height = Math.min(input.scrollHeight, 180) + "px";
+    });
+
+    setTimeout(focusInput, 500);
 }
 
 setTimeout(magicInstallFullPageWritingInput, 0);
@@ -2702,6 +2736,68 @@ html.magic-home-font-ready .text-line {
     }
 }
 /* End hidden full-page writing surface */
+
+
+/* Floating page writing input visible layer */
+
+/* 原来的底部区域仍然隐藏 */
+#chatPage .input-container {
+    position: fixed !important;
+    left: 0 !important;
+    bottom: 0 !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    overflow: visible !important;
+    pointer-events: none !important;
+    opacity: 1 !important;
+    z-index: 1 !important;
+}
+
+/* 真正输入框：像写在纸面上一样，不要框 */
+#userInput.magicFloatingPageInput {
+    position: fixed !important;
+    display: block !important;
+    z-index: 95 !important;
+    width: min(70vw, 760px) !important;
+    min-height: 74px !important;
+    max-height: 180px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+    background: transparent !important;
+    resize: none !important;
+    overflow: hidden !important;
+
+    color: rgba(48, 26, 20, 0.92) !important;
+    caret-color: rgba(48, 26, 20, 0.9) !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+
+    font-family: "Bradley Hand", "Segoe Print", "Comic Sans MS", "Snell Roundhand", cursive !important;
+    font-size: clamp(27px, 3vw, 40px) !important;
+    line-height: 1.56 !important;
+    letter-spacing: 0.2px !important;
+}
+
+#userInput.magicFloatingPageInput::placeholder {
+    color: rgba(70, 42, 33, 0.28) !important;
+}
+
+@media (max-width: 768px) {
+    #userInput.magicFloatingPageInput {
+        width: 82vw !important;
+        min-height: 88px !important;
+        font-size: clamp(24px, 6vw, 34px) !important;
+    }
+}
+/* End floating page writing input visible layer */
 
 </style>
 
