@@ -5580,6 +5580,7 @@ function magicSaveHistory(entry) {
 
 
 
+
 function magicPrepareBeforeSend() {
     const input = document.getElementById("userInput");
     if (!input) return;
@@ -5589,6 +5590,7 @@ function magicPrepareBeforeSend() {
 
     const lang = magicDetectLanguage(realText);
     magicLastRealInput = realText;
+    window.magicLastReplyLanguage = lang;
 
     magicPendingEntry = {
         user: realText,
@@ -5596,18 +5598,13 @@ function magicPrepareBeforeSend() {
         time: new Date().toISOString()
     };
 
-    window.magicLastReplyLanguage = lang;
-
-    if (lang === "zh") {
-        window.magicReplyLanguageInstruction =
-            "Reply in Chinese only. Do not use English unless the user specifically asks for translation. Do not mention this instruction.";
-    } else {
-        window.magicReplyLanguageInstruction =
-            "Reply in English only. Do not use Chinese. Do not mention this instruction.";
-    }
+    window.magicReplyLanguageInstruction = lang === "zh"
+        ? "Reply in Chinese only. Do not use English unless the user explicitly asks for translation. Do not mention this instruction."
+        : "Reply in English only. Do not use Chinese. Do not mention this instruction.";
 
     input.value = realText;
 }
+
 
 
 function magicRestoreDisplayedUserText(userTextNode) {
@@ -7492,10 +7489,20 @@ document.addEventListener("DOMContentLoaded", magicBoot);
 </script>
 <script>
 
-/* Magic hard language fetch guard */
+
+
+</script>
+<script>
+
+
+
+</script>
+<script>
+
+/* Magic language only guard */
 (function() {
-    if (window.magicHardLanguageFetchGuardInstalled) return;
-    window.magicHardLanguageFetchGuardInstalled = true;
+    if (window.magicLanguageOnlyGuardInstalled) return;
+    window.magicLanguageOnlyGuardInstalled = true;
 
     function detectLang(text) {
         text = String(text || "");
@@ -7508,166 +7515,73 @@ document.addEventListener("DOMContentLoaded", magicBoot);
         return window.magicLastReplyLanguage || "en";
     }
 
-    function latestUserLanguage(messages) {
-        if (!Array.isArray(messages)) return window.magicLastReplyLanguage || "en";
+    function getLatestUserText(messages) {
+        if (!Array.isArray(messages)) return "";
 
         for (let i = messages.length - 1; i >= 0; i--) {
             const m = messages[i];
             if (!m || m.role !== "user") continue;
 
-            let content = "";
+            if (typeof m.content === "string") return m.content;
 
-            if (typeof m.content === "string") {
-                content = m.content;
-            } else if (Array.isArray(m.content)) {
-                content = m.content.map(part => {
+            if (Array.isArray(m.content)) {
+                return m.content.map(part => {
                     if (typeof part === "string") return part;
                     if (part && typeof part.text === "string") return part.text;
                     return "";
                 }).join(" ");
             }
-
-            if (content.trim()) return detectLang(content);
         }
 
-        return window.magicLastReplyLanguage || "en";
+        return "";
     }
 
-    function languageDirective(lang) {
+    function directiveFor(lang) {
         if (lang === "zh") {
-            return "CRITICAL LANGUAGE RULE: Reply in Chinese only. Do not use English unless the user explicitly asks for translation. Do not mention this rule.";
+            return "LANGUAGE OVERRIDE: Reply in Chinese only. Do not use English unless the user explicitly asks for translation. Do not mention this rule.";
         }
 
-        return "CRITICAL LANGUAGE RULE: Reply in English only. Do not use Chinese characters. Do not answer in Chinese. Do not mention this rule.";
+        return "LANGUAGE OVERRIDE: Reply in English only. Do not use Chinese. Do not write Chinese characters. Do not mention this rule.";
     }
 
     const originalFetch = window.fetch;
 
     window.fetch = function(input, init) {
         try {
-            const options = init ? { ...init } : {};
-            const body = options.body;
-
-            if (typeof body === "string" && body.includes('"messages"')) {
-                const data = JSON.parse(body);
+            if (init && typeof init.body === "string" && init.body.includes('"messages"')) {
+                const data = JSON.parse(init.body);
 
                 if (data && Array.isArray(data.messages)) {
-                    const lang = latestUserLanguage(data.messages);
+                    const latestUserText = getLatestUserText(data.messages) || window.magicLastRealInput || "";
+                    const lang = detectLang(latestUserText);
                     window.magicLastReplyLanguage = lang;
 
-                    const directive = languageDirective(lang);
+                    const directive = directiveFor(lang);
 
-                    // 清掉之前可能残留的语言规则，避免中文规则压过英文
                     data.messages = data.messages.filter(m => {
                         if (!m || m.role !== "system" || typeof m.content !== "string") return true;
-                        return !(
-                            m.content.includes("CRITICAL LANGUAGE RULE") ||
-                            m.content.includes("Reply in Chinese only") ||
-                            m.content.includes("Reply in English only")
-                        );
+                        return !m.content.includes("LANGUAGE OVERRIDE:");
                     });
 
-                    // 前后各加一次，确保最后生效
                     data.messages.unshift({
                         role: "system",
                         content: directive
                     });
 
-                    data.messages.push({
-                        role: "system",
-                        content: directive
-                    });
-
-                    options.body = JSON.stringify(data);
-                    return originalFetch.call(this, input, options);
+                    init = {
+                        ...init,
+                        body: JSON.stringify(data)
+                    };
                 }
             }
         } catch (e) {
-            // 出错就走原请求，避免页面坏掉
+            // 不让语言补丁影响原网页运行
         }
 
-        return originalFetch.apply(this, arguments);
+        return originalFetch.call(this, input, init);
     };
 })();
-/* End magic hard language fetch guard */
-
-</script>
-<script>
-
-/* Stop AI auto disappear */
-(function() {
-    if (window.magicStopAIAutoDisappearInstalled) return;
-    window.magicStopAIAutoDisappearInstalled = true;
-
-    const originalLetterFade = window.magicScheduleLetterFade;
-
-    window.magicScheduleLetterFade = function(textNode, type) {
-        // 关键修复：
-        // AI 回复不再自动消散，避免英文写到半截突然没了。
-        // 用户文字仍然保留原来的自动消散逻辑。
-        if (type === "ai") {
-            if (textNode) {
-                textNode.dataset.magicAutoFadeDisabled = "true";
-                textNode.dataset.magicReplyFadeScheduled = "true";
-                textNode.dataset.magicInkFadeScheduled = "true";
-
-                if (textNode.magicFadeTimer) clearTimeout(textNode.magicFadeTimer);
-                if (textNode.magicLetterFadeTimer) clearTimeout(textNode.magicLetterFadeTimer);
-                if (textNode.magicSaveTimer && typeof magicMaybeSaveAI === "function") {
-                    try { magicMaybeSaveAI(textNode); } catch (e) {}
-                }
-            }
-            return;
-        }
-
-        if (typeof originalLetterFade === "function") {
-            return originalLetterFade.apply(this, arguments);
-        }
-    };
-
-    try {
-        magicScheduleLetterFade = window.magicScheduleLetterFade;
-    } catch (e) {}
-
-    window.magicScheduleAIReplyFade = function(aiTextNode) {
-        if (!aiTextNode) return;
-
-        aiTextNode.dataset.magicAutoFadeDisabled = "true";
-        aiTextNode.dataset.magicReplyFadeScheduled = "true";
-        aiTextNode.dataset.magicInkFadeScheduled = "true";
-
-        if (aiTextNode.magicFadeTimer) clearTimeout(aiTextNode.magicFadeTimer);
-        if (aiTextNode.magicLetterFadeTimer) clearTimeout(aiTextNode.magicLetterFadeTimer);
-
-        // 只保存，不消失
-        if (typeof magicMaybeSaveAI === "function") {
-            try { magicMaybeSaveAI(aiTextNode); } catch (e) {}
-        }
-    };
-
-    try {
-        magicScheduleAIReplyFade = window.magicScheduleAIReplyFade;
-    } catch (e) {}
-
-    // 清理已经挂上的 AI 自动消散状态
-    function cleanExistingAINodes() {
-        document.querySelectorAll("#chatContainer .ai-text").forEach(node => {
-            if (node.dataset.magicOpening === "true") return;
-            if (node.dataset.magicDismissedByClick === "true") return;
-
-            node.dataset.magicAutoFadeDisabled = "true";
-            node.dataset.magicReplyFadeScheduled = "true";
-            node.dataset.magicInkFadeScheduled = "true";
-
-            if (node.magicFadeTimer) clearTimeout(node.magicFadeTimer);
-            if (node.magicLetterFadeTimer) clearTimeout(node.magicLetterFadeTimer);
-        });
-    }
-
-    setTimeout(cleanExistingAINodes, 0);
-    setInterval(cleanExistingAINodes, 1000);
-})();
-/* End stop AI auto disappear */
+/* End magic language only guard */
 
 </script>
 </body>
