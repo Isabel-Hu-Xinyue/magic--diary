@@ -2355,6 +2355,51 @@ html.magic-home-font-ready .text-line {
 }
 /* End stable word-safe diary writing */
 
+
+/* Stable final layout reveal for CJK and opening */
+#chatContainer .magic-cjk-reply-stable-line,
+#chatContainer .magic-ink-stable-line,
+#chatContainer .magic-opening-stable-line {
+    display: block !important;
+    width: 100% !important;
+    white-space: nowrap !important;
+    overflow: visible !important;
+}
+
+#chatContainer .magic-cjk-reply-stable-token,
+#chatContainer .magic-ink-stable-token,
+#chatContainer .magic-opening-stable-token {
+    display: inline-block !important;
+    white-space: nowrap !important;
+    vertical-align: baseline !important;
+}
+
+#chatContainer .magic-cjk-reply-stable-letter,
+#chatContainer .magic-ink-stable-letter,
+#chatContainer .magic-opening-stable-letter {
+    display: inline !important;
+    white-space: pre !important;
+}
+
+#chatContainer .magic-opening-message {
+    position: absolute !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    text-align: center !important;
+    box-sizing: border-box !important;
+}
+
+#chatContainer .magic-opening-text {
+    text-align: center !important;
+    width: 100% !important;
+    max-width: 100% !important;
+}
+
+#chatContainer .message.ai-message .ai-text {
+    overflow: visible !important;
+}
+/* End stable final layout reveal for CJK and opening */
+
 </style>
 
 <script>
@@ -4840,7 +4885,11 @@ ${quotes.join('\n')}
         }
 
         function addTypingMessage(text, isUser, callback) {
-            const messageDiv = document.createElement('div');
+            if (!isUser && typeof magicIsOpeningDiaryText === "function" && magicIsOpeningDiaryText(text)) {
+                return magicAddOpeningMessage(text, callback);
+            }
+
+                        const messageDiv = document.createElement('div');
             messageDiv.className = 'message';
 
             const textDiv = document.createElement('div');
@@ -5371,6 +5420,235 @@ function magicAnchorAIReplyFromLeft(box, point, text) {
 
 
 
+
+function magicIsOpeningDiaryText(text) {
+    const s = String(text || "");
+    return s.includes("At last, you have opened me") ||
+           s.includes("Between these pages") ||
+           s.includes("Begin. Let me see");
+}
+
+function magicHasCJKText(text) {
+    return /[\u3400-\u9FFF\uF900-\uFAFF]/.test(String(text || ""));
+}
+
+function magicTokenizeStableText(text) {
+    const result = [];
+    const s = String(text || "");
+    let latin = "";
+
+    function flushLatin() {
+        if (latin) {
+            result.push(latin);
+            latin = "";
+        }
+    }
+
+    Array.from(s).forEach(ch => {
+        if (ch === "\n") {
+            flushLatin();
+            result.push("\n");
+        } else if (/\s/.test(ch)) {
+            flushLatin();
+            result.push(" ");
+        } else if (/[\u3400-\u9FFF\uF900-\uFAFF，。？！；：《》、“”‘’（）【】]/.test(ch)) {
+            flushLatin();
+            result.push(ch);
+        } else {
+            latin += ch;
+        }
+    });
+
+    flushLatin();
+    return result;
+}
+
+function magicMakeStableLines(text, targetDiv) {
+    const computed = window.getComputedStyle(targetDiv);
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
+    ctx.font = computed.font || "32px serif";
+
+    const maxWidth = Math.max(220, targetDiv.clientWidth || window.innerWidth * 0.66);
+    const tokens = magicTokenizeStableText(text);
+
+    const lines = [];
+    let current = [];
+    let currentWidth = 0;
+
+    function pushLine() {
+        lines.push(current);
+        current = [];
+        currentWidth = 0;
+    }
+
+    tokens.forEach(token => {
+        if (token === "\n") {
+            pushLine();
+            return;
+        }
+
+        if (token === " " && current.length === 0) return;
+
+        const tokenWidth = ctx.measureText(token).width;
+
+        if (current.length > 0 && currentWidth + tokenWidth > maxWidth) {
+            pushLine();
+            if (token !== " ") {
+                current.push(token);
+                currentWidth = tokenWidth;
+            }
+        } else {
+            current.push(token);
+            currentWidth += tokenWidth;
+        }
+    });
+
+    if (current.length > 0) lines.push(current);
+    return lines;
+}
+
+function magicRenderStableInkText(targetDiv, text, options) {
+    const align = options && options.align ? options.align : "left";
+    const classPrefix = options && options.classPrefix ? options.classPrefix : "magic-ink";
+    const revealQueue = [];
+
+    targetDiv.innerHTML = "";
+
+    const lines = magicMakeStableLines(text, targetDiv);
+
+    lines.forEach((lineTokens, lineIndex) => {
+        const lineDiv = document.createElement("div");
+        lineDiv.className = classPrefix + "-stable-line";
+        lineDiv.style.display = "block";
+        lineDiv.style.width = "100%";
+        lineDiv.style.textAlign = align;
+        lineDiv.style.whiteSpace = "nowrap";
+        lineDiv.style.minHeight = "1.48em";
+        lineDiv.style.marginTop = lineIndex === 0 ? "0" : "0.18em";
+
+        if (!lineTokens.length) {
+            lineDiv.innerHTML = "&nbsp;";
+            targetDiv.appendChild(lineDiv);
+            return;
+        }
+
+        lineTokens.forEach(token => {
+            if (token === " ") {
+                lineDiv.appendChild(document.createTextNode(" "));
+                return;
+            }
+
+            const tokenSpan = document.createElement("span");
+            tokenSpan.className = classPrefix + "-stable-token";
+            tokenSpan.style.display = "inline-block";
+            tokenSpan.style.whiteSpace = "nowrap";
+            tokenSpan.style.verticalAlign = "baseline";
+
+            Array.from(token).forEach(ch => {
+                const letter = document.createElement("span");
+                letter.className = classPrefix + "-stable-letter magic-ink-letter magic-letter";
+                letter.textContent = ch;
+                letter.style.opacity = "0";
+                letter.style.filter = "blur(1.2px)";
+                letter.style.transition = "opacity 520ms ease, filter 650ms ease";
+                letter.style.whiteSpace = "pre";
+                tokenSpan.appendChild(letter);
+                revealQueue.push(letter);
+            });
+
+            lineDiv.appendChild(tokenSpan);
+        });
+
+        targetDiv.appendChild(lineDiv);
+    });
+
+    return revealQueue;
+}
+
+function magicRevealStableQueue(revealQueue, done, speed) {
+    let index = 0;
+
+    function revealNext() {
+        if (index >= revealQueue.length) {
+            if (done) done();
+            return;
+        }
+
+        const span = revealQueue[index];
+        const ch = span.textContent || "";
+
+        span.style.opacity = "1";
+        span.style.filter = "blur(0px)";
+
+        index += 1;
+
+        let delay = speed || 50;
+        if ("，。？！；：,.!?;:".includes(ch)) delay = 120;
+        if (ch === " ") delay = 18;
+
+        setTimeout(revealNext, delay);
+    }
+
+    setTimeout(revealNext, 90);
+}
+
+
+
+
+function magicAddOpeningMessage(text, callback) {
+    const chatContainer = document.getElementById("chatContainer");
+    if (!chatContainer) return;
+
+    const messageDiv = document.createElement("div");
+    messageDiv.className = "message ai-message magic-opening-message";
+
+    const textDiv = document.createElement("div");
+    textDiv.className = "message-text ai-text magic-opening-text";
+    textDiv.dataset.magicOpening = "true";
+    textDiv.dataset.magicTyping = "true";
+
+    messageDiv.appendChild(textDiv);
+    chatContainer.appendChild(messageDiv);
+
+    const isSmall = window.innerWidth <= 768;
+
+    messageDiv.style.position = "absolute";
+    messageDiv.style.margin = "0";
+    messageDiv.style.left = "50%";
+    messageDiv.style.top = isSmall ? "8%" : "8.5%";
+    messageDiv.style.transform = "translateX(-50%)";
+    messageDiv.style.width = isSmall ? "84vw" : "min(72vw, 900px)";
+    messageDiv.style.maxWidth = isSmall ? "84vw" : "900px";
+    messageDiv.style.textAlign = "center";
+    messageDiv.style.boxSizing = "border-box";
+
+    textDiv.style.setProperty("display", "block", "important");
+    textDiv.style.setProperty("width", "100%", "important");
+    textDiv.style.setProperty("max-width", "100%", "important");
+    textDiv.style.setProperty("text-align", "center", "important");
+    textDiv.style.setProperty("white-space", "normal", "important");
+    textDiv.style.setProperty("overflow-wrap", "normal", "important");
+    textDiv.style.setProperty("word-break", "normal", "important");
+    textDiv.style.setProperty("line-break", "auto", "important");
+    textDiv.style.setProperty("hyphens", "none", "important");
+
+    const revealQueue = magicRenderStableInkText(textDiv, text, {
+        align: "center",
+        classPrefix: "magic-opening"
+    });
+
+    magicRevealStableQueue(revealQueue, () => {
+        textDiv.dataset.magicTyping = "false";
+        if (callback) callback();
+    }, 34);
+
+    if (typeof updateCloseDiaryButton === "function") {
+        updateCloseDiaryButton();
+    }
+}
+
+
 function magicTypeAIInLatestUserSpot(text) {
     const chatContainer = document.getElementById("chatContainer");
     if (!chatContainer) {
@@ -5428,6 +5706,7 @@ function magicTypeAIInLatestUserSpot(text) {
     aiTextDiv.style.setProperty("white-space", "normal", "important");
     aiTextDiv.style.setProperty("overflow-wrap", "normal", "important");
     aiTextDiv.style.setProperty("word-break", "normal", "important");
+    aiTextDiv.style.setProperty("line-break", "auto", "important");
     aiTextDiv.style.setProperty("hyphens", "none", "important");
 
     box.appendChild(aiTextDiv);
@@ -5436,69 +5715,24 @@ function magicTypeAIInLatestUserSpot(text) {
     magicSetFloatingMessagePosition(aiTextDiv, magicReplyPoint);
     magicAnchorAIReplyFromLeft(box, magicReplyPoint, text);
 
-    const tokens = String(text || "").match(/\S+|\s+/g) || [];
-    const revealQueue = [];
-
-    tokens.forEach(token => {
-        if (/^\s+$/.test(token)) {
-            aiTextDiv.appendChild(document.createTextNode(token));
-            return;
-        }
-
-        const wordSpan = document.createElement("span");
-        wordSpan.className = "magic-ink-word";
-        wordSpan.style.display = "inline-block";
-        wordSpan.style.whiteSpace = "nowrap";
-        wordSpan.style.verticalAlign = "baseline";
-
-        Array.from(token).forEach(ch => {
-            const letter = document.createElement("span");
-            letter.className = "magic-ink-letter magic-letter";
-            letter.textContent = ch;
-            letter.style.opacity = "0";
-            letter.style.filter = "blur(1.3px)";
-            letter.style.transition = "opacity 520ms ease, filter 650ms ease";
-            letter.style.whiteSpace = "pre";
-            wordSpan.appendChild(letter);
-            revealQueue.push(letter);
-        });
-
-        aiTextDiv.appendChild(wordSpan);
+    const revealQueue = magicRenderStableInkText(aiTextDiv, text, {
+        align: "left",
+        classPrefix: magicHasCJKText(text) ? "magic-cjk-reply" : "magic-ink"
     });
 
-    let index = 0;
+    magicRevealStableQueue(revealQueue, () => {
+        aiTextDiv.dataset.magicTyping = "false";
 
-    function revealNextLetter() {
-        if (index >= revealQueue.length) {
-            aiTextDiv.dataset.magicTyping = "false";
-
-            if (typeof magicMaybeSaveAI === "function") {
-                magicMaybeSaveAI(aiTextDiv);
-            }
-
-            if (typeof magicScheduleInkReplyFade === "function") {
-                magicScheduleInkReplyFade(aiTextDiv);
-            }
-
-            return;
+        if (typeof magicMaybeSaveAI === "function") {
+            magicMaybeSaveAI(aiTextDiv);
         }
 
-        const letter = revealQueue[index];
-        const ch = letter.textContent || "";
-
-        letter.style.opacity = "1";
-        letter.style.filter = "blur(0px)";
-
-        index += 1;
-
-        let delay = 54;
-        if (".,;:!?，。？！；：".includes(ch)) delay = 135;
-
-        setTimeout(revealNextLetter, delay);
-    }
-
-    setTimeout(revealNextLetter, 80);
+        if (typeof magicScheduleInkReplyFade === "function") {
+            magicScheduleInkReplyFade(aiTextDiv);
+        }
+    }, magicHasCJKText(text) ? 46 : 54);
 }
+
 
 
 
@@ -5674,42 +5908,12 @@ function magicFitOpeningTextNode(aiTextNode) {
 
 
 
+
 function magicForceCenterOpeningMessage(node) {
     if (!node) return;
-
-    const text = node.textContent || "";
-    const isOpening =
-        text.includes("At last, you have opened me") ||
-        text.includes("Between these pages") ||
-        text.includes("Begin. Let me see");
-
-    if (!isOpening) return;
-
-    const box = node.closest(".message");
-    if (!box) return;
-
-    const isSmall = window.innerWidth <= 768;
-
-    box.classList.add("magic-opening-message");
-    box.style.position = "absolute";
-    box.style.margin = "0";
-    box.style.transform = "none";
-    box.style.left = isSmall ? "8%" : "14%";
-    box.style.top = isSmall ? "10%" : "11%";
-    box.style.width = isSmall ? "84vw" : "min(72vw, 900px)";
-    box.style.maxWidth = isSmall ? "84vw" : "900px";
-    box.style.textAlign = "left";
-    box.style.boxSizing = "border-box";
-
-    node.style.setProperty("display", "block", "important");
-    node.style.setProperty("width", "100%", "important");
-    node.style.setProperty("max-width", "100%", "important");
-    node.style.setProperty("text-align", "left", "important");
-    node.style.setProperty("white-space", "pre-wrap", "important");
-    node.style.setProperty("overflow-wrap", "normal", "important");
-    node.style.setProperty("word-break", "normal", "important");
-    node.style.setProperty("hyphens", "none", "important");
+    if (node.dataset && node.dataset.magicOpening === "true") return;
 }
+
 
 
 
@@ -5720,6 +5924,9 @@ function magicWatchMessages() {
     });
 
     document.querySelectorAll("#chatContainer .ai-text").forEach(node => {
+        if (node.dataset.magicOpening === "true") {
+            return;
+        }
         if (typeof magicForceCenterOpeningMessage === "function") {
             magicForceCenterOpeningMessage(node);
         }
