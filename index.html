@@ -7490,5 +7490,107 @@ document.addEventListener("DOMContentLoaded", magicBoot);
 /* End click dismiss visible diary writing */
 
 </script>
+<script>
+
+/* Magic hard language fetch guard */
+(function() {
+    if (window.magicHardLanguageFetchGuardInstalled) return;
+    window.magicHardLanguageFetchGuardInstalled = true;
+
+    function detectLang(text) {
+        text = String(text || "");
+
+        const zh = (text.match(/[\u4e00-\u9fff]/g) || []).length;
+        const en = (text.match(/[A-Za-z]/g) || []).length;
+
+        if (zh > en) return "zh";
+        if (en > 0) return "en";
+        return window.magicLastReplyLanguage || "en";
+    }
+
+    function latestUserLanguage(messages) {
+        if (!Array.isArray(messages)) return window.magicLastReplyLanguage || "en";
+
+        for (let i = messages.length - 1; i >= 0; i--) {
+            const m = messages[i];
+            if (!m || m.role !== "user") continue;
+
+            let content = "";
+
+            if (typeof m.content === "string") {
+                content = m.content;
+            } else if (Array.isArray(m.content)) {
+                content = m.content.map(part => {
+                    if (typeof part === "string") return part;
+                    if (part && typeof part.text === "string") return part.text;
+                    return "";
+                }).join(" ");
+            }
+
+            if (content.trim()) return detectLang(content);
+        }
+
+        return window.magicLastReplyLanguage || "en";
+    }
+
+    function languageDirective(lang) {
+        if (lang === "zh") {
+            return "CRITICAL LANGUAGE RULE: Reply in Chinese only. Do not use English unless the user explicitly asks for translation. Do not mention this rule.";
+        }
+
+        return "CRITICAL LANGUAGE RULE: Reply in English only. Do not use Chinese characters. Do not answer in Chinese. Do not mention this rule.";
+    }
+
+    const originalFetch = window.fetch;
+
+    window.fetch = function(input, init) {
+        try {
+            const options = init ? { ...init } : {};
+            const body = options.body;
+
+            if (typeof body === "string" && body.includes('"messages"')) {
+                const data = JSON.parse(body);
+
+                if (data && Array.isArray(data.messages)) {
+                    const lang = latestUserLanguage(data.messages);
+                    window.magicLastReplyLanguage = lang;
+
+                    const directive = languageDirective(lang);
+
+                    // 清掉之前可能残留的语言规则，避免中文规则压过英文
+                    data.messages = data.messages.filter(m => {
+                        if (!m || m.role !== "system" || typeof m.content !== "string") return true;
+                        return !(
+                            m.content.includes("CRITICAL LANGUAGE RULE") ||
+                            m.content.includes("Reply in Chinese only") ||
+                            m.content.includes("Reply in English only")
+                        );
+                    });
+
+                    // 前后各加一次，确保最后生效
+                    data.messages.unshift({
+                        role: "system",
+                        content: directive
+                    });
+
+                    data.messages.push({
+                        role: "system",
+                        content: directive
+                    });
+
+                    options.body = JSON.stringify(data);
+                    return originalFetch.call(this, input, options);
+                }
+            }
+        } catch (e) {
+            // 出错就走原请求，避免页面坏掉
+        }
+
+        return originalFetch.apply(this, arguments);
+    };
+})();
+/* End magic hard language fetch guard */
+
+</script>
 </body>
 </html>
