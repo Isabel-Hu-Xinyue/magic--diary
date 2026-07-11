@@ -6,70 +6,7 @@
     <title>Magic Diary</title>
     <!-- 移动端调试控制台，右下角小齿轮可打开 -->
     <script src="https://cdn.jsdelivr.net/npm/eruda">
-/* Click to dismiss current diary reply */
-function magicDismissCurrentDiaryReply() {
-    const chatContainer = document.getElementById("chatContainer");
-    if (!chatContainer) return;
 
-    const aiNodes = Array.from(chatContainer.querySelectorAll(".ai-text")).filter(node => {
-        const box = node.closest(".message");
-        if (!box) return false;
-        if (box.closest("#magicArchiveOverlay") || box.closest("#magicArchiveContent")) return false;
-        if (box.style.display === "none") return false;
-
-        const text = (node.textContent || "").trim();
-        if (!text) return false;
-
-        return true;
-    });
-
-    if (!aiNodes.length) return;
-
-    const latest = aiNodes[aiNodes.length - 1];
-    const box = latest.closest(".message");
-    if (!box) return;
-
-    latest.dataset.magicTyping = "false";
-    latest.dataset.magicReplyFadeScheduled = "true";
-    latest.dataset.magicInkFadeScheduled = "true";
-
-    box.style.transition = "opacity 360ms ease, filter 360ms ease";
-    box.style.opacity = "0";
-    box.style.filter = "blur(3px)";
-
-    setTimeout(() => {
-        box.style.display = "none";
-    }, 380);
-}
-
-function magicInstallReplyClickDismiss() {
-    const chatPage = document.getElementById("chatPage");
-    if (!chatPage) return;
-
-    if (chatPage.dataset.magicReplyClickDismissInstalled === "true") return;
-    chatPage.dataset.magicReplyClickDismissInstalled = "true";
-
-    chatPage.addEventListener("click", function(e) {
-        if (
-            e.target.closest("#closeDiaryButton") ||
-            e.target.closest("#magicArchiveButton") ||
-            e.target.closest("#magicArchiveOverlay") ||
-            e.target.closest("#magicArchiveContent") ||
-            e.target.closest(".input-container") ||
-            e.target.closest("#magicPageWriteButton") ||
-            e.target.closest("#magicSurfaceWriter") ||
-            e.target.closest("#magicSurfaceInput")
-        ) {
-            return;
-        }
-
-        magicDismissCurrentDiaryReply();
-    }, true);
-}
-
-setTimeout(magicInstallReplyClickDismiss, 0);
-setInterval(magicInstallReplyClickDismiss, 1500);
-/* End click to dismiss current diary reply */
 
 </script>
     <script>eruda.init();</script>
@@ -2603,6 +2540,9 @@ html.magic-home-font-ready .text-line {
     opacity: 1 !important;
 }
 /* End brush reveal reply animation */
+
+
+
 
 </style>
 
@@ -6681,5 +6621,108 @@ document.addEventListener("DOMContentLoaded", magicBoot);
 })();
 </script>
 
+<script>
+
+/* Click dismiss visible diary writing */
+(function() {
+    function isControlTarget(target) {
+        return !!(
+            target.closest("#closeDiaryButton") ||
+            target.closest("#magicArchiveButton") ||
+            target.closest("#magicArchiveOverlay") ||
+            target.closest("#magicArchiveContent") ||
+            target.closest(".input-container") ||
+            target.closest("#userInput") ||
+            target.closest("#magicPageWriteButton") ||
+            target.closest("#magicSurfaceWriter") ||
+            target.closest("#magicSurfaceInput")
+        );
+    }
+
+    function isOpeningText(node) {
+        const text = node.textContent || "";
+        return text.includes("At last, you have opened me") ||
+               text.includes("Between these pages") ||
+               text.includes("Begin. Let me see");
+    }
+
+    function magicDismissVisibleDiaryWriting() {
+        const chatContainer = document.getElementById("chatContainer");
+        if (!chatContainer) return false;
+
+        const nodes = Array.from(
+            chatContainer.querySelectorAll(".user-text, .ai-text")
+        ).filter(node => {
+            const box = node.closest(".message");
+            if (!box) return false;
+            if (box.closest("#magicArchiveOverlay") || box.closest("#magicArchiveContent")) return false;
+            if (box.style.display === "none") return false;
+            if (box.classList.contains("magic-click-dismissed")) return false;
+
+            const text = (node.textContent || "").trim();
+            if (!text) return false;
+
+            // 开篇文字继续交给原来的点击消失逻辑，不混在这里
+            if (isOpeningText(node)) return false;
+
+            return true;
+        });
+
+        if (!nodes.length) return false;
+
+        nodes.forEach(node => {
+            const box = node.closest(".message");
+            if (!box) return;
+
+            // 防止旧的打字/消散计时器继续干扰
+            node.dataset.magicTyping = "false";
+            node.dataset.magicReplyFadeScheduled = "true";
+            node.dataset.magicInkFadeScheduled = "true";
+            node.dataset.magicUserLetterFadeStarted = "true";
+            node.dataset.magicAILetterFadeStarted = "true";
+
+            // 如果是 AI 回复，尽量先触发保存，避免 Archive 逻辑卡住
+            if (node.classList.contains("ai-text") && typeof magicMaybeSaveAI === "function") {
+                try { magicMaybeSaveAI(node); } catch (e) {}
+            }
+
+            box.classList.add("magic-click-dismissed");
+
+            setTimeout(() => {
+                box.style.setProperty("display", "none", "important");
+            }, 280);
+        });
+
+        return true;
+    }
+
+    function install() {
+        const chatPage = document.getElementById("chatPage");
+        if (!chatPage) return;
+
+        if (chatPage.dataset.magicDismissVisibleWritingInstalled === "true") return;
+        chatPage.dataset.magicDismissVisibleWritingInstalled = "true";
+
+        // 用 pointerdown，比 click 更早、更稳
+        chatPage.addEventListener("pointerdown", function(e) {
+            if (isControlTarget(e.target)) return;
+
+            const dismissed = magicDismissVisibleDiaryWriting();
+
+            if (dismissed) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+        }, true);
+    }
+
+    window.magicDismissVisibleDiaryWriting = magicDismissVisibleDiaryWriting;
+
+    setTimeout(install, 0);
+    setInterval(install, 1200);
+})();
+/* End click dismiss visible diary writing */
+
+</script>
 </body>
 </html>
