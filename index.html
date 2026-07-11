@@ -5,7 +5,90 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Magic Diary</title>
     <!-- 移动端调试控制台，右下角小齿轮可打开 -->
-    <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
+    <script src="https://cdn.jsdelivr.net/npm/eruda">
+/* Magic full-page writing input */
+function magicInstallFullPageWritingInput() {
+    const chatPage = document.getElementById("chatPage");
+    const input = document.getElementById("userInput");
+
+    if (!chatPage || !input) return;
+
+    input.setAttribute("placeholder", "");
+    input.setAttribute("autocomplete", "off");
+    input.setAttribute("autocorrect", "off");
+    input.setAttribute("autocapitalize", "off");
+    input.setAttribute("spellcheck", "false");
+
+    if (!document.getElementById("magicPageWriteButton")) {
+        const btn = document.createElement("button");
+        btn.id = "magicPageWriteButton";
+        btn.type = "button";
+        btn.textContent = "Write";
+
+        btn.addEventListener("click", function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            if (typeof sendMessage === "function") {
+                sendMessage();
+            }
+        });
+
+        document.body.appendChild(btn);
+    }
+
+    if (input.dataset.magicFullPageInputInstalled === "true") return;
+    input.dataset.magicFullPageInputInstalled = "true";
+
+    function focusHiddenInput() {
+        try {
+            input.focus({ preventScroll: true });
+        } catch (e) {
+            input.focus();
+        }
+    }
+
+    chatPage.addEventListener("pointerdown", function(e) {
+        if (
+            e.target.closest("#closeDiaryButton") ||
+            e.target.closest("#magicArchiveButton") ||
+            e.target.closest("#magicArchiveOverlay") ||
+            e.target.closest("#magicPageWriteButton")
+        ) {
+            return;
+        }
+
+        const rect = chatPage.getBoundingClientRect();
+        if (rect.width && rect.height) {
+            window.magicCurrentWritingPoint = {
+                x: Math.max(22, Math.min(78, ((e.clientX - rect.left) / rect.width) * 100)),
+                y: Math.max(24, Math.min(72, ((e.clientY - rect.top) / rect.height) * 100))
+            };
+        }
+
+        setTimeout(focusHiddenInput, 0);
+    }, true);
+
+    document.addEventListener("keydown", function(e) {
+        if (document.activeElement !== input) return;
+
+        if (e.key === "Enter" && !e.shiftKey) {
+            e.preventDefault();
+
+            if (typeof sendMessage === "function") {
+                sendMessage();
+            }
+        }
+    }, true);
+
+    setTimeout(focusHiddenInput, 300);
+}
+
+setTimeout(magicInstallFullPageWritingInput, 0);
+setInterval(magicInstallFullPageWritingInput, 1200);
+/* End magic full-page writing input */
+
+</script>
     <script>eruda.init();</script>
     <style>
         @import url('https://cdn.jsdelivr.net/npm/lxgw-wenkai-webfont@1.1.0/style.css');
@@ -2537,6 +2620,88 @@ html.magic-home-font-ready .text-line {
     opacity: 1 !important;
 }
 /* End brush reveal reply animation */
+
+
+/* Hidden full-page writing surface */
+
+/* 隐藏原来的固定输入框外观 */
+#chatPage .input-container {
+    position: fixed !important;
+    left: 0 !important;
+    bottom: 0 !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    opacity: 0.01 !important;
+    overflow: hidden !important;
+    pointer-events: none !important;
+    z-index: -1 !important;
+}
+
+/* 隐藏心情栏和原来的按钮 */
+#chatPage #moodSelector,
+#chatPage .mood-selector,
+#chatPage .send-button,
+#chatPage button[onclick="sendMessage()"] {
+    display: none !important;
+}
+
+/* 保留真正的输入能力，但视觉上不出现输入框 */
+#chatPage #userInput {
+    position: fixed !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 1px !important;
+    height: 1px !important;
+    min-height: 1px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+    outline: none !important;
+    background: transparent !important;
+    color: transparent !important;
+    caret-color: transparent !important;
+    resize: none !important;
+    opacity: 0.01 !important;
+    pointer-events: none !important;
+}
+
+/* 新的小型 Write 按钮，不再是固定输入框 */
+#magicPageWriteButton {
+    position: fixed !important;
+    right: 5.4vw !important;
+    bottom: 5.2vh !important;
+    z-index: 80 !important;
+    border: 1px solid rgba(113, 77, 38, 0.38) !important;
+    background: rgba(255, 247, 224, 0.52) !important;
+    color: rgba(73, 43, 31, 0.78) !important;
+    border-radius: 999px !important;
+    padding: 8px 18px !important;
+    font-family: "Cinzel Decorative", Georgia, serif !important;
+    font-size: 13px !important;
+    letter-spacing: 0.9px !important;
+    cursor: pointer !important;
+    backdrop-filter: blur(3px) !important;
+    box-shadow: 0 5px 18px rgba(74, 44, 21, 0.12) !important;
+}
+
+#magicPageWriteButton:hover {
+    background: rgba(255, 241, 205, 0.76) !important;
+}
+
+@media (max-width: 768px) {
+    #magicPageWriteButton {
+        right: 6vw !important;
+        bottom: 4.5vh !important;
+        font-size: 12px !important;
+        padding: 7px 15px !important;
+    }
+}
+/* End hidden full-page writing surface */
 
 </style>
 
