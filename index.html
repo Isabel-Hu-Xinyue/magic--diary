@@ -2478,6 +2478,48 @@ html.magic-home-font-ready .text-line {
 }
 /* End fix CJK clipping and smaller opening */
 
+
+/* Fix CJK clipping only */
+
+/* 中文回复容器：给一点安全边距，避免贴边裁字 */
+#chatContainer .message.ai-message .ai-text:has(.magic-cjk-reply-stable-line) {
+    box-sizing: border-box !important;
+    padding-left: 0.12em !important;
+    padding-right: 0.42em !important;
+    overflow: visible !important;
+}
+
+/* 中文每一行：再单独加一点左右空间 */
+#chatContainer .ai-text .magic-cjk-reply-stable-line {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    padding-left: 0.12em !important;
+    padding-right: 0.42em !important;
+    white-space: nowrap !important;
+    overflow: visible !important;
+}
+
+/* 中文 token/字：允许笔画超出，不要被裁 */
+#chatContainer .ai-text .magic-cjk-reply-stable-token,
+#chatContainer .ai-text .magic-cjk-reply-stable-letter {
+    display: inline-block !important;
+    overflow: visible !important;
+    padding-right: 0.02em !important;
+    line-height: 1.82 !important;
+    box-sizing: border-box !important;
+}
+
+/* 手机上再多留一点 */
+@media (max-width: 768px) {
+    #chatContainer .message.ai-message .ai-text:has(.magic-cjk-reply-stable-line),
+    #chatContainer .ai-text .magic-cjk-reply-stable-line {
+        padding-left: 0.16em !important;
+        padding-right: 0.52em !important;
+    }
+}
+/* End fix CJK clipping only */
+
 </style>
 
 <script>
@@ -5547,7 +5589,12 @@ function magicMakeStableLines(text, targetDiv) {
     const ctx = canvas.getContext("2d");
     ctx.font = computed.font || "32px serif";
 
-    const maxWidth = Math.max(220, targetDiv.clientWidth || window.innerWidth * 0.66);
+    const isCJK = typeof magicHasCJKText === "function"
+        ? magicHasCJKText(text)
+        : /[\u3400-\u9FFF\uF900-\uFAFF]/.test(String(text || ""));
+    const rawWidth = targetDiv.clientWidth || window.innerWidth * 0.66;
+    const horizontalSafety = isCJK ? 52 : 8;
+    const maxWidth = Math.max(180, rawWidth - horizontalSafety);
     const tokens = magicTokenizeStableText(text);
 
     const lines = [];
