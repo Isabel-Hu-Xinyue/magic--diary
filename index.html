@@ -5208,7 +5208,7 @@ messagesForRequest = [
                     }
 
                     const data = await response.json();
-                    const aiMessage = data.choices[0].message.content;
+                    let aiMessage = magicCleanDiaryStageDirections(data.choices[0].message.content);
 
                     removeLoading();
 
@@ -6615,5 +6615,46 @@ document.addEventListener("DOMContentLoaded", magicBoot);
 })();
 </script>
 
+<script>
+
+/* Strip stage directions from diary replies */
+function magicCleanDiaryStageDirections(text) {
+    let s = String(text || "").trim();
+
+    /*
+      只删“回复开头”的舞台旁白，不碰正文中的普通括号。
+      例：
+      （语气放慢，带着一丝观察后的平静）
+      (quietly)
+      *pauses*
+    */
+    for (let i = 0; i < 6; i++) {
+        const before = s;
+
+        s = s.replace(/^\s*[（(][^（）()\n]{1,120}[）)]\s*/u, "");
+        s = s.replace(/^\s*[［\[][^［\]\n]{1,120}[］\]]\s*/u, "");
+        s = s.replace(/^\s*\*[^*\n]{1,120}\*\s*/u, "");
+
+        if (s === before) break;
+    }
+
+    // 如果第一行整行都是括号旁白，也删掉
+    const lines = s.split(/\n/);
+    while (
+        lines.length &&
+        (
+            /^\s*[（(][^（）()\n]{1,120}[）)]\s*$/.test(lines[0]) ||
+            /^\s*[［\[][^［\]\n]{1,120}[］\]]\s*$/.test(lines[0]) ||
+            /^\s*\*[^*\n]{1,120}\*\s*$/.test(lines[0])
+        )
+    ) {
+        lines.shift();
+    }
+
+    return lines.join("\n").trim();
+}
+/* End strip stage directions from diary replies */
+
+</script>
 </body>
 </html>
