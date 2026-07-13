@@ -2684,6 +2684,25 @@ html.magic-home-font-ready .text-line {
 }
 /* End archive daily row view */
 
+
+/* Clean click dismiss writing */
+#chatContainer .user-text.magic-user-click-dismissed {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    filter: blur(2px) !important;
+    pointer-events: none !important;
+    transition: opacity 140ms ease, filter 140ms ease !important;
+}
+
+#chatContainer .message.magic-ai-click-dismissed {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    filter: blur(3px) !important;
+    pointer-events: none !important;
+    transition: opacity 160ms ease, filter 160ms ease !important;
+}
+/* End clean click dismiss writing */
+
 </style>
 
 <script>
@@ -6339,6 +6358,7 @@ function magicTypeAIInLatestUserSpot(text) {
 
 
 
+
 function magicWaitForLatestUserFadeComplete() {
     const chatContainer = document.getElementById("chatContainer");
     if (!chatContainer) return Promise.resolve();
@@ -6354,6 +6374,14 @@ function magicWaitForLatestUserFadeComplete() {
     const box = userTextNode.closest(".message");
     if (!box) return Promise.resolve();
 
+    if (
+        userTextNode.dataset.magicUserClickDismissed === "true" ||
+        box.dataset.magicUserClickDismissed === "true" ||
+        userTextNode.classList.contains("magic-user-click-dismissed")
+    ) {
+        return Promise.resolve();
+    }
+
     magicScheduleLetterFade(userTextNode, "user");
 
     return new Promise(resolve => {
@@ -6367,7 +6395,13 @@ function magicWaitForLatestUserFadeComplete() {
         }
 
         function check() {
-            if (!box.isConnected || box.style.display === "none") {
+            if (
+                !box.isConnected ||
+                box.style.display === "none" ||
+                userTextNode.dataset.magicUserClickDismissed === "true" ||
+                box.dataset.magicUserClickDismissed === "true" ||
+                userTextNode.classList.contains("magic-user-click-dismissed")
+            ) {
                 finish();
                 return;
             }
@@ -6383,6 +6417,7 @@ function magicWaitForLatestUserFadeComplete() {
         check();
     });
 }
+
 
 
 function magicScheduleLetterFade(textNode, kind) {
@@ -7053,6 +7088,132 @@ function magicCleanDiaryStageDirections(text) {
     setInterval(installMagicDailyArchiveButton, 1200);
 })();
 /* End archive daily button override */
+
+</script>
+<script>
+
+/* Clean click dismiss writing */
+(function() {
+    function isControlTarget(target) {
+        return !!(
+            target.closest("#closeDiaryButton") ||
+            target.closest("#magicArchiveButton") ||
+            target.closest("#magicArchiveOverlay") ||
+            target.closest("#magicArchiveContent") ||
+            target.closest(".input-container") ||
+            target.closest("#userInput") ||
+            target.closest("#sendButton") ||
+            target.closest("input") ||
+            target.closest("textarea") ||
+            target.closest("button")
+        );
+    }
+
+    function isOpeningText(node) {
+        const text = node.textContent || "";
+        return text.includes("At last, you have opened me") ||
+               text.includes("Between these pages") ||
+               text.includes("Begin. Let me see");
+    }
+
+    function getVisibleWritingNodes() {
+        const chatContainer = document.getElementById("chatContainer");
+        if (!chatContainer) return [];
+
+        return Array.from(chatContainer.querySelectorAll(".user-text, .ai-text")).filter(node => {
+            const box = node.closest(".message");
+            if (!box) return false;
+
+            if (box.closest("#magicArchiveOverlay") || box.closest("#magicArchiveContent")) return false;
+            if (box.style.display === "none") return false;
+            if (isOpeningText(node)) return false;
+
+            if (node.classList.contains("magic-user-click-dismissed")) return false;
+            if (box.classList.contains("magic-ai-click-dismissed")) return false;
+
+            const text = (node.textContent || "").trim();
+            if (!text) return false;
+
+            const rect = box.getBoundingClientRect();
+            return rect.width > 0 && rect.height > 0;
+        });
+    }
+
+    function dismissLatestWriting() {
+        const nodes = getVisibleWritingNodes();
+        if (!nodes.length) return false;
+
+        const latest = nodes[nodes.length - 1];
+        const box = latest.closest(".message");
+        if (!box) return false;
+
+        if (latest.classList.contains("user-text")) {
+            /*
+              用户文字：
+              只隐藏视觉。
+              不隐藏整个 message box。
+              不清空 magicPendingEntry。
+              不阻断后面的 AI 回复。
+            */
+            latest.dataset.magicUserClickDismissed = "true";
+            box.dataset.magicUserClickDismissed = "true";
+            latest.classList.add("magic-user-click-dismissed");
+
+            if (box.magicUserStableTimer) {
+                clearTimeout(box.magicUserStableTimer);
+            }
+
+            return true;
+        }
+
+        if (latest.classList.contains("ai-text")) {
+            /*
+              AI 回复：
+              只隐藏当前回复。
+              不影响下一轮输入。
+            */
+            latest.dataset.magicTyping = "false";
+            latest.dataset.magicDismissedByClick = "true";
+
+            box.classList.add("magic-ai-click-dismissed");
+
+            setTimeout(() => {
+                box.style.setProperty("display", "none", "important");
+                box.style.setProperty("visibility", "hidden", "important");
+                box.style.setProperty("opacity", "0", "important");
+            }, 170);
+
+            return true;
+        }
+
+        return false;
+    }
+
+    function install() {
+        const chatPage = document.getElementById("chatPage");
+        if (!chatPage) return;
+
+        if (chatPage.dataset.magicCleanClickDismissInstalled === "true") return;
+        chatPage.dataset.magicCleanClickDismissInstalled = "true";
+
+        chatPage.addEventListener("pointerdown", function(event) {
+            if (isControlTarget(event.target)) return;
+
+            const dismissed = dismissLatestWriting();
+
+            if (dismissed) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+        }, true);
+    }
+
+    window.magicDismissVisibleDiaryWriting = dismissLatestWriting;
+
+    setTimeout(install, 0);
+    setInterval(install, 1200);
+})();
+/* End clean click dismiss writing */
 
 </script>
 </body>
