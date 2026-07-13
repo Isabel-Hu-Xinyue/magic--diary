@@ -2684,6 +2684,47 @@ html.magic-home-font-ready .text-line {
 }
 /* End archive daily row view */
 
+
+/* Magic burn hole fade */
+.magic-burn-hole-overlay {
+    position: absolute !important;
+    z-index: 20 !important;
+    pointer-events: none !important;
+    border-radius: 50% !important;
+    opacity: 0 !important;
+
+    background:
+        radial-gradient(circle,
+            rgba(33, 15, 6, 0.72) 0%,
+            rgba(61, 26, 9, 0.58) 18%,
+            rgba(128, 66, 20, 0.38) 34%,
+            rgba(184, 112, 36, 0.18) 48%,
+            rgba(0, 0, 0, 0) 68%
+        ) !important;
+
+    filter: blur(0.4px) contrast(1.12) !important;
+    mix-blend-mode: multiply !important;
+}
+
+.magic-burn-hole-ember {
+    position: absolute !important;
+    z-index: 21 !important;
+    pointer-events: none !important;
+    border-radius: 50% !important;
+    opacity: 0 !important;
+
+    background:
+        radial-gradient(circle,
+            rgba(255, 198, 92, 0.38) 0%,
+            rgba(169, 79, 22, 0.24) 36%,
+            rgba(0, 0, 0, 0) 68%
+        ) !important;
+
+    filter: blur(1.6px) !important;
+    mix-blend-mode: screen !important;
+}
+/* End magic burn hole fade */
+
 </style>
 
 <script>
@@ -6385,52 +6426,140 @@ function magicWaitForLatestUserFadeComplete() {
 }
 
 
-function magicScheduleLetterFade(textNode, kind) {
-    const chatContainer = document.getElementById("chatContainer");
-    if (!chatContainer) return;
+
+/* Magic burn hole fade */
+function magicRunBurnHoleDisappear(textNode, type) {
+    if (!textNode) return;
 
     const box = textNode.closest(".message");
     if (!box) return;
+    if (box.dataset.magicBurnHoleRunning === "true") return;
 
-    if (!chatContainer.contains(box)) return;
-    if (box.closest("#magicArchiveOverlay") || box.closest("#magicArchiveContent")) return;
+    box.dataset.magicBurnHoleRunning = "true";
 
-    const text = textNode.textContent || "";
-    if (!text.trim()) return;
+    const boxRect = box.getBoundingClientRect();
+    const textRect = textNode.getBoundingClientRect();
 
-    const prefix = kind === "ai" ? "magicAI" : "magicUser";
-    const startedKey = prefix + "LetterFadeStarted";
-    const lastTextKey = prefix + "LastText";
-    const waitingKey = prefix + "WaitingForStableText";
-    const timerKey = prefix + "StableTimer";
-
-    if (box.dataset[startedKey] === "true") return;
-
-    if (box.dataset[lastTextKey] === text && box.dataset[waitingKey] === "true") {
+    if (!boxRect.width || !boxRect.height || !textRect.width || !textRect.height) {
+        box.style.setProperty("display", "none", "important");
         return;
     }
 
-    box.dataset[lastTextKey] = text;
-    box.dataset[waitingKey] = "true";
+    if (getComputedStyle(box).position === "static") {
+        box.style.position = "absolute";
+    }
 
-    clearTimeout(box[timerKey]);
+    box.style.overflow = "visible";
 
-    box[timerKey] = setTimeout(() => {
-        const finalText = textNode.textContent || "";
+    const burnX = (textRect.left - boxRect.left) + textRect.width * 0.5;
+    const burnY = (textRect.top - boxRect.top) + textRect.height * 0.5;
 
-        if (finalText !== box.dataset[lastTextKey]) {
-            box.dataset[waitingKey] = "false";
-            return;
+    const maxRadius = Math.sqrt(textRect.width * textRect.width + textRect.height * textRect.height) * 0.62 + 42;
+    const duration = type === "user" ? 980 : 1180;
+
+    const overlay = document.createElement("div");
+    overlay.className = "magic-burn-hole-overlay";
+
+    const ember = document.createElement("div");
+    ember.className = "magic-burn-hole-ember";
+
+    box.appendChild(overlay);
+    box.appendChild(ember);
+
+    textNode.style.webkitMaskRepeat = "no-repeat";
+    textNode.style.maskRepeat = "no-repeat";
+    textNode.style.webkitMaskSize = "100% 100%";
+    textNode.style.maskSize = "100% 100%";
+
+    const textLocalX = burnX - (textRect.left - boxRect.left);
+    const textLocalY = burnY - (textRect.top - boxRect.top);
+
+    const start = performance.now();
+
+    function easeOutCubic(t) {
+        return 1 - Math.pow(1 - t, 3);
+    }
+
+    function frame(now) {
+        const raw = Math.min(1, (now - start) / duration);
+        const eased = easeOutCubic(raw);
+
+        const radius = Math.max(0.1, eased * maxRadius);
+        const edge = 18 + eased * 10;
+
+        const mask = `radial-gradient(circle at ${textLocalX}px ${textLocalY}px,
+            transparent 0px,
+            transparent ${radius}px,
+            rgba(0, 0, 0, 0.28) ${radius + edge * 0.34}px,
+            rgba(0, 0, 0, 0.72) ${radius + edge * 0.68}px,
+            black ${radius + edge}px
+        )`;
+
+        textNode.style.webkitMaskImage = mask;
+        textNode.style.maskImage = mask;
+
+        const size = (radius + edge + 24) * 2;
+        const left = burnX - size / 2;
+        const top = burnY - size / 2;
+
+        overlay.style.left = left + "px";
+        overlay.style.top = top + "px";
+        overlay.style.width = size + "px";
+        overlay.style.height = size + "px";
+        overlay.style.opacity = String(raw < 0.18 ? raw / 0.18 : Math.max(0, 1 - (raw - 0.72) / 0.28));
+
+        const emberSize = size * 0.62;
+        ember.style.left = (burnX - emberSize / 2) + "px";
+        ember.style.top = (burnY - emberSize / 2) + "px";
+        ember.style.width = emberSize + "px";
+        ember.style.height = emberSize + "px";
+        ember.style.opacity = String(raw < 0.35 ? raw / 0.35 * 0.5 : Math.max(0, 0.5 - (raw - 0.35) / 0.65));
+
+        textNode.style.filter = `blur(${eased * 1.2}px)`;
+        textNode.style.opacity = String(Math.max(0, 1 - Math.max(0, raw - 0.68) / 0.32));
+
+        if (raw < 1) {
+            requestAnimationFrame(frame);
+        } else {
+            textNode.style.webkitMaskImage = "";
+            textNode.style.maskImage = "";
+            textNode.style.filter = "";
+            textNode.style.opacity = "";
+
+            overlay.remove();
+            ember.remove();
+
+            box.style.setProperty("display", "none", "important");
+            box.dataset.magicBurnHoleRunning = "false";
         }
+    }
 
-        if (box.dataset[startedKey] === "true") return;
-
-        box.dataset[startedKey] = "true";
-        box.dataset[waitingKey] = "false";
-
-        magicStartLetterFade(textNode, kind);
-    }, kind === "ai" ? 1600 : 900);
+    requestAnimationFrame(frame);
 }
+
+function magicScheduleLetterFade(textNode, type) {
+    if (!textNode) return;
+    if (textNode.dataset.magicBurnFadeScheduled === "true") return;
+
+    const box = textNode.closest(".message");
+    if (!box) return;
+    if (box.closest("#magicArchiveOverlay") || box.closest("#magicArchiveContent")) return;
+    if (textNode.dataset.magicOpening === "true") return;
+
+    textNode.dataset.magicBurnFadeScheduled = "true";
+
+    const delay = type === "user" ? 1050 : 7200;
+
+    if (textNode.magicBurnFadeTimer) {
+        clearTimeout(textNode.magicBurnFadeTimer);
+    }
+
+    textNode.magicBurnFadeTimer = setTimeout(() => {
+        magicRunBurnHoleDisappear(textNode, type);
+    }, delay);
+}
+/* End magic burn hole fade */
+
 
 
 function magicAnimateAndHideUserMessage(userTextNode) {
