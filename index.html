@@ -2750,17 +2750,23 @@ html.magic-home-font-ready .text-line {
 
 
 
-/* Home three text unified reveal no jump */
+
+
+
+
+
+
+/* Home reveal A stable */
 /*
-   Adds the middle decoration text and makes top, middle, and bottom home texts
-   appear at the same time with no vertical jumping.
-   No chat, Archive, input, reply, or click-dismiss behavior is changed.
+   Uses the selected A reveal:
+   fast enough, still ink-like.
+   No JS starter. No font-ready takeover. No transform animation.
 */
 
 #magicMiddleText {
     position: fixed !important;
     left: 50% !important;
-    top: 66% !important;
+    top: 67.5% !important;
     transform: translate(-50%, -50%) !important;
     z-index: 19 !important;
     width: min(860px, 86vw) !important;
@@ -2779,113 +2785,42 @@ html.magic-home-font-ready .text-line {
         0 0 10px rgba(99, 16, 22, 0.36),
         0 5px 0 rgba(118, 72, 32, 0.18),
         0 12px 28px rgba(45, 16, 12, 0.28) !important;
-
-    opacity: 0 !important;
-    filter: blur(4px) !important;
 }
 
-/* Kill staggered delays on the home page only */
-#diaryPage .text-line,
-#magicMiddleText,
-#magicHomeHint,
-#magicHomeHint div {
-    animation-delay: 0ms !important;
-    transition-delay: 0ms !important;
-}
-
-/* Unified reveal: opacity + blur only. No transform animation, so nothing jumps. */
-html.magic-home-font-ready #diaryPage .text-line,
-html.magic-home-font-ready #magicMiddleText,
-html.magic-home-font-ready #magicHomeHint {
-    opacity: 1 !important;
-    filter: blur(0) !important;
-    animation: magicHomeUnifiedFadeNoJump 950ms ease-out both !important;
-    animation-delay: 0ms !important;
-}
-
-html.magic-home-font-ready #magicHomeHint div {
-    opacity: 1 !important;
-    filter: blur(0) !important;
-    animation-delay: 0ms !important;
-    transition-delay: 0ms !important;
-}
-
-@keyframes magicHomeUnifiedFadeNoJump {
-    from {
-        opacity: 0;
-        filter: blur(4px);
-    }
-    to {
-        opacity: 1;
-        filter: blur(0);
-    }
-}
-
-@media (max-width: 768px) {
-    #magicMiddleText {
-        top: 52% !important;
-        width: 88vw !important;
-        font-size: clamp(36px, 11vw, 66px) !important;
-        line-height: 1.02 !important;
-        letter-spacing: 0.3px !important;
-    }
-}
-/* End Home three text unified reveal no jump */
-
-
-/* Home slow ink reveal */
-/*
-   Only changes how the three home texts appear.
-   Position, font, color, chat, Archive, input, and replies are not changed.
-*/
-
-/* Before reveal: keep them in place, only invisible and slightly blurred */
+/* One rule for all three homepage groups.
+   Nothing moves. Only opacity and blur change. */
 #diaryPage .text-line,
 #magicMiddleText,
 #magicHomeHint {
     opacity: 0 !important;
-    filter: blur(7px) saturate(0.75) !important;
+    filter: blur(10px) saturate(0.55) !important;
+    animation: magicHomeRevealA 2.2s ease-out 0.18s both !important;
+    transition: none !important;
+    animation-delay: 0.18s !important;
 }
 
-/* Same timing for top text, middle text, and bottom hint */
-html.magic-home-font-ready #diaryPage .text-line,
-html.magic-home-font-ready #magicMiddleText,
-html.magic-home-font-ready #magicHomeHint {
-    opacity: 1 !important;
-    filter: blur(0) saturate(1) !important;
-    animation: magicHomeSlowInkAppear 2600ms cubic-bezier(0.22, 0.72, 0.18, 1) both !important;
-    animation-delay: 0ms !important;
-    transition-delay: 0ms !important;
-}
-
-/* Make inner hint lines follow the parent exactly */
-html.magic-home-font-ready #magicHomeHint div {
+/* Inner hint lines should not run their own animation */
+#magicHomeHint div {
     opacity: 1 !important;
     filter: none !important;
-    animation-delay: 0ms !important;
-    transition-delay: 0ms !important;
+    animation: none !important;
+    transition: none !important;
 }
 
-/* No translate, no scale, no jumping. Only ink-like opacity and blur. */
-@keyframes magicHomeSlowInkAppear {
+@keyframes magicHomeRevealA {
     0% {
         opacity: 0;
-        filter: blur(8px) saturate(0.65);
+        filter: blur(10px) saturate(0.55);
     }
 
-    28% {
-        opacity: 0.18;
+    35% {
+        opacity: 0.28;
         filter: blur(6px) saturate(0.72);
     }
 
-    58% {
-        opacity: 0.62;
-        filter: blur(3px) saturate(0.88);
-    }
-
-    82% {
-        opacity: 0.88;
-        filter: blur(1px) saturate(0.96);
+    70% {
+        opacity: 0.72;
+        filter: blur(2.5px) saturate(0.92);
     }
 
     100% {
@@ -2893,7 +2828,17 @@ html.magic-home-font-ready #magicHomeHint div {
         filter: blur(0) saturate(1);
     }
 }
-/* End home slow ink reveal */
+
+@media (max-width: 768px) {
+    #magicMiddleText {
+        top: 66% !important;
+        width: 88vw !important;
+        font-size: clamp(36px, 11vw, 66px) !important;
+        line-height: 1.02 !important;
+        letter-spacing: 0.3px !important;
+    }
+}
+/* End home reveal A stable */
 
 </style>
 
