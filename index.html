@@ -2832,6 +2832,69 @@ html.magic-home-font-ready #magicHomeHint div {
 }
 /* End Home three text unified reveal no jump */
 
+
+/* Home slow ink reveal */
+/*
+   Only changes how the three home texts appear.
+   Position, font, color, chat, Archive, input, and replies are not changed.
+*/
+
+/* Before reveal: keep them in place, only invisible and slightly blurred */
+#diaryPage .text-line,
+#magicMiddleText,
+#magicHomeHint {
+    opacity: 0 !important;
+    filter: blur(7px) saturate(0.75) !important;
+}
+
+/* Same timing for top text, middle text, and bottom hint */
+html.magic-home-font-ready #diaryPage .text-line,
+html.magic-home-font-ready #magicMiddleText,
+html.magic-home-font-ready #magicHomeHint {
+    opacity: 1 !important;
+    filter: blur(0) saturate(1) !important;
+    animation: magicHomeSlowInkAppear 2600ms cubic-bezier(0.22, 0.72, 0.18, 1) both !important;
+    animation-delay: 0ms !important;
+    transition-delay: 0ms !important;
+}
+
+/* Make inner hint lines follow the parent exactly */
+html.magic-home-font-ready #magicHomeHint div {
+    opacity: 1 !important;
+    filter: none !important;
+    animation-delay: 0ms !important;
+    transition-delay: 0ms !important;
+}
+
+/* No translate, no scale, no jumping. Only ink-like opacity and blur. */
+@keyframes magicHomeSlowInkAppear {
+    0% {
+        opacity: 0;
+        filter: blur(8px) saturate(0.65);
+    }
+
+    28% {
+        opacity: 0.18;
+        filter: blur(6px) saturate(0.72);
+    }
+
+    58% {
+        opacity: 0.62;
+        filter: blur(3px) saturate(0.88);
+    }
+
+    82% {
+        opacity: 0.88;
+        filter: blur(1px) saturate(0.96);
+    }
+
+    100% {
+        opacity: 1;
+        filter: blur(0) saturate(1);
+    }
+}
+/* End home slow ink reveal */
+
 </style>
 
 <script>
