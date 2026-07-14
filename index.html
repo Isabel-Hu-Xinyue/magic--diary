@@ -2746,6 +2746,45 @@ html.magic-home-font-ready .text-line {
 }
 /* End AI Chinese font B - Zhi Mang Xing */
 
+
+/* Home text and hint sync reveal */
+/*
+   Only syncs the first home-page title text and the lower hint.
+   Does not change chat, Archive, input, reply font, or Tom Riddle behavior.
+*/
+#diaryPage .text-line,
+#magicHomeHint,
+#magicHomeHint div {
+    animation-delay: 0ms !important;
+    transition-delay: 0ms !important;
+}
+
+html.magic-home-font-ready #diaryPage .text-line,
+html.magic-home-font-ready #magicHomeHint {
+    opacity: 1 !important;
+    animation: magicHomeSyncReveal 900ms ease-out both !important;
+}
+
+html.magic-home-font-ready #magicHomeHint div {
+    opacity: 1 !important;
+    animation-delay: 0ms !important;
+    transition-delay: 0ms !important;
+}
+
+@keyframes magicHomeSyncReveal {
+    from {
+        opacity: 0;
+        filter: blur(5px);
+        transform: translateY(7px);
+    }
+    to {
+        opacity: 1;
+        filter: blur(0);
+        transform: translateY(0);
+    }
+}
+/* End home text and hint sync reveal */
+
 </style>
 
 <script>
