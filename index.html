@@ -2750,17 +2750,98 @@ html.magic-home-font-ready .text-line {
 
 
 
-
-
-
-
-
-
-/* Home reveal A stable */
+/* Home three text unified reveal no jump */
 /*
-   Uses the selected A reveal:
-   fast enough, still ink-like.
-   No JS starter. No font-ready takeover. No transform animation.
+   Adds the middle decoration text and makes top, middle, and bottom home texts
+   appear at the same time with no vertical jumping.
+   No chat, Archive, input, reply, or click-dismiss behavior is changed.
+*/
+
+#magicMiddleText {
+    position: fixed !important;
+    left: 50% !important;
+    top: 66% !important;
+    transform: translate(-50%, -50%) !important;
+    z-index: 19 !important;
+    width: min(860px, 86vw) !important;
+    text-align: center !important;
+    pointer-events: none !important;
+
+    font-family: "UnifrakturMaguntia", "Pirata One", "Cinzel Decorative", serif !important;
+    font-size: clamp(44px, 6.8vw, 92px) !important;
+    line-height: 1.08 !important;
+    font-weight: 900 !important;
+    letter-spacing: 0.8px !important;
+
+    color: #521316 !important;
+    -webkit-text-stroke: 1px rgba(202, 155, 69, 0.72) !important;
+    text-shadow:
+        0 0 10px rgba(99, 16, 22, 0.36),
+        0 5px 0 rgba(118, 72, 32, 0.18),
+        0 12px 28px rgba(45, 16, 12, 0.28) !important;
+
+    opacity: 0 !important;
+    filter: blur(4px) !important;
+}
+
+/* Kill staggered delays on the home page only */
+#diaryPage .text-line,
+#magicMiddleText,
+#magicHomeHint,
+#magicHomeHint div {
+    animation-delay: 0ms !important;
+    transition-delay: 0ms !important;
+}
+
+/* Unified reveal: opacity + blur only. No transform animation, so nothing jumps. */
+html.magic-home-font-ready #diaryPage .text-line,
+html.magic-home-font-ready #magicMiddleText,
+html.magic-home-font-ready #magicHomeHint {
+    opacity: 1 !important;
+    filter: blur(0) !important;
+    animation: magicHomeUnifiedFadeNoJump 950ms ease-out both !important;
+    animation-delay: 0ms !important;
+}
+
+html.magic-home-font-ready #magicHomeHint div {
+    opacity: 1 !important;
+    filter: blur(0) !important;
+    animation-delay: 0ms !important;
+    transition-delay: 0ms !important;
+}
+
+@keyframes magicHomeUnifiedFadeNoJump {
+    from {
+        opacity: 0;
+        filter: blur(4px);
+    }
+    to {
+        opacity: 1;
+        filter: blur(0);
+    }
+}
+
+@media (max-width: 768px) {
+    #magicMiddleText {
+        top: 52% !important;
+        width: 88vw !important;
+        font-size: clamp(36px, 11vw, 66px) !important;
+        line-height: 1.02 !important;
+        letter-spacing: 0.3px !important;
+    }
+}
+/* End Home three text unified reveal no jump */
+
+
+
+
+
+/* Home reveal A visible fix */
+/*
+   Fixes invisible homepage text.
+   Uses selected A speed.
+   No opacity: 0 !important, so the animation can actually reveal the text.
+   No transform animation, so position does not jump.
 */
 
 #magicMiddleText {
@@ -2787,19 +2868,17 @@ html.magic-home-font-ready .text-line {
         0 12px 28px rgba(45, 16, 12, 0.28) !important;
 }
 
-/* One rule for all three homepage groups.
-   Nothing moves. Only opacity and blur change. */
 #diaryPage .text-line,
 #magicMiddleText,
 #magicHomeHint {
-    opacity: 0 !important;
-    filter: blur(10px) saturate(0.55) !important;
-    animation: magicHomeRevealA 2.2s ease-out 0.18s both !important;
-    transition: none !important;
+    animation-name: magicHomeRevealAVisible !important;
+    animation-duration: 2.2s !important;
+    animation-timing-function: ease-out !important;
     animation-delay: 0.18s !important;
+    animation-fill-mode: both !important;
+    transition: none !important;
 }
 
-/* Inner hint lines should not run their own animation */
 #magicHomeHint div {
     opacity: 1 !important;
     filter: none !important;
@@ -2807,7 +2886,7 @@ html.magic-home-font-ready .text-line {
     transition: none !important;
 }
 
-@keyframes magicHomeRevealA {
+@keyframes magicHomeRevealAVisible {
     0% {
         opacity: 0;
         filter: blur(10px) saturate(0.55);
@@ -2838,7 +2917,7 @@ html.magic-home-font-ready .text-line {
         letter-spacing: 0.3px !important;
     }
 }
-/* End home reveal A stable */
+/* End home reveal A visible fix */
 
 </style>
 
