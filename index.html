@@ -2722,6 +2722,30 @@ html.magic-home-font-ready .text-line {
 }
 /* End CJK serif font closer to English */
 
+
+/* AI Chinese font B - Zhi Mang Xing */
+/*
+   English keeps the current English-style fonts first.
+   Chinese characters fall through to Zhi Mang Xing.
+   This only targets Tom Riddle replies, not Archive or other UI.
+*/
+#chatContainer .message.ai-message .ai-text,
+#chatContainer .message.ai-message .ai-text .magic-letter,
+#chatContainer div.ai-text,
+#chatContainer div.ai-text .magic-letter,
+#chatContainer .ai-text,
+#chatContainer .ai-text .magic-letter {
+    font-family:
+        "Cinzel Decorative",
+        "Cormorant Garamond",
+        "Times New Roman",
+        "Zhi Mang Xing",
+        "Long Cang",
+        cursive !important;
+    font-synthesis: none !important;
+}
+/* End AI Chinese font B - Zhi Mang Xing */
+
 </style>
 
 <script>
