@@ -2750,25 +2750,17 @@ html.magic-home-font-ready .text-line {
 
 
 
-
-
-
-
-
-
-/* Home clean font-ready ink reveal */
+/* Home three text unified reveal no jump */
 /*
-   Clean homepage reveal:
-   - no old font-ready jump
-   - no transform animation
-   - waits for fonts before showing text
-   - top / middle / bottom reveal together
+   Adds the middle decoration text and makes top, middle, and bottom home texts
+   appear at the same time with no vertical jumping.
+   No chat, Archive, input, reply, or click-dismiss behavior is changed.
 */
 
 #magicMiddleText {
     position: fixed !important;
     left: 50% !important;
-    top: 67.5% !important;
+    top: 66% !important;
     transform: translate(-50%, -50%) !important;
     z-index: 19 !important;
     width: min(860px, 86vw) !important;
@@ -2787,86 +2779,140 @@ html.magic-home-font-ready .text-line {
         0 0 10px rgba(99, 16, 22, 0.36),
         0 5px 0 rgba(118, 72, 32, 0.18),
         0 12px 28px rgba(45, 16, 12, 0.28) !important;
-}
 
-/* 默认先藏住，等字体准备好再出现，避免字体跳一下 */
-html:not(.magic-home-reveal-ready) #diaryPage .text-line,
-html:not(.magic-home-reveal-ready) #magicMiddleText,
-html:not(.magic-home-reveal-ready) #magicHomeHint {
     opacity: 0 !important;
-    filter: blur(14px) saturate(0.45) contrast(0.72) !important;
-    animation: none !important;
-    transition: none !important;
+    filter: blur(4px) !important;
 }
 
-/* 准备好以后，上中下三段一起慢慢显现 */
-html.magic-home-reveal-ready #diaryPage .text-line,
-html.magic-home-reveal-ready #magicMiddleText,
-html.magic-home-reveal-ready #magicHomeHint {
-    opacity: 1 !important;
-    animation: magicHomeCleanInkReveal 9500ms cubic-bezier(0.18, 0.72, 0.12, 1) both !important;
+/* Kill staggered delays on the home page only */
+#diaryPage .text-line,
+#magicMiddleText,
+#magicHomeHint,
+#magicHomeHint div {
     animation-delay: 0ms !important;
-    transition: none !important;
+    transition-delay: 0ms !important;
 }
 
-/* 下方提示内部行不要自己再动 */
-html.magic-home-reveal-ready #magicHomeHint div {
+/* Unified reveal: opacity + blur only. No transform animation, so nothing jumps. */
+html.magic-home-font-ready #diaryPage .text-line,
+html.magic-home-font-ready #magicMiddleText,
+html.magic-home-font-ready #magicHomeHint {
     opacity: 1 !important;
-    filter: none !important;
-    animation: none !important;
-    transition: none !important;
+    filter: blur(0) !important;
+    animation: magicHomeUnifiedFadeNoJump 950ms ease-out both !important;
+    animation-delay: 0ms !important;
 }
 
-/* 不改 transform，所以位置不会跳 */
-@keyframes magicHomeCleanInkReveal {
-    0% {
+html.magic-home-font-ready #magicHomeHint div {
+    opacity: 1 !important;
+    filter: blur(0) !important;
+    animation-delay: 0ms !important;
+    transition-delay: 0ms !important;
+}
+
+@keyframes magicHomeUnifiedFadeNoJump {
+    from {
         opacity: 0;
-        filter: blur(15px) saturate(0.35) contrast(0.70);
+        filter: blur(4px);
     }
-
-    20% {
-        opacity: 0.05;
-        filter: blur(13px) saturate(0.42) contrast(0.74);
-    }
-
-    40% {
-        opacity: 0.18;
-        filter: blur(10px) saturate(0.56) contrast(0.82);
-    }
-
-    58% {
-        opacity: 0.38;
-        filter: blur(7px) saturate(0.70) contrast(0.88);
-    }
-
-    74% {
-        opacity: 0.62;
-        filter: blur(4px) saturate(0.82) contrast(0.94);
-    }
-
-    88% {
-        opacity: 0.84;
-        filter: blur(1.8px) saturate(0.94) contrast(0.98);
-    }
-
-    100% {
+    to {
         opacity: 1;
-        filter: blur(0) saturate(1) contrast(1);
+        filter: blur(0);
     }
 }
 
 @media (max-width: 768px) {
     #magicMiddleText {
-        top: 66% !important;
+        top: 52% !important;
         width: 88vw !important;
         font-size: clamp(36px, 11vw, 66px) !important;
         line-height: 1.02 !important;
         letter-spacing: 0.3px !important;
     }
 }
-/* End home clean font-ready ink reveal */
+/* End Home three text unified reveal no jump */
+
+
+/* Home slow ink reveal */
+/*
+   Only changes how the three home texts appear.
+   Position, font, color, chat, Archive, input, and replies are not changed.
+*/
+
+/* Before reveal: keep them in place, only invisible and slightly blurred */
+#diaryPage .text-line,
+#magicMiddleText,
+#magicHomeHint {
+    opacity: 0 !important;
+    filter: blur(7px) saturate(0.75) !important;
+}
+
+/* Same timing for top text, middle text, and bottom hint */
+html.magic-home-font-ready #diaryPage .text-line,
+html.magic-home-font-ready #magicMiddleText,
+html.magic-home-font-ready #magicHomeHint {
+    opacity: 1 !important;
+    filter: blur(0) saturate(1) !important;
+    animation: magicHomeSlowInkAppear 2600ms cubic-bezier(0.22, 0.72, 0.18, 1) both !important;
+    animation-delay: 0ms !important;
+    transition-delay: 0ms !important;
+}
+
+/* Make inner hint lines follow the parent exactly */
+html.magic-home-font-ready #magicHomeHint div {
+    opacity: 1 !important;
+    filter: none !important;
+    animation-delay: 0ms !important;
+    transition-delay: 0ms !important;
+}
+
+/* No translate, no scale, no jumping. Only ink-like opacity and blur. */
+@keyframes magicHomeSlowInkAppear {
+    0% {
+        opacity: 0;
+        filter: blur(8px) saturate(0.65);
+    }
+
+    28% {
+        opacity: 0.18;
+        filter: blur(6px) saturate(0.72);
+    }
+
+    58% {
+        opacity: 0.62;
+        filter: blur(3px) saturate(0.88);
+    }
+
+    82% {
+        opacity: 0.88;
+        filter: blur(1px) saturate(0.96);
+    }
+
+    100% {
+        opacity: 1;
+        filter: blur(0) saturate(1);
+    }
+}
+/* End home slow ink reveal */
 
 </style>
+
+<script>
+/* Magic home font ready script */
+(function() {
+    function showHomeText() {
+        document.documentElement.classList.add("magic-home-font-ready");
+    }
+
+    if (document.fonts && document.fonts.ready) {
+        document.fonts.ready.then(showHomeText).catch(showHomeText);
+    } else {
+        showHomeText();
+    }
+
+    setTimeout(showHomeText, 1800);
+})();
+</script>
 
 </head>
 <body>
@@ -7554,28 +7600,5 @@ function magicCleanDiaryStageDirections(text) {
 /* End clean click dismiss writing */
 
 </script>
-
-<script>
-/* Home clean reveal starter */
-(function() {
-    function revealHomeText() {
-        document.documentElement.classList.add("magic-home-reveal-ready");
-    }
-
-    if (document.fonts && document.fonts.ready) {
-        document.fonts.ready.then(function() {
-            setTimeout(revealHomeText, 500);
-        }).catch(function() {
-            setTimeout(revealHomeText, 900);
-        });
-    } else {
-        setTimeout(revealHomeText, 900);
-    }
-
-    // 兜底：如果字体接口卡住，最多 3 秒后也显示
-    setTimeout(revealHomeText, 3000);
-})();
-</script>
-
 </body>
 </html>
