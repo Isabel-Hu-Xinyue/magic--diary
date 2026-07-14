@@ -2750,98 +2750,20 @@ html.magic-home-font-ready .text-line {
 
 
 
-/* Home three text unified reveal no jump */
+
+
+
+
+
+
+
+
+
+/* Home JS reveal A exact */
 /*
-   Adds the middle decoration text and makes top, middle, and bottom home texts
-   appear at the same time with no vertical jumping.
-   No chat, Archive, input, reply, or click-dismiss behavior is changed.
-*/
-
-#magicMiddleText {
-    position: fixed !important;
-    left: 50% !important;
-    top: 66% !important;
-    transform: translate(-50%, -50%) !important;
-    z-index: 19 !important;
-    width: min(860px, 86vw) !important;
-    text-align: center !important;
-    pointer-events: none !important;
-
-    font-family: "UnifrakturMaguntia", "Pirata One", "Cinzel Decorative", serif !important;
-    font-size: clamp(44px, 6.8vw, 92px) !important;
-    line-height: 1.08 !important;
-    font-weight: 900 !important;
-    letter-spacing: 0.8px !important;
-
-    color: #521316 !important;
-    -webkit-text-stroke: 1px rgba(202, 155, 69, 0.72) !important;
-    text-shadow:
-        0 0 10px rgba(99, 16, 22, 0.36),
-        0 5px 0 rgba(118, 72, 32, 0.18),
-        0 12px 28px rgba(45, 16, 12, 0.28) !important;
-
-    opacity: 0 !important;
-    filter: blur(4px) !important;
-}
-
-/* Kill staggered delays on the home page only */
-#diaryPage .text-line,
-#magicMiddleText,
-#magicHomeHint,
-#magicHomeHint div {
-    animation-delay: 0ms !important;
-    transition-delay: 0ms !important;
-}
-
-/* Unified reveal: opacity + blur only. No transform animation, so nothing jumps. */
-html.magic-home-font-ready #diaryPage .text-line,
-html.magic-home-font-ready #magicMiddleText,
-html.magic-home-font-ready #magicHomeHint {
-    opacity: 1 !important;
-    filter: blur(0) !important;
-    animation: magicHomeUnifiedFadeNoJump 950ms ease-out both !important;
-    animation-delay: 0ms !important;
-}
-
-html.magic-home-font-ready #magicHomeHint div {
-    opacity: 1 !important;
-    filter: blur(0) !important;
-    animation-delay: 0ms !important;
-    transition-delay: 0ms !important;
-}
-
-@keyframes magicHomeUnifiedFadeNoJump {
-    from {
-        opacity: 0;
-        filter: blur(4px);
-    }
-    to {
-        opacity: 1;
-        filter: blur(0);
-    }
-}
-
-@media (max-width: 768px) {
-    #magicMiddleText {
-        top: 52% !important;
-        width: 88vw !important;
-        font-size: clamp(36px, 11vw, 66px) !important;
-        line-height: 1.02 !important;
-        letter-spacing: 0.3px !important;
-    }
-}
-/* End Home three text unified reveal no jump */
-
-
-
-
-
-/* Home reveal A visible fix */
-/*
-   Fixes invisible homepage text.
-   Uses selected A speed.
-   No opacity: 0 !important, so the animation can actually reveal the text.
-   No transform animation, so position does not jump.
+   Static homepage layout + JS-controlled reveal.
+   This keeps position, font, color, and text.
+   JS will reproduce preview A exactly with opacity + blur.
 */
 
 #magicMiddleText {
@@ -2868,44 +2790,22 @@ html.magic-home-font-ready #magicHomeHint div {
         0 12px 28px rgba(45, 16, 12, 0.28) !important;
 }
 
-#diaryPage .text-line,
-#magicMiddleText,
-#magicHomeHint {
-    animation-name: magicHomeRevealAVisible !important;
-    animation-duration: 2.2s !important;
-    animation-timing-function: ease-out !important;
-    animation-delay: 0.18s !important;
-    animation-fill-mode: both !important;
+/* Before JS starts, hide the three groups so there is no first-frame pop. */
+html:not(.magic-home-js-reveal-done) #diaryPage .text-line,
+html:not(.magic-home-js-reveal-done) #magicMiddleText,
+html:not(.magic-home-js-reveal-done) #magicHomeHint {
+    opacity: 0 !important;
+    filter: blur(10px) saturate(0.55) !important;
+    animation: none !important;
     transition: none !important;
 }
 
+/* Bottom hint internal lines should not animate separately. */
 #magicHomeHint div {
     opacity: 1 !important;
     filter: none !important;
     animation: none !important;
     transition: none !important;
-}
-
-@keyframes magicHomeRevealAVisible {
-    0% {
-        opacity: 0;
-        filter: blur(10px) saturate(0.55);
-    }
-
-    35% {
-        opacity: 0.28;
-        filter: blur(6px) saturate(0.72);
-    }
-
-    70% {
-        opacity: 0.72;
-        filter: blur(2.5px) saturate(0.92);
-    }
-
-    100% {
-        opacity: 1;
-        filter: blur(0) saturate(1);
-    }
 }
 
 @media (max-width: 768px) {
@@ -2917,26 +2817,9 @@ html.magic-home-font-ready #magicHomeHint div {
         letter-spacing: 0.3px !important;
     }
 }
-/* End home reveal A visible fix */
+/* End home JS reveal A exact */
 
 </style>
-
-<script>
-/* Magic home font ready script */
-(function() {
-    function showHomeText() {
-        document.documentElement.classList.add("magic-home-font-ready");
-    }
-
-    if (document.fonts && document.fonts.ready) {
-        document.fonts.ready.then(showHomeText).catch(showHomeText);
-    } else {
-        showHomeText();
-    }
-
-    setTimeout(showHomeText, 1800);
-})();
-</script>
 
 </head>
 <body>
@@ -7624,5 +7507,132 @@ function magicCleanDiaryStageDirections(text) {
 /* End clean click dismiss writing */
 
 </script>
+
+<script>
+/* Home JS reveal A exact starter */
+(function() {
+    let started = false;
+
+    function getHomeRevealNodes() {
+        const nodes = [];
+
+        document.querySelectorAll("#diaryPage .text-line").forEach(function(node) {
+            nodes.push(node);
+        });
+
+        const middle = document.getElementById("magicMiddleText");
+        if (middle) nodes.push(middle);
+
+        const hint = document.getElementById("magicHomeHint");
+        if (hint) nodes.push(hint);
+
+        return nodes;
+    }
+
+    function applyFrame(nodes, opacity, blur, saturation) {
+        nodes.forEach(function(node) {
+            node.style.setProperty("opacity", String(opacity), "important");
+            node.style.setProperty("filter", "blur(" + blur + "px) saturate(" + saturation + ")", "important");
+            node.style.setProperty("animation", "none", "important");
+            node.style.setProperty("transition", "none", "important");
+        });
+    }
+
+    function lerp(a, b, t) {
+        return a + (b - a) * t;
+    }
+
+    function interpolateA(progress) {
+        /*
+           Exact preview A:
+           0%   opacity 0,    blur 10,   saturation .55
+           35%  opacity .28,  blur 6,    saturation .72
+           70%  opacity .72,  blur 2.5,  saturation .92
+           100% opacity 1,    blur 0,    saturation 1
+        */
+        const points = [
+            [0.00, 0.00, 10.0, 0.55],
+            [0.35, 0.28, 6.0, 0.72],
+            [0.70, 0.72, 2.5, 0.92],
+            [1.00, 1.00, 0.0, 1.00]
+        ];
+
+        for (let i = 0; i < points.length - 1; i++) {
+            const a = points[i];
+            const b = points[i + 1];
+
+            if (progress >= a[0] && progress <= b[0]) {
+                const local = (progress - a[0]) / (b[0] - a[0]);
+                const eased = 1 - Math.pow(1 - local, 2.2);
+
+                return [
+                    lerp(a[1], b[1], eased),
+                    lerp(a[2], b[2], eased),
+                    lerp(a[3], b[3], eased)
+                ];
+            }
+        }
+
+        return [1, 0, 1];
+    }
+
+    function startReveal() {
+        if (started) return;
+        started = true;
+
+        const nodes = getHomeRevealNodes();
+        if (!nodes.length) return;
+
+        document.documentElement.classList.add("magic-home-js-reveal-running");
+
+        applyFrame(nodes, 0, 10, 0.55);
+
+        const duration = 2200;
+        const delay = 180;
+
+        setTimeout(function() {
+            const start = performance.now();
+
+            function step(now) {
+                const progress = Math.min(1, (now - start) / duration);
+                const values = interpolateA(progress);
+
+                applyFrame(nodes, values[0], values[1], values[2]);
+
+                if (progress < 1) {
+                    requestAnimationFrame(step);
+                } else {
+                    applyFrame(nodes, 1, 0, 1);
+                    document.documentElement.classList.add("magic-home-js-reveal-done");
+                }
+            }
+
+            requestAnimationFrame(step);
+        }, delay);
+    }
+
+    function waitForFontsThenReveal() {
+        if (document.fonts && document.fonts.ready) {
+            document.fonts.ready.then(function() {
+                setTimeout(startReveal, 120);
+            }).catch(function() {
+                setTimeout(startReveal, 250);
+            });
+        } else {
+            setTimeout(startReveal, 250);
+        }
+
+        setTimeout(startReveal, 1600);
+    }
+
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", waitForFontsThenReveal, { once: true });
+    } else {
+        waitForFontsThenReveal();
+    }
+})();
+/* End home JS reveal A exact starter */
+</script>
+
 </body>
 </html>
