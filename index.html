@@ -2759,11 +2759,14 @@ html.magic-home-font-ready .text-line {
 
 
 
-/* Home JS reveal A exact */
+
+
+
+/* Home JS reveal A 1.5s */
 /*
-   Static homepage layout + JS-controlled reveal.
-   This keeps position, font, color, and text.
-   JS will reproduce preview A exactly with opacity + blur.
+   Homepage reveal selected by user:
+   wait 1.5s, then play preview A effect.
+   No movement. No font/color/position changes.
 */
 
 #magicMiddleText {
@@ -2790,7 +2793,7 @@ html.magic-home-font-ready .text-line {
         0 12px 28px rgba(45, 16, 12, 0.28) !important;
 }
 
-/* Before JS starts, hide the three groups so there is no first-frame pop. */
+/* 首页文字先保持隐藏，等 JS 在 1.5 秒后逐帧显现 */
 html:not(.magic-home-js-reveal-done) #diaryPage .text-line,
 html:not(.magic-home-js-reveal-done) #magicMiddleText,
 html:not(.magic-home-js-reveal-done) #magicHomeHint {
@@ -2800,7 +2803,7 @@ html:not(.magic-home-js-reveal-done) #magicHomeHint {
     transition: none !important;
 }
 
-/* Bottom hint internal lines should not animate separately. */
+/* 下方提示内部行不单独动画 */
 #magicHomeHint div {
     opacity: 1 !important;
     filter: none !important;
@@ -2817,7 +2820,7 @@ html:not(.magic-home-js-reveal-done) #magicHomeHint {
         letter-spacing: 0.3px !important;
     }
 }
-/* End home JS reveal A exact */
+/* End home JS reveal A 1.5s */
 
 </style>
 
@@ -7508,8 +7511,9 @@ function magicCleanDiaryStageDirections(text) {
 
 </script>
 
+
 <script>
-/* Home JS reveal A exact starter */
+/* Home JS reveal A 1.5s starter */
 (function() {
     let started = false;
 
@@ -7543,13 +7547,6 @@ function magicCleanDiaryStageDirections(text) {
     }
 
     function interpolateA(progress) {
-        /*
-           Exact preview A:
-           0%   opacity 0,    blur 10,   saturation .55
-           35%  opacity .28,  blur 6,    saturation .72
-           70%  opacity .72,  blur 2.5,  saturation .92
-           100% opacity 1,    blur 0,    saturation 1
-        */
         const points = [
             [0.00, 0.00, 10.0, 0.55],
             [0.35, 0.28, 6.0, 0.72],
@@ -7583,12 +7580,10 @@ function magicCleanDiaryStageDirections(text) {
         const nodes = getHomeRevealNodes();
         if (!nodes.length) return;
 
-        document.documentElement.classList.add("magic-home-js-reveal-running");
-
         applyFrame(nodes, 0, 10, 0.55);
 
+        const waitBeforeReveal = 1500;
         const duration = 2200;
-        const delay = 180;
 
         setTimeout(function() {
             const start = performance.now();
@@ -7608,30 +7603,31 @@ function magicCleanDiaryStageDirections(text) {
             }
 
             requestAnimationFrame(step);
-        }, delay);
+        }, waitBeforeReveal);
     }
 
-    function waitForFontsThenReveal() {
+    function readyThenReveal() {
         if (document.fonts && document.fonts.ready) {
             document.fonts.ready.then(function() {
                 setTimeout(startReveal, 120);
             }).catch(function() {
-                setTimeout(startReveal, 250);
+                setTimeout(startReveal, 120);
             });
         } else {
-            setTimeout(startReveal, 250);
+            setTimeout(startReveal, 120);
         }
 
-        setTimeout(startReveal, 1600);
+        /* 兜底：字体接口卡住时也能显示 */
+        setTimeout(startReveal, 2600);
     }
 
     if (document.readyState === "loading") {
-        document.addEventListener("DOMContentLoaded", waitForFontsThenReveal, { once: true });
+        document.addEventListener("DOMContentLoaded", readyThenReveal, { once: true });
     } else {
-        waitForFontsThenReveal();
+        readyThenReveal();
     }
 })();
-/* End home JS reveal A exact starter */
+/* End home JS reveal A 1.5s starter */
 </script>
 
 </body>
