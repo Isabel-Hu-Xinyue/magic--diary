@@ -2762,11 +2762,14 @@ html.magic-home-font-ready .text-line {
 
 
 
-/* Home JS reveal A 1.5s */
+
+
+
+/* Home robust reveal A 1.5s */
 /*
-   Homepage reveal selected by user:
-   wait 1.5s, then play preview A effect.
-   No movement. No font/color/position changes.
+   Fix top homepage text missing.
+   JS will find the top text by exact wording, not only by class name.
+   Keeps selected 1.5s delay + preview A reveal.
 */
 
 #magicMiddleText {
@@ -2793,17 +2796,15 @@ html.magic-home-font-ready .text-line {
         0 12px 28px rgba(45, 16, 12, 0.28) !important;
 }
 
-/* 首页文字先保持隐藏，等 JS 在 1.5 秒后逐帧显现 */
-html:not(.magic-home-js-reveal-done) #diaryPage .text-line,
-html:not(.magic-home-js-reveal-done) #magicMiddleText,
-html:not(.magic-home-js-reveal-done) #magicHomeHint {
+/* 这里只稳定中间和下面，不再强行把所有 top .text-line 永久藏住 */
+#magicMiddleText,
+#magicHomeHint {
     opacity: 0 !important;
     filter: blur(10px) saturate(0.55) !important;
     animation: none !important;
     transition: none !important;
 }
 
-/* 下方提示内部行不单独动画 */
 #magicHomeHint div {
     opacity: 1 !important;
     filter: none !important;
@@ -2820,7 +2821,7 @@ html:not(.magic-home-js-reveal-done) #magicHomeHint {
         letter-spacing: 0.3px !important;
     }
 }
-/* End home JS reveal A 1.5s */
+/* End home robust reveal A 1.5s */
 
 </style>
 
@@ -7512,23 +7513,89 @@ function magicCleanDiaryStageDirections(text) {
 </script>
 
 
+
 <script>
-/* Home JS reveal A 1.5s starter */
+/* Home robust reveal A 1.5s starter */
 (function() {
     let started = false;
+
+    const TOP_TEXTS = [
+        "Do you remember Tom Riddle's diary in Harry Potter?",
+        "You write down what you dare not say aloud,",
+        "and the page writes back.",
+        "But this time, the one answering you",
+        "is already waiting in the ink."
+    ];
+
+    function normalizeText(s) {
+        return String(s || "").replace(/\s+/g, " ").trim();
+    }
+
+    function ownText(el) {
+        let s = "";
+        el.childNodes.forEach(function(node) {
+            if (node.nodeType === Node.TEXT_NODE) {
+                s += node.textContent;
+            }
+        });
+        return normalizeText(s);
+    }
+
+    function addUnique(list, node) {
+        if (!node) return;
+        if (!list.includes(node)) list.push(node);
+    }
+
+    function findTopTextNodes() {
+        const found = [];
+        const root = document.getElementById("diaryPage") || document.body;
+        const all = Array.from(root.querySelectorAll("*"));
+
+        TOP_TEXTS.forEach(function(target) {
+            let match = null;
+
+            // 先找最准确的：元素自己的文字正好等于这一行
+            for (const el of all) {
+                if (ownText(el) === target) {
+                    match = el;
+                    break;
+                }
+            }
+
+            // 再兜底：元素整体文字正好等于这一行
+            if (!match) {
+                for (const el of all) {
+                    if (normalizeText(el.textContent) === target) {
+                        match = el;
+                        break;
+                    }
+                }
+            }
+
+            addUnique(found, match);
+        });
+
+        return found;
+    }
 
     function getHomeRevealNodes() {
         const nodes = [];
 
+        // 关键修复：上面五行按文字内容找，不再只依赖 .text-line
+        findTopTextNodes().forEach(function(node) {
+            addUnique(nodes, node);
+        });
+
+        // 保留旧 class 兜底
         document.querySelectorAll("#diaryPage .text-line").forEach(function(node) {
-            nodes.push(node);
+            addUnique(nodes, node);
         });
 
         const middle = document.getElementById("magicMiddleText");
-        if (middle) nodes.push(middle);
+        addUnique(nodes, middle);
 
         const hint = document.getElementById("magicHomeHint");
-        if (hint) nodes.push(hint);
+        addUnique(nodes, hint);
 
         return nodes;
     }
@@ -7539,6 +7606,7 @@ function magicCleanDiaryStageDirections(text) {
             node.style.setProperty("filter", "blur(" + blur + "px) saturate(" + saturation + ")", "important");
             node.style.setProperty("animation", "none", "important");
             node.style.setProperty("transition", "none", "important");
+            node.style.setProperty("visibility", "visible", "important");
         });
     }
 
@@ -7573,12 +7641,21 @@ function magicCleanDiaryStageDirections(text) {
         return [1, 0, 1];
     }
 
+    function forceFinalVisible() {
+        const nodes = getHomeRevealNodes();
+        applyFrame(nodes, 1, 0, 1);
+        document.documentElement.classList.add("magic-home-js-reveal-done");
+    }
+
     function startReveal() {
         if (started) return;
         started = true;
 
         const nodes = getHomeRevealNodes();
-        if (!nodes.length) return;
+
+        if (!nodes.length) {
+            return;
+        }
 
         applyFrame(nodes, 0, 10, 0.55);
 
@@ -7597,8 +7674,7 @@ function magicCleanDiaryStageDirections(text) {
                 if (progress < 1) {
                     requestAnimationFrame(step);
                 } else {
-                    applyFrame(nodes, 1, 0, 1);
-                    document.documentElement.classList.add("magic-home-js-reveal-done");
+                    forceFinalVisible();
                 }
             }
 
@@ -7607,18 +7683,14 @@ function magicCleanDiaryStageDirections(text) {
     }
 
     function readyThenReveal() {
-        if (document.fonts && document.fonts.ready) {
-            document.fonts.ready.then(function() {
-                setTimeout(startReveal, 120);
-            }).catch(function() {
-                setTimeout(startReveal, 120);
-            });
-        } else {
-            setTimeout(startReveal, 120);
-        }
+        // 让可能存在的字体 ready 规则也别把上面文字藏住
+        document.documentElement.classList.add("magic-home-font-ready");
 
-        /* 兜底：字体接口卡住时也能显示 */
-        setTimeout(startReveal, 2600);
+        // 先等页面结构稳定一点，再找文字
+        setTimeout(startReveal, 280);
+
+        // 兜底：如果某些节点稍晚出现，最后强制显示
+        setTimeout(forceFinalVisible, 5200);
     }
 
     if (document.readyState === "loading") {
@@ -7627,7 +7699,7 @@ function magicCleanDiaryStageDirections(text) {
         readyThenReveal();
     }
 })();
-/* End home JS reveal A 1.5s starter */
+/* End home robust reveal A 1.5s starter */
 </script>
 
 </body>
