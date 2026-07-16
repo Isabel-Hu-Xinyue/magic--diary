@@ -1,11 +1,4 @@
-python3 <<'PY'
-from pathlib import Path
-import subprocess
-
-desktop = Path.home() / "Desktop"
-out = desktop / "ink-test.html"
-
-html = r'''<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -405,13 +398,4 @@ body {
 })();
 </script>
 </body>
-</html>'''
-
-out.write_text(html, encoding="utf-8")
-subprocess.run("pbcopy", input=html, text=True)
-
-print("完成。")
-print("更平滑版 ink-test.html 已保存到桌面：", out)
-print("完整代码已复制到剪贴板。")
-print("下一步去 GitHub 更新 ink-test.html。")
-PY
+</html>
