@@ -2828,39 +2828,41 @@ html.magic-home-font-ready .text-line {
 /*
    Test page only:
    - real Apple Pencil handwriting layer inside the real diary page
+   - canvas catches palm/finger contact so palm does not interfere
+   - only Apple Pencil draws
    - no textarea, no cursor, no Write button
-   - does not change Tom's reply logic yet
 */
 
 body.magic-ink-diary-mode .input-container {
     display: none !important;
 }
 
+/* Canvas lives only inside chatPage, not over the homepage */
 #magicInkDiaryCanvas {
-    position: fixed !important;
+    position: absolute !important;
     inset: 0 !important;
-    width: 100vw !important;
-    height: 100dvh !important;
-    z-index: 6 !important;
-    pointer-events: none !important;
+    width: 100% !important;
+    height: 100% !important;
+    z-index: 7 !important;
+    pointer-events: auto !important;
     touch-action: none !important;
 }
 
-/* 让原来的用户/AI文字仍然在手写层上方，避免被笔迹盖住 */
+/* Buttons and Archive remain above the handwriting layer */
+#magicArchiveButton,
+#magicArchiveOverlay,
+#magicArchiveContent,
+#closeDiaryButton {
+    z-index: 9999 !important;
+}
+
+/* Existing Tom / user text stays visible above paper background */
 #chatContainer .message,
 #chatContainer .user-text,
 #chatContainer .ai-text,
 #chatContainer .magic-letter {
     position: relative;
     z-index: 8 !important;
-}
-
-/* Archive 和按钮永远在最上面 */
-#magicArchiveButton,
-#magicArchiveOverlay,
-#magicArchiveContent,
-#closeDiaryButton {
-    z-index: 9999 !important;
 }
 /* End ink diary handwriting layer test */
 
@@ -7747,8 +7749,6 @@ function magicCleanDiaryStageDirections(text) {
 <script>
 /* Ink diary handwriting layer test starter */
 (function () {
-    const STORAGE_KEY = "magicInkDiaryTestStrokes_v1";
-
     let canvas = null;
     let ctx = null;
     let dpr = 1;
@@ -7762,7 +7762,7 @@ function magicCleanDiaryStageDirections(text) {
 
     let lastSmooth = null;
     let lastWidth = null;
-    let saveTimer = null;
+    let clearTimer = null;
 
     function installInkDiaryLayer() {
         if (document.body.dataset.magicInkDiaryInstalled === "true") return;
@@ -7775,70 +7775,77 @@ function magicCleanDiaryStageDirections(text) {
 
         canvas = document.createElement("canvas");
         canvas.id = "magicInkDiaryCanvas";
-        document.body.appendChild(canvas);
+        chatPage.appendChild(canvas);
 
         ctx = canvas.getContext("2d", { alpha: true, desynchronized: true });
 
-        loadSaved();
+        strokes = []; // 测试页每次刷新清空旧笔迹
         resizeCanvas();
 
         window.addEventListener("resize", resizeCanvas);
 
-        /*
-           关键：不让 canvas 抢点击。
-           我们监听整个页面的 pen 事件；只有 Apple Pencil 会画。
-           手掌/手指不画。
-        */
-        document.addEventListener("pointerdown", startDraw, { passive: false, capture: true });
-        document.addEventListener("pointermove", moveDraw, { passive: false, capture: true });
+        canvas.addEventListener("pointerdown", startDraw, { passive: false });
+        canvas.addEventListener("pointermove", moveDraw, { passive: false });
 
         if ("onpointerrawupdate" in window) {
-            document.addEventListener("pointerrawupdate", moveDraw, { passive: false, capture: true });
+            canvas.addEventListener("pointerrawupdate", moveDraw, { passive: false });
         }
 
-        document.addEventListener("pointerup", endDraw, { passive: false, capture: true });
-        document.addEventListener("pointercancel", endDraw, { passive: false, capture: true });
+        canvas.addEventListener("pointerup", endDraw, { passive: false });
+        canvas.addEventListener("pointercancel", endDraw, { passive: false });
 
-        // 三指双击清空笔迹；平时页面不放按钮
-        let clearTapCount = 0;
-        document.addEventListener("touchend", function(e) {
-            if (e.changedTouches && e.changedTouches.length >= 3) {
-                clearTapCount++;
-                setTimeout(function() {
-                    clearTapCount = 0;
-                }, 450);
+        /*
+           关键：canvas 接住手掌/手指。
+           手掌不会画，也不会漏到下面页面。
+        */
+        canvas.addEventListener("touchstart", handleTouchForPalmAndClear, { passive: false });
+        canvas.addEventListener("touchmove", handleTouchForPalmAndClear, { passive: false });
+        canvas.addEventListener("touchend", stopClearTimer, { passive: false });
+        canvas.addEventListener("touchcancel", stopClearTimer, { passive: false });
+    }
 
-                if (clearTapCount >= 2) {
-                    strokes = [];
-                    rawStroke = [];
-                    smoothStroke = [];
-                    lastSmooth = null;
-                    lastWidth = null;
-                    try {
-                        localStorage.removeItem(STORAGE_KEY);
-                    } catch (err) {}
-                    redrawAll();
-                    clearTapCount = 0;
-                }
+    function handleTouchForPalmAndClear(e) {
+        e.preventDefault();
+
+        if (e.touches && e.touches.length >= 3) {
+            if (!clearTimer) {
+                clearTimer = setTimeout(function() {
+                    clearTimer = null;
+                    clearInk();
+                }, 800);
             }
-        }, { passive: true });
+        } else {
+            stopClearTimer(e);
+        }
+    }
+
+    function stopClearTimer(e) {
+        if (e) e.preventDefault();
+
+        if (clearTimer) {
+            clearTimeout(clearTimer);
+            clearTimer = null;
+        }
+    }
+
+    function clearInk() {
+        strokes = [];
+        rawStroke = [];
+        smoothStroke = [];
+        lastSmooth = null;
+        lastWidth = null;
+        drawing = false;
+        activePointerId = null;
+        redrawAll();
+
+        try {
+            localStorage.removeItem("magicInkDiaryTestStrokes_v1");
+            localStorage.removeItem("magicInkDiaryTestStrokes_v2");
+        } catch (err) {}
     }
 
     function isApplePencil(e) {
         return e.pointerType === "pen";
-    }
-
-    function isBlockedTarget(target) {
-        if (!target || !target.closest) return false;
-
-        return !!(
-            target.closest("#magicArchiveButton") ||
-            target.closest("#magicArchiveOverlay") ||
-            target.closest("#magicArchiveContent") ||
-            target.closest("#closeDiaryButton") ||
-            target.closest("button") ||
-            target.closest("a")
-        );
     }
 
     function resizeCanvas() {
@@ -7846,10 +7853,14 @@ function magicCleanDiaryStageDirections(text) {
 
         dpr = Math.max(1, window.devicePixelRatio || 1);
 
-        canvas.width = Math.floor(window.innerWidth * dpr);
-        canvas.height = Math.floor(window.innerHeight * dpr);
-        canvas.style.width = window.innerWidth + "px";
-        canvas.style.height = window.innerHeight + "px";
+        const rect = canvas.getBoundingClientRect();
+        const width = rect.width || window.innerWidth;
+        const height = rect.height || window.innerHeight;
+
+        canvas.width = Math.floor(width * dpr);
+        canvas.height = Math.floor(height * dpr);
+        canvas.style.width = width + "px";
+        canvas.style.height = height + "px";
 
         ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
         ctx.imageSmoothingEnabled = true;
@@ -7857,12 +7868,14 @@ function magicCleanDiaryStageDirections(text) {
     }
 
     function pointFromEvent(e) {
+        const rect = canvas.getBoundingClientRect();
+
         let pressure = e.pressure;
         if (!pressure || pressure <= 0) pressure = 0.45;
 
         return {
-            x: e.clientX,
-            y: e.clientY,
+            x: e.clientX - rect.left,
+            y: e.clientY - rect.top,
             p: pressure,
             t: performance.now()
         };
@@ -8023,10 +8036,13 @@ function magicCleanDiaryStageDirections(text) {
     }
 
     function startDraw(e) {
-        if (!isApplePencil(e)) return;
-        if (isBlockedTarget(e.target)) return;
+        if (!isApplePencil(e)) {
+            e.preventDefault();
+            return;
+        }
 
         e.preventDefault();
+        stopClearTimer();
 
         drawing = true;
         activePointerId = e.pointerId;
@@ -8036,12 +8052,23 @@ function magicCleanDiaryStageDirections(text) {
         lastSmooth = null;
         lastWidth = null;
 
+        try {
+            canvas.setPointerCapture(e.pointerId);
+        } catch (err) {}
+
         addRawPoint(pointFromEvent(e));
     }
 
     function moveDraw(e) {
-        if (!drawing || e.pointerId !== activePointerId) return;
-        if (!isApplePencil(e)) return;
+        if (!drawing || e.pointerId !== activePointerId) {
+            e.preventDefault();
+            return;
+        }
+
+        if (!isApplePencil(e)) {
+            e.preventDefault();
+            return;
+        }
 
         e.preventDefault();
 
@@ -8052,7 +8079,10 @@ function magicCleanDiaryStageDirections(text) {
     }
 
     function endDraw(e) {
-        if (!drawing || e.pointerId !== activePointerId) return;
+        if (!drawing || e.pointerId !== activePointerId) {
+            e.preventDefault();
+            return;
+        }
 
         e.preventDefault();
 
@@ -8072,7 +8102,9 @@ function magicCleanDiaryStageDirections(text) {
         lastSmooth = null;
         lastWidth = null;
 
-        saveLater();
+        try {
+            canvas.releasePointerCapture(e.pointerId);
+        } catch (err) {}
     }
 
     function redrawStroke(stroke) {
@@ -8093,28 +8125,9 @@ function magicCleanDiaryStageDirections(text) {
     }
 
     function redrawAll() {
-        if (!ctx) return;
-        ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+        if (!ctx || !canvas) return;
+        ctx.clearRect(0, 0, canvas.width / dpr, canvas.height / dpr);
         strokes.forEach(redrawStroke);
-    }
-
-    function saveLater() {
-        clearTimeout(saveTimer);
-
-        saveTimer = setTimeout(function() {
-            try {
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(strokes));
-            } catch (e) {}
-        }, 500);
-    }
-
-    function loadSaved() {
-        try {
-            const saved = localStorage.getItem(STORAGE_KEY);
-            if (saved) strokes = JSON.parse(saved) || [];
-        } catch (e) {
-            strokes = [];
-        }
     }
 
     if (document.readyState === "loading") {
