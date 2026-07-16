@@ -2892,45 +2892,46 @@ body.magic-ink-read-mode .input-container {
 /* End ink read handwriting test */
 
 
-/* Ink read bottom nav click fix */
+
+
+
+/* Ink read bottom safe zone fix */
 /*
    Fix only:
-   - Diary / Map / Self bottom navigation should be clickable above handwriting canvas
-   - keep Apple Pencil handwriting layer unchanged
-   - keep three-finger clear unchanged
-   - keep auto-read logic unchanged
+   - do not let the handwriting canvas cover the bottom navigation area
+   - Diary / Map / Self / Archive should receive taps normally
+   - keep Apple Pencil writing, palm rejection, smooth ink, and three-finger clear unchanged
 */
 
-body.magic-ink-read-mode .magic-ink-bottom-nav-above,
-body.magic-ink-read-mode .magic-ink-bottom-nav-above * {
+body.magic-ink-read-mode {
+    --magic-ink-bottom-safe-zone: 118px;
+}
+
+body.magic-ink-read-mode #magicInkReadCanvas {
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: var(--magic-ink-bottom-safe-zone) !important;
+
+    width: 100% !important;
+    height: auto !important;
+
+    z-index: 7 !important;
+    pointer-events: auto !important;
+    touch-action: none !important;
+}
+
+/* Keep bottom controls clickable and above normal page layers */
+body.magic-ink-read-mode nav,
+body.magic-ink-read-mode footer,
+body.magic-ink-read-mode button,
+body.magic-ink-read-mode a,
+body.magic-ink-read-mode [role="button"],
+body.magic-ink-read-mode [onclick] {
     pointer-events: auto !important;
 }
 
-body.magic-ink-read-mode .magic-ink-bottom-nav-above {
-    position: relative !important;
-    z-index: 10020 !important;
-}
-
-/* Make common bottom navigation structures sit above the handwriting canvas */
-body.magic-ink-read-mode nav,
-body.magic-ink-read-mode footer,
-body.magic-ink-read-mode [class*="nav"],
-body.magic-ink-read-mode [class*="Nav"],
-body.magic-ink-read-mode [class*="tab"],
-body.magic-ink-read-mode [class*="Tab"],
-body.magic-ink-read-mode [class*="bottom"],
-body.magic-ink-read-mode [class*="Bottom"] {
-    position: relative;
-    z-index: 10020;
-    pointer-events: auto;
-}
-
-/* Keep the handwriting canvas below bottom navigation, but still above the paper */
-body.magic-ink-read-mode #magicInkReadCanvas {
-    z-index: 7 !important;
-}
-
-/* Archive remains highest */
+/* Archive remains clickable */
 body.magic-ink-read-mode #magicArchiveButton,
 body.magic-ink-read-mode #magicArchiveOverlay,
 body.magic-ink-read-mode #magicArchiveContent,
@@ -2938,7 +2939,7 @@ body.magic-ink-read-mode #closeDiaryButton {
     z-index: 10030 !important;
     pointer-events: auto !important;
 }
-/* End ink read bottom nav click fix */
+/* End ink read bottom safe zone fix */
 
 </style>
 
@@ -8483,96 +8484,6 @@ function magicCleanDiaryStageDirections(text) {
 /* End ink read handwriting test starter */
 </script>
 
-
-<script>
-/* Ink read bottom nav click fix starter */
-(function () {
-    function textOf(el) {
-        return String(el && el.textContent || "")
-            .replace(/\s+/g, " ")
-            .trim()
-            .toLowerCase();
-    }
-
-    function looksLikeBottomNavLabel(text) {
-        if (!text) return false;
-
-        return (
-            text === "diary" ||
-            text === "map" ||
-            text === "self" ||
-            text === "diary map" ||
-            text.includes("diary") ||
-            text.includes("map") ||
-            text.includes("self") ||
-            text.includes("tree") ||
-            text.includes("archive")
-        );
-    }
-
-    function liftNodeAndParents(el) {
-        if (!el || !el.getBoundingClientRect) return;
-
-        let node = el;
-        let steps = 0;
-
-        while (node && node !== document.body && steps < 5) {
-            const rect = node.getBoundingClientRect ? node.getBoundingClientRect() : null;
-
-            if (rect) {
-                const nearBottom = rect.top > window.innerHeight * 0.52;
-                const notFullPage = rect.height < window.innerHeight * 0.45;
-
-                if (nearBottom && notFullPage) {
-                    node.classList.add("magic-ink-bottom-nav-above");
-                }
-            }
-
-            node = node.parentElement;
-            steps++;
-        }
-    }
-
-    function fixBottomNavClicking() {
-        const candidates = Array.from(document.querySelectorAll(
-            "button, a, [role='button'], [onclick], div, span, li"
-        ));
-
-        candidates.forEach(function(el) {
-            const text = textOf(el);
-            if (!looksLikeBottomNavLabel(text)) return;
-
-            const rect = el.getBoundingClientRect();
-            if (!rect || rect.width < 8 || rect.height < 8) return;
-
-            /*
-               Only lift controls in the lower part of the screen.
-               This avoids touching homepage text or normal diary messages.
-            */
-            if (rect.top < window.innerHeight * 0.50) return;
-
-            const clickable = el.closest("button, a, [role='button'], [onclick]") || el;
-            clickable.classList.add("magic-ink-bottom-nav-above");
-            liftNodeAndParents(clickable);
-        });
-    }
-
-    if (document.readyState === "loading") {
-        document.addEventListener("DOMContentLoaded", fixBottomNavClicking, { once: true });
-    } else {
-        fixBottomNavClicking();
-    }
-
-    window.addEventListener("resize", function() {
-        setTimeout(fixBottomNavClicking, 120);
-    });
-
-    setTimeout(fixBottomNavClicking, 500);
-    setTimeout(fixBottomNavClicking, 1200);
-    setTimeout(fixBottomNavClicking, 2200);
-})();
-/* End ink read bottom nav click fix starter */
-</script>
 
 </body>
 </html>
