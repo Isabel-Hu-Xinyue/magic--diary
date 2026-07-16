@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<title>Free Handwriting Check</title>
+<style>
+html, body {
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: #efe7d3;
+    touch-action: none;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+}
+
+body {
+    font-family: Georgia, "Times New Roman", serif;
+    background:
+        radial-gradient(circle at 50% 12%, rgba(98, 68, 38, 0.08), transparent 28%),
+        repeating-linear-gradient(
+            0deg,
+            transparent,
+            transparent 3px,
+            rgba(118, 89, 54, 0.026) 3px,
+            rgba(118, 89, 54, 0.026) 5px
+        ),
+        #efe7d3;
+}
+
+#paper {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100dvh;
+    display: block;
+    touch-action: none;
+}
+
+#panel {
+    position: fixed;
+    left: 14px;
+    right: 14px;
+    bottom: 14px;
+    z-index: 20;
+
+    padding: 10px 12px;
+    border-radius: 16px;
+    background: rgba(255, 250, 238, 0.84);
+    border: 1px solid rgba(72, 43, 28, 0.18);
+    color: rgba(44, 25, 18, 0.82);
+
+    font-size: 13px;
+    line-height: 1.45;
+}
+
+#buttons {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+button {
+    border: 1px solid rgba(72, 43, 28, 0.22);
+    border-radius: 10px;
+    padding: 7px 10px;
+    background: rgba(255, 255, 255, 0.78);
+    font-family: inherit;
+    font-size: 13px;
+}
+
+#status {
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.small {
+    opacity: 0.68;
+    font-size: 12px;
+}
+</style>
+</head>
+<body>
+<canvas id="paper"></canvas>
+
+<div id="panel">
+    <div id="status">Ready. Tap Check Support first.</div>
+    <div class="small">No API key. No cloud. No keyboard. This only tests browser native handwriting recognition.</div>
+    <div id="buttons">
+        <button id="checkBtn">Check Support</button>
+        <button id="recognizeBtn">Recognize</button>
+        <button id="clearBtn">Clear</button>
+    </div>
+</div>
+
+<script>
+(function () {
+    const canvas = document.getElementById("paper");
+    const ctx = canvas.getContext("2d", { alpha: true, desynchronized: true });
+
+    const statusEl = document.getElementById("status");
+    const checkBtn = document.getElementById("checkBtn");
+    const recognizeBtn = document.getElementById("recognizeBtn");
+    const clearBtn = document.getElementById("clearBtn");
+
+    let dpr = 1;
+    let drawing = false;
+    let activePointerId = null;
+
+    let visualStrokes = [];
+    let visualStroke = [];
+
+    let apiRecognizer = null;
+    let apiDrawing = null;
+    let apiActiveStroke = null;
+    let strokeStartTime = 0;
+
+    let lastSmooth = null;
+    let lastWidth = null;
+
+    function setStatus(text) {
+        statusEl.textContent = text;
+    }
+
+    function resizeCanvas() {
+        dpr = Math.max(1, window.devicePixelRatio || 1);
+
+        const w = Math.ceil((window.visualViewport && window.visualViewport.width) || window.innerWidth);
+        const h = Math.ceil((window.visualViewport && window.visualViewport.height) || window.innerHeight);
+
+        canvas.width = Math.floor(w * dpr);
+        canvas.height = Math.floor(h * dpr);
+        canvas.style.width = w + "px";
+        canvas.style.height = h + "px";
+
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        ctx.imageSmoothingEnabled = true;
+        redrawAll();
+    }
+
+    function isPen(e) {
+        return e.pointerType === "pen" || e.pointerType === "mouse";
+    }
+
+    function pointFromEvent(e) {
+        let pressure = e.pressure;
+        if (!pressure || pressure <= 0) pressure = 0.45;
+
+        return {
+            x: e.clientX,
+            y: e.clientY,
+            p: pressure,
+            t: performance.now()
+        };
+    }
+
+    function dist(a, b) {
+        const dx = b.x - a.x;
+        const dy = b.y - a.y;
+        return Math.sqrt(dx * dx + dy * dy);
+    }
+
+    function lerp(a, b, t) {
+        return a + (b - a) * t;
+    }
+
+    function smoothPoint(p) {
+        if (!lastSmooth) {
+            lastSmooth = { x: p.x, y: p.y, p: p.p, t: p.t };
+            return lastSmooth;
+        }
+
+        const follow = 0.34;
+
+        lastSmooth = {
+            x: lerp(lastSmooth.x, p.x, follow),
+            y: lerp(lastSmooth.y, p.y, follow),
+            p: lerp(lastSmooth.p, p.p, 0.24),
+            t: p.t
+        };
+
+        return lastSmooth;
+    }
+
+    function inkWidth(pressure) {
+        const raw = 1.85 + pressure * 3.75;
+
+        if (lastWidth == null) {
+            lastWidth = raw;
+            return raw;
+        }
+
+        lastWidth = lerp(lastWidth, raw, 0.22);
+        return lastWidth;
+    }
+
+    function midpoint(a, b) {
+        return {
+            x: (a.x + b.x) / 2,
+            y: (a.y + b.y) / 2,
+            p: (a.p + b.p) / 2
+        };
+    }
+
+    function drawDot(p) {
+        const w = inkWidth(p.p);
+
+        ctx.save();
+        ctx.fillStyle = "rgba(43, 22, 14, 0.88)";
+        ctx.shadowColor = "rgba(43, 22, 14, 0.18)";
+        ctx.shadowBlur = 0.72;
+
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, w * 0.50, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+    }
+
+    function drawLine(a, b) {
+        const w = inkWidth(b.p);
+
+        ctx.save();
+        ctx.lineCap = "round";
+        ctx.lineJoin = "round";
+        ctx.strokeStyle = "rgba(43, 22, 14, 0.88)";
+        ctx.lineWidth = w;
+        ctx.shadowColor = "rgba(43, 22, 14, 0.15)";
+        ctx.shadowBlur = 0.85;
+
+        ctx.beginPath();
+        ctx.moveTo(a.x, a.y);
+        ctx.lineTo(b.x, b.y);
+        ctx.stroke();
+
+        ctx.restore();
+    }
+
+    function drawCurve(a, b, c) {
+        const m1 = midpoint(a, b);
+        const m2 = midpoint(b, c);
+        const w = inkWidth(b.p);
+
+        ctx.save();
+        ctx.lineCap = "round";
+        ctx.lineJoin = "round";
+        ctx.strokeStyle = "rgba(43, 22, 14, 0.88)";
+        ctx.lineWidth = w;
+        ctx.shadowColor = "rgba(43, 22, 14, 0.15)";
+        ctx.shadowBlur = 0.85;
+
+        ctx.beginPath();
+        ctx.moveTo(m1.x, m1.y);
+        ctx.quadraticCurveTo(b.x, b.y, m2.x, m2.y);
+        ctx.stroke();
+
+        ctx.restore();
+    }
+
+    function addVisualPoint(p) {
+        const smoothed = smoothPoint(p);
+
+        if (visualStroke.length) {
+            const last = visualStroke[visualStroke.length - 1];
+            const d = dist(last, smoothed);
+
+            if (d < 0.62) return;
+
+            const steps = Math.max(1, Math.ceil(d / 3.1));
+
+            for (let i = 1; i <= steps; i++) {
+                const t = i / steps;
+                const q = {
+                    x: lerp(last.x, smoothed.x, t),
+                    y: lerp(last.y, smoothed.y, t),
+                    p: lerp(last.p, smoothed.p, t),
+                    t: smoothed.t
+                };
+
+                visualStroke.push(q);
+                drawLatestSegment();
+            }
+        } else {
+            visualStroke.push(smoothed);
+            drawDot(smoothed);
+        }
+    }
+
+    function drawLatestSegment() {
+        const n = visualStroke.length;
+
+        if (n === 1) {
+            drawDot(visualStroke[0]);
+        } else if (n === 2) {
+            drawLine(visualStroke[0], visualStroke[1]);
+        } else {
+            drawCurve(visualStroke[n - 3], visualStroke[n - 2], visualStroke[n - 1]);
+        }
+    }
+
+    function redrawStroke(stroke) {
+        if (!stroke || !stroke.length) return;
+
+        lastWidth = null;
+        drawDot(stroke[0]);
+
+        for (let i = 1; i < stroke.length; i++) {
+            if (i >= 2) {
+                drawCurve(stroke[i - 2], stroke[i - 1], stroke[i]);
+            } else {
+                drawLine(stroke[i - 1], stroke[i]);
+            }
+        }
+
+        lastWidth = null;
+    }
+
+    function redrawAll() {
+        ctx.clearRect(0, 0, canvas.width / dpr, canvas.height / dpr);
+        visualStrokes.forEach(redrawStroke);
+    }
+
+    function collectEvents(e) {
+        if (typeof e.getCoalescedEvents === "function") {
+            const events = e.getCoalescedEvents();
+            if (events && events.length) return events;
+        }
+        return [e];
+    }
+
+    async function checkSupport() {
+        const hasCreate = "createHandwritingRecognizer" in navigator;
+        const hasQueryA = "queryHandwritingRecognizer" in navigator;
+        const hasQueryB = "queryHandwritingRecognizerSupport" in navigator;
+        const hasStroke = "HandwritingStroke" in window;
+
+        let text = "";
+        text += "createHandwritingRecognizer: " + hasCreate + "\\n";
+        text += "queryHandwritingRecognizer: " + hasQueryA + "\\n";
+        text += "queryHandwritingRecognizerSupport: " + hasQueryB + "\\n";
+        text += "HandwritingStroke: " + hasStroke + "\\n";
+
+        if (!hasCreate || !hasStroke) {
+            text += "\\nRESULT: Not supported in this browser/device.";
+            setStatus(text);
+            return;
+        }
+
+        try {
+            let queryResult = null;
+
+            if (hasQueryA) {
+                queryResult = await navigator.queryHandwritingRecognizer({ languages: ["en"] });
+            } else if (hasQueryB) {
+                queryResult = await navigator.queryHandwritingRecognizerSupport({ languages: ["en"] });
+            }
+
+            text += "\\nQuery result: " + JSON.stringify(queryResult) + "\\n";
+
+            apiRecognizer = await navigator.createHandwritingRecognizer({ languages: ["en"] });
+            apiDrawing = apiRecognizer.startDrawing({
+                recognitionType: "text",
+                inputType: "stylus",
+                alternatives: 3
+            });
+
+            text += "\\nRESULT: Supported enough to test recognition. Write simple English first, like hello.";
+            setStatus(text);
+
+        } catch (err) {
+            text += "\\nRESULT: API exists but recognizer failed.\\n" + (err && err.message ? err.message : String(err));
+            setStatus(text);
+        }
+    }
+
+    function addApiPoint(e) {
+        if (!apiActiveStroke) return;
+
+        const rect = canvas.getBoundingClientRect();
+        const t = Date.now() - strokeStartTime;
+
+        try {
+            apiActiveStroke.addPoint({
+                x: e.clientX - rect.left,
+                y: e.clientY - rect.top,
+                t: t
+            });
+        } catch (err) {}
+    }
+
+    function start(e) {
+        if (!isPen(e)) return;
+        e.preventDefault();
+
+        drawing = true;
+        activePointerId = e.pointerId;
+
+        visualStroke = [];
+        lastSmooth = null;
+        lastWidth = null;
+
+        try {
+            canvas.setPointerCapture(e.pointerId);
+        } catch (err) {}
+
+        if (apiDrawing && "HandwritingStroke" in window) {
+            try {
+                apiActiveStroke = new HandwritingStroke();
+                strokeStartTime = Date.now();
+                addApiPoint(e);
+            } catch (err) {
+                apiActiveStroke = null;
+            }
+        }
+
+        addVisualPoint(pointFromEvent(e));
+    }
+
+    function move(e) {
+        if (!drawing || e.pointerId !== activePointerId) return;
+        if (!isPen(e)) return;
+        e.preventDefault();
+
+        const events = collectEvents(e);
+        for (const item of events) {
+            addApiPoint(item);
+            addVisualPoint(pointFromEvent(item));
+        }
+    }
+
+    async function end(e) {
+        if (!drawing || e.pointerId !== activePointerId) return;
+        e.preventDefault();
+
+        const events = collectEvents(e);
+        for (const item of events) {
+            addApiPoint(item);
+            addVisualPoint(pointFromEvent(item));
+        }
+
+        if (visualStroke.length) {
+            visualStrokes.push(visualStroke.slice());
+        }
+
+        if (apiDrawing && apiActiveStroke) {
+            try {
+                apiDrawing.addStroke(apiActiveStroke);
+            } catch (err) {}
+        }
+
+        drawing = false;
+        activePointerId = null;
+        visualStroke = [];
+        apiActiveStroke = null;
+        lastSmooth = null;
+        lastWidth = null;
+    }
+
+    async function recognize() {
+        if (!apiDrawing) {
+            setStatus("No native recognizer yet. Tap Check Support first.");
+            return;
+        }
+
+        try {
+            setStatus("Recognizing with browser native handwriting API…");
+
+            const predictions = await apiDrawing.getPrediction();
+
+            if (!predictions || !predictions.length) {
+                setStatus("No prediction returned.");
+                return;
+            }
+
+            const lines = predictions.map(function(p, i) {
+                return (i + 1) + ". " + (p && p.text ? p.text : JSON.stringify(p));
+            });
+
+            setStatus("SUCCESS\\n" + lines.join("\\n"));
+
+        } catch (err) {
+            setStatus("Recognition failed:\\n" + (err && err.message ? err.message : String(err)));
+        }
+    }
+
+    function clearAll() {
+        visualStrokes = [];
+        visualStroke = [];
+        lastSmooth = null;
+        lastWidth = null;
+        redrawAll();
+
+        try {
+            if (apiDrawing) apiDrawing.clear();
+        } catch (err) {}
+
+        setStatus("Cleared. Write again, then tap Recognize.");
+    }
+
+    checkBtn.addEventListener("click", checkSupport);
+    recognizeBtn.addEventListener("click", recognize);
+    clearBtn.addEventListener("click", clearAll);
+
+    canvas.addEventListener("pointerdown", start, { passive: false });
+    canvas.addEventListener("pointermove", move, { passive: false });
+
+    if ("onpointerrawupdate" in window) {
+        canvas.addEventListener("pointerrawupdate", move, { passive: false });
+    }
+
+    canvas.addEventListener("pointerup", end, { passive: false });
+    canvas.addEventListener("pointercancel", end, { passive: false });
+
+    resizeCanvas();
+    window.addEventListener("resize", resizeCanvas);
+
+    if (window.visualViewport) {
+        window.visualViewport.addEventListener("resize", resizeCanvas);
+    }
+})();
+</script>
+</body>
+</html>
