@@ -1,4 +1,11 @@
-<!DOCTYPE html>
+python3 <<'PY'
+from pathlib import Path
+import subprocess
+
+desktop = Path.home() / "Desktop"
+out = desktop / "ink-test.html"
+
+html = r'''<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -109,20 +116,21 @@ body {
 
     function smoothPoint(p) {
         /*
-           低通滤波：让点位更圆滑。
-           数值越大越跟手，越小越顺。
+           更顺滑一点：
+           follow 从 0.42 降到 0.34。
+           数值越小越圆滑，但也会稍微更有“墨迹跟随感”。
         */
         if (!lastSmooth) {
             lastSmooth = { x: p.x, y: p.y, p: p.p, t: p.t };
             return lastSmooth;
         }
 
-        const follow = 0.42;
+        const follow = 0.34;
 
         lastSmooth = {
             x: lerp(lastSmooth.x, p.x, follow),
             y: lerp(lastSmooth.y, p.y, follow),
-            p: lerp(lastSmooth.p, p.p, 0.35),
+            p: lerp(lastSmooth.p, p.p, 0.24),
             t: p.t
         };
 
@@ -130,14 +138,14 @@ body {
     }
 
     function inkWidth(pressure) {
-        const raw = 1.75 + pressure * 3.65;
+        const raw = 1.85 + pressure * 3.75;
 
         if (lastWidth == null) {
             lastWidth = raw;
             return raw;
         }
 
-        lastWidth = lerp(lastWidth, raw, 0.28);
+        lastWidth = lerp(lastWidth, raw, 0.22);
         return lastWidth;
     }
 
@@ -154,11 +162,11 @@ body {
 
         ctx.save();
         ctx.fillStyle = "rgba(43, 22, 14, 0.88)";
-        ctx.shadowColor = "rgba(43, 22, 14, 0.16)";
-        ctx.shadowBlur = 0.45;
+        ctx.shadowColor = "rgba(43, 22, 14, 0.18)";
+        ctx.shadowBlur = 0.72;
 
         ctx.beginPath();
-        ctx.arc(p.x, p.y, w * 0.48, 0, Math.PI * 2);
+        ctx.arc(p.x, p.y, w * 0.50, 0, Math.PI * 2);
         ctx.fill();
         ctx.restore();
     }
@@ -175,11 +183,10 @@ body {
         ctx.lineWidth = w;
 
         /*
-           轻微柔边，减少颗粒感。
-           不做太大，不然会糊。
+           柔边再加一点，减少颗粒。
         */
-        ctx.shadowColor = "rgba(43, 22, 14, 0.12)";
-        ctx.shadowBlur = 0.55;
+        ctx.shadowColor = "rgba(43, 22, 14, 0.15)";
+        ctx.shadowBlur = 0.85;
 
         ctx.beginPath();
         ctx.moveTo(m1.x, m1.y);
@@ -197,8 +204,8 @@ body {
         ctx.lineJoin = "round";
         ctx.strokeStyle = "rgba(43, 22, 14, 0.88)";
         ctx.lineWidth = w;
-        ctx.shadowColor = "rgba(43, 22, 14, 0.12)";
-        ctx.shadowBlur = 0.55;
+        ctx.shadowColor = "rgba(43, 22, 14, 0.15)";
+        ctx.shadowBlur = 0.85;
 
         ctx.beginPath();
         ctx.moveTo(a.x, a.y);
@@ -218,12 +225,15 @@ body {
             const d = dist(last, smoothed);
 
             /*
-               太近的点不重复画，避免堆出颗粒。
-               太远则补点，避免断线。
+               颗粒感来自太密的小段重复叠墨。
+               这里略微提高过滤阈值，让线更干净。
             */
-            if (d < 0.45) return;
+            if (d < 0.62) return;
 
-            const steps = Math.max(1, Math.ceil(d / 2.8));
+            /*
+               远距离仍然补点，防止断线。
+            */
+            const steps = Math.max(1, Math.ceil(d / 3.1));
 
             for (let i = 1; i <= steps; i++) {
                 const t = i / steps;
@@ -365,14 +375,14 @@ body {
         clearTimeout(saveTimer);
         saveTimer = setTimeout(function() {
             try {
-                localStorage.setItem("magicInkTestStrokesV4Smooth", JSON.stringify(strokes));
+                localStorage.setItem("magicInkTestStrokesV5Smoother", JSON.stringify(strokes));
             } catch (e) {}
         }, 500);
     }
 
     function loadSaved() {
         try {
-            const saved = localStorage.getItem("magicInkTestStrokesV4Smooth");
+            const saved = localStorage.getItem("magicInkTestStrokesV5Smoother");
             if (saved) strokes = JSON.parse(saved) || [];
         } catch (e) {
             strokes = [];
@@ -395,4 +405,13 @@ body {
 })();
 </script>
 </body>
-</html>
+</html>'''
+
+out.write_text(html, encoding="utf-8")
+subprocess.run("pbcopy", input=html, text=True)
+
+print("完成。")
+print("更平滑版 ink-test.html 已保存到桌面：", out)
+print("完整代码已复制到剪贴板。")
+print("下一步去 GitHub 更新 ink-test.html。")
+PY
