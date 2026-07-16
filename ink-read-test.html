@@ -2891,6 +2891,55 @@ body.magic-ink-read-mode .input-container {
 }
 /* End ink read handwriting test */
 
+
+/* Ink read bottom nav click fix */
+/*
+   Fix only:
+   - Diary / Map / Self bottom navigation should be clickable above handwriting canvas
+   - keep Apple Pencil handwriting layer unchanged
+   - keep three-finger clear unchanged
+   - keep auto-read logic unchanged
+*/
+
+body.magic-ink-read-mode .magic-ink-bottom-nav-above,
+body.magic-ink-read-mode .magic-ink-bottom-nav-above * {
+    pointer-events: auto !important;
+}
+
+body.magic-ink-read-mode .magic-ink-bottom-nav-above {
+    position: relative !important;
+    z-index: 10020 !important;
+}
+
+/* Make common bottom navigation structures sit above the handwriting canvas */
+body.magic-ink-read-mode nav,
+body.magic-ink-read-mode footer,
+body.magic-ink-read-mode [class*="nav"],
+body.magic-ink-read-mode [class*="Nav"],
+body.magic-ink-read-mode [class*="tab"],
+body.magic-ink-read-mode [class*="Tab"],
+body.magic-ink-read-mode [class*="bottom"],
+body.magic-ink-read-mode [class*="Bottom"] {
+    position: relative;
+    z-index: 10020;
+    pointer-events: auto;
+}
+
+/* Keep the handwriting canvas below bottom navigation, but still above the paper */
+body.magic-ink-read-mode #magicInkReadCanvas {
+    z-index: 7 !important;
+}
+
+/* Archive remains highest */
+body.magic-ink-read-mode #magicArchiveButton,
+body.magic-ink-read-mode #magicArchiveOverlay,
+body.magic-ink-read-mode #magicArchiveContent,
+body.magic-ink-read-mode #closeDiaryButton {
+    z-index: 10030 !important;
+    pointer-events: auto !important;
+}
+/* End ink read bottom nav click fix */
+
 </style>
 
 </head>
@@ -8432,6 +8481,97 @@ function magicCleanDiaryStageDirections(text) {
     setTimeout(installInkReadLayer, 800);
 })();
 /* End ink read handwriting test starter */
+</script>
+
+
+<script>
+/* Ink read bottom nav click fix starter */
+(function () {
+    function textOf(el) {
+        return String(el && el.textContent || "")
+            .replace(/\s+/g, " ")
+            .trim()
+            .toLowerCase();
+    }
+
+    function looksLikeBottomNavLabel(text) {
+        if (!text) return false;
+
+        return (
+            text === "diary" ||
+            text === "map" ||
+            text === "self" ||
+            text === "diary map" ||
+            text.includes("diary") ||
+            text.includes("map") ||
+            text.includes("self") ||
+            text.includes("tree") ||
+            text.includes("archive")
+        );
+    }
+
+    function liftNodeAndParents(el) {
+        if (!el || !el.getBoundingClientRect) return;
+
+        let node = el;
+        let steps = 0;
+
+        while (node && node !== document.body && steps < 5) {
+            const rect = node.getBoundingClientRect ? node.getBoundingClientRect() : null;
+
+            if (rect) {
+                const nearBottom = rect.top > window.innerHeight * 0.52;
+                const notFullPage = rect.height < window.innerHeight * 0.45;
+
+                if (nearBottom && notFullPage) {
+                    node.classList.add("magic-ink-bottom-nav-above");
+                }
+            }
+
+            node = node.parentElement;
+            steps++;
+        }
+    }
+
+    function fixBottomNavClicking() {
+        const candidates = Array.from(document.querySelectorAll(
+            "button, a, [role='button'], [onclick], div, span, li"
+        ));
+
+        candidates.forEach(function(el) {
+            const text = textOf(el);
+            if (!looksLikeBottomNavLabel(text)) return;
+
+            const rect = el.getBoundingClientRect();
+            if (!rect || rect.width < 8 || rect.height < 8) return;
+
+            /*
+               Only lift controls in the lower part of the screen.
+               This avoids touching homepage text or normal diary messages.
+            */
+            if (rect.top < window.innerHeight * 0.50) return;
+
+            const clickable = el.closest("button, a, [role='button'], [onclick]") || el;
+            clickable.classList.add("magic-ink-bottom-nav-above");
+            liftNodeAndParents(clickable);
+        });
+    }
+
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", fixBottomNavClicking, { once: true });
+    } else {
+        fixBottomNavClicking();
+    }
+
+    window.addEventListener("resize", function() {
+        setTimeout(fixBottomNavClicking, 120);
+    });
+
+    setTimeout(fixBottomNavClicking, 500);
+    setTimeout(fixBottomNavClicking, 1200);
+    setTimeout(fixBottomNavClicking, 2200);
+})();
+/* End ink read bottom nav click fix starter */
 </script>
 
 </body>
