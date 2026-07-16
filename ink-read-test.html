@@ -3068,6 +3068,31 @@ body.magic-ink-read-mode .magic-ink-bottom-nav-group {
 }
 /* End ink read bottom buttons lift fix */
 
+
+/* Ink read OCR diagnosis */
+/*
+   Diagnosis only:
+   - show whether auto-read is triggered
+   - show whether handwriting image is captured
+   - show whether OCR request succeeds
+   - do not change handwriting range / bottom buttons / clear gesture
+*/
+
+body.magic-ink-read-mode #magicInkReadStatus {
+    left: 16px !important;
+    bottom: 88px !important;
+    max-width: min(620px, 88vw) !important;
+
+    background: rgba(255, 250, 238, 0.72) !important;
+    border: 1px solid rgba(72, 43, 28, 0.18) !important;
+    color: rgba(50, 27, 19, 0.76) !important;
+
+    font-size: 13px !important;
+    line-height: 1.45 !important;
+    z-index: 10080 !important;
+}
+/* End ink read OCR diagnosis */
+
 </style>
 
 </head>
@@ -4612,7 +4637,10 @@ ${userMessages}
 
             try {
                 console.log('[模式识别] 开始请求 API');
-                const response = await fetch(API_URL, {
+                setStatus("2/5 正在请求模型识别手写字…");
+            console.log("[Ink OCR] requesting OCR model");
+
+            const response = await fetch(API_URL, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -8081,6 +8109,9 @@ function magicCleanDiaryStageDirections(text) {
 
         if (!strokes.length) return;
 
+        setStatus("已停笔，2.8 秒后自动读取…", 1600);
+        console.log("[Ink OCR] auto read scheduled");
+
         const mySerial = ++readSerial;
 
         autoReadTimer = setTimeout(function() {
@@ -8518,11 +8549,15 @@ function magicCleanDiaryStageDirections(text) {
         const imageUrl = makeInkImageDataURL();
 
         if (!imageUrl) {
+            setStatus("诊断：没有截到手写图，所以无法读取。", 3200);
+            console.warn("[Ink OCR] no image captured");
             return;
         }
 
+        console.log("[Ink OCR] image captured, length:", imageUrl.length);
+
         readingNow = true;
-        setStatus("Reading the ink…");
+        setStatus("1/5 已截取手写图，准备识别…");
 
         try {
             if (typeof API_URL === "undefined" || typeof API_KEY === "undefined") {
@@ -8572,22 +8607,29 @@ function magicCleanDiaryStageDirections(text) {
 
             if (!response.ok) {
                 const errorText = await response.text().catch(function() { return ""; });
-                throw new Error(errorText || "The model could not read image input.");
+                throw new Error("HTTP " + response.status + ": " + (errorText || "The model could not read image input.").slice(0, 500));
             }
 
             const data = await response.json();
-            const readText = extractReadableText(data && data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content);
+            console.log("[Ink OCR] raw response:", data);
+
+            const rawOcrText = data && data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content;
+            const readText = extractReadableText(rawOcrText);
+
+            setStatus("3/5 模型返回：" + (readText || rawOcrText || "空结果"), 2600);
+            console.log("[Ink OCR] raw text:", rawOcrText);
+            console.log("[Ink OCR] cleaned text:", readText);
 
             if (serialAtStart !== readSerial) {
                 return;
             }
 
             if (!readText) {
-                setStatus("The diary could not read it clearly.", 2400);
+                setStatus("诊断：模型返回了结果，但没有可用文字。可能没识别清楚。", 3600);
                 return;
             }
 
-            setStatus("Read: " + readText, 1700);
+            setStatus("4/5 识别成功：" + readText, 2400);
 
             const input = document.getElementById("userInput");
             const sendButton = document.getElementById("sendButton");
@@ -8595,6 +8637,8 @@ function magicCleanDiaryStageDirections(text) {
             if (!input || !sendButton) {
                 throw new Error("Original send controls are missing.");
             }
+
+            setStatus("5/5 正在把文字交给 Tom…", 1800);
 
             input.value = readText;
             input.dispatchEvent(new Event("input", { bubbles: true }));
@@ -8607,8 +8651,8 @@ function magicCleanDiaryStageDirections(text) {
             }, 350);
 
         } catch (err) {
-            console.error(err);
-            setStatus("Reading failed. The current model may not support image input.", 3600);
+            console.error("[Ink OCR] failed:", err);
+            setStatus("诊断失败：" + (err && err.message ? err.message : "当前模型可能不支持图片识别"), 5200);
         } finally {
             readingNow = false;
         }
