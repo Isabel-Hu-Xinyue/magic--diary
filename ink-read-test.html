@@ -3040,6 +3040,34 @@ body.magic-ink-read-mode #closeDiaryButton {
 }
 /* End ink read bottom safe zone fix */
 
+
+/* Ink read bottom buttons lift fix */
+/*
+   Fix only:
+   - lift bottom Diary / Map / Self controls slightly upward
+   - reveal their English labels
+   - keep handwriting canvas and writing area unchanged
+*/
+
+body.magic-ink-read-mode .magic-ink-bottom-buttons-lift {
+    position: relative !important;
+    z-index: 10040 !important;
+    transform: translateY(-18px) !important;
+    pointer-events: auto !important;
+}
+
+body.magic-ink-read-mode .magic-ink-bottom-buttons-lift * {
+    pointer-events: auto !important;
+}
+
+/* Keep the marked bottom nav above handwriting canvas */
+body.magic-ink-read-mode .magic-ink-bottom-nav-group {
+    position: relative !important;
+    z-index: 10040 !important;
+    pointer-events: auto !important;
+}
+/* End ink read bottom buttons lift fix */
+
 </style>
 
 </head>
@@ -8597,6 +8625,73 @@ function magicCleanDiaryStageDirections(text) {
 /* End ink read handwriting test starter */
 </script>
 
+
+
+<script>
+/* Ink read bottom buttons lift fix starter */
+(function () {
+    function cleanText(el) {
+        return String(el && el.textContent || "")
+            .replace(/\s+/g, " ")
+            .trim()
+            .toLowerCase();
+    }
+
+    function isTargetLabel(text) {
+        return (
+            text === "diary" ||
+            text === "map" ||
+            text === "self" ||
+            text.includes("diary") ||
+            text.includes("map") ||
+            text.includes("self")
+        );
+    }
+
+    function liftBottomButtons() {
+        const all = Array.from(document.querySelectorAll("button, a, [role='button'], [onclick], div, span"));
+
+        all.forEach(function(el) {
+            const text = cleanText(el);
+            if (!isTargetLabel(text)) return;
+
+            const rect = el.getBoundingClientRect();
+            if (!rect || rect.width < 8 || rect.height < 8) return;
+
+            // 只处理屏幕底部的那三个导航按钮，避免影响页面正文
+            if (rect.top < window.innerHeight * 0.55) return;
+
+            const clickable = el.closest("button, a, [role='button'], [onclick]") || el;
+            clickable.classList.add("magic-ink-bottom-buttons-lift");
+
+            // 把外层导航组也提到 canvas 上方，但不整体大幅移动
+            let p = clickable.parentElement;
+            let steps = 0;
+            while (p && p !== document.body && steps < 4) {
+                const pr = p.getBoundingClientRect();
+                if (pr && pr.top > window.innerHeight * 0.50 && pr.height < window.innerHeight * 0.40) {
+                    p.classList.add("magic-ink-bottom-nav-group");
+                }
+                p = p.parentElement;
+                steps++;
+            }
+        });
+    }
+
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", liftBottomButtons, { once: true });
+    } else {
+        liftBottomButtons();
+    }
+
+    setTimeout(liftBottomButtons, 500);
+    setTimeout(liftBottomButtons, 1200);
+    window.addEventListener("resize", function() {
+        setTimeout(liftBottomButtons, 120);
+    });
+})();
+/* End ink read bottom buttons lift fix starter */
+</script>
 
 </body>
 </html>
